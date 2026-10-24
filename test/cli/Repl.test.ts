@@ -38,7 +38,7 @@ async function replay(chunks: string[], terminal = false): Promise<string> {
   return text();
 }
 
-test('a piped script is echoed like the spec transcripts', async () => {
+test('the loop echoes a piped script like the transcripts in the spec', async () => {
   const script = ['init', '', '# a comment', 'create rect r1 0 0 1 1', 'move r9 1 1', 'boom', ''];
   expect(await replay([script.join('\n')])).toBe(
     [
@@ -59,7 +59,7 @@ test('a piped script is echoed like the spec transcripts', async () => {
   );
 });
 
-test('on a terminal it prompts, completes with Tab, paints errors red and quits on Ctrl+C', async () => {
+test('on a terminal, the loop prompts, completes with Tab, paints errors red and quits on Ctrl+C', async () => {
   // Readline completes only when a Tab ends a chunk, as a single keypress does. So the test
   // sends each key as its own chunk.
   const output = await replay(['ini', '\t', '\n', 'move r9 1 1\n', '\u0003', 'tree\n'], true);
@@ -72,7 +72,7 @@ test('on a terminal it prompts, completes with Tab, paints errors red and quits 
   expect(screen).not.toContain('(800x600)');
 });
 
-test('on a terminal the prompt comes back after each command, and the typed line is not echoed twice', async () => {
+test('on a terminal, the prompt comes back after each command, and the typed line is not echoed twice', async () => {
   // This input comes at human speed: it ends only after the Repl has answered the first line.
   const input = new PassThrough();
   const { output, text } = recorder(true);

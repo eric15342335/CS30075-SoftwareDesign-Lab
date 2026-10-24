@@ -15,7 +15,7 @@ const fixtures = join(import.meta.dir, '..', 'fixtures');
 const dir = mkdtempSync(join(tmpdir(), 'svg-commands-'));
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
-test('save then read: feedback with counts, and save without a name reuses the file', () => {
+test('save and read report element counts, and save without a name reuses the file', () => {
   const session = Session.spec();
   const file = join(dir, 'demo.svg');
   expect(session.run(new SaveCommand(session.workspace, file))).toEqual([
@@ -30,7 +30,7 @@ test('save then read: feedback with counts, and save without a name reuses the f
   expect(copy.fingerprint()).toEqual(session.fingerprint());
 });
 
-test('read prints warnings first, and a later save writes back to the file read', () => {
+test('read lists the warnings first, and a later save writes back to the file that was read', () => {
   const file = join(dir, 'other.svg');
   copyFileSync(join(fixtures, 'other.svg'), file);
   const session = new Session();
@@ -44,7 +44,7 @@ test('read prints warnings first, and a later save writes back to the file read'
   expect(readFileSync(file, 'utf8')).toContain('<rect id="rect1" ');
 });
 
-test('a document with one element says "1 element"', () => {
+test('the feedback for a document with one element says "1 element"', () => {
   const session = new Session();
   session.run(new InitCommand(session.workspace));
   session.create('g', 'only');
@@ -57,7 +57,7 @@ test('a document with one element says "1 element"', () => {
   ]);
 });
 
-test('save needs a file name after init, also when an earlier document was read', () => {
+test('save needs a file name after init, even when an earlier document was read', () => {
   const session = new Session();
   expect(() => session.run(new SaveCommand(session.workspace))).toThrow('no document');
   session.run(new InitCommand(session.workspace));
@@ -69,7 +69,7 @@ test('save needs a file name after init, also when an earlier document was read'
   expect(() => session.run(new SaveCommand(session.workspace))).toThrow('no file name');
 });
 
-test('a failed read or save changes nothing, history included', () => {
+test('a failed read or save changes nothing, including the history', () => {
   const session = Session.spec();
   const before = session.fingerprint();
   const missing = join(dir, 'missing.svg');
@@ -84,7 +84,7 @@ test('a failed read or save changes nothing, history included', () => {
   expect(session.undo()).toEqual(['rect#box removed']);
 });
 
-test('canvas shows the size and leaves history alone', () => {
+test('canvas shows the size and does not change the history', () => {
   const session = Session.spec();
   expect(session.run(new CanvasCommand(session.workspace))).toEqual(['canvas 800x600']);
   expect(session.undo()).toEqual(['rect#box removed']);
@@ -92,7 +92,7 @@ test('canvas shows the size and leaves history alone', () => {
   expect(() => empty.run(new CanvasCommand(empty.workspace))).toThrow('no document');
 });
 
-test('canvas resize: a missing height stays, sizes must be positive, and undo stops', () => {
+test('a canvas resize keeps the old height when none is given, needs positive sizes and blocks undo', () => {
   const session = Session.spec();
   expect(session.run(new ResizeCommand(session.workspace, new Decimal(1024)))).toEqual([
     'canvas resized to 1024x600',

@@ -48,7 +48,7 @@ describe('documents', () => {
     expect(redo).toThrow(noDocument);
   });
 
-  test('init creates the canvas, 800x600 by default', () => {
+  test('init creates a canvas, which is 800x600 by default', () => {
     const { init } = editor();
     expect(init()).toEqual(['canvas 800x600 created']);
     expect(init(400, 300)).toEqual(['canvas 400x300 created']);
@@ -70,7 +70,7 @@ describe('history', () => {
     expect(() => executor.redo()).toThrow('nothing to redo');
   });
 
-  test('undo and redo walk the history with the spec feedback', () => {
+  test('undo and redo walk through the history and return the spec feedback', () => {
     const { init, create, undo, redo, ids } = editor();
     init();
     expect(create('g', 'g1')).toEqual(['g#g1 created']);
@@ -88,7 +88,7 @@ describe('history', () => {
     expect(redo).toThrow('nothing to redo');
   });
 
-  test('a new edit clears redo', () => {
+  test('a new edit clears the redo stack', () => {
     const { init, create, undo, redo } = editor();
     init();
     create('g', 'a');

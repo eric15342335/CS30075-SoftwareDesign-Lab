@@ -54,7 +54,7 @@ function expectRejected(doc: SvgDocument, edit: () => unknown, message: string):
 }
 
 describe('lookup', () => {
-  test('builds the spec session document', () => {
+  test('session() builds the document from the spec session', () => {
     expect(outline(session().canvas)).toEqual([
       'svg (800x600)',
       '  rect#bg x=0 y=0 w=800 h=600 fill=#ffffff',
@@ -75,7 +75,7 @@ describe('lookup', () => {
 });
 
 describe('create', () => {
-  test('in a container, undone by detaching', () => {
+  test('create in a container is undone by detaching the shape', () => {
     const doc = session();
     expectUndoable(doc, () => doc.create('text', 'note', ['1', '2', 'hi'], 'markers'), [
       'svg (800x600)',
@@ -88,7 +88,7 @@ describe('create', () => {
     ]);
   });
 
-  test('spec error messages', () => {
+  test('create raises the spec error messages', () => {
     const doc = session();
     const create =
       (...args: Parameters<SvgDocument['create']>) =>
@@ -122,7 +122,7 @@ describe('create', () => {
 });
 
 describe('delete', () => {
-  test('a leaf comes back at its old index', () => {
+  test('undo puts a deleted leaf back at its old index', () => {
     const doc = session();
     expectUndoable(doc, () => doc.delete('c1'), [
       'svg (800x600)',
@@ -133,7 +133,7 @@ describe('delete', () => {
     ]);
   });
 
-  test('a container goes with its descendants', () => {
+  test('deleting a container also removes its descendants', () => {
     const doc = session();
     doc.delete('markers');
     expect(doc.count()).toBe(2);
@@ -153,7 +153,7 @@ describe('move and scale', () => {
     ]);
   });
 
-  test('scale undo restores exact values', () => {
+  test('undoing scale restores the exact values', () => {
     const doc = session();
     const before = outline(doc.canvas);
     const mementos = [3, 7, 0.1].map((factor) => doc.scale('markers', n(factor)));
@@ -161,7 +161,7 @@ describe('move and scale', () => {
     expect(outline(doc.canvas)).toEqual(before);
   });
 
-  test('scale factor must be positive', () => {
+  test('the scale factor must be positive', () => {
     const doc = session();
     expectRejected(doc, () => doc.scale('c1', n(0)), 'scale factor must be positive');
     expectRejected(doc, () => doc.scale('c1', n(-2)), 'scale factor must be positive');
@@ -170,7 +170,7 @@ describe('move and scale', () => {
 });
 
 describe('set', () => {
-  test('changes one attribute and remembers the old value', () => {
+  test('set changes one attribute and remembers the old value', () => {
     const doc = session();
     let old: string | undefined;
     expectUndoable(doc, () => {
@@ -188,7 +188,7 @@ describe('set', () => {
     expect(old).toBe('My Diagram');
   });
 
-  test('works on containers and rejects unknown attributes', () => {
+  test('set works on containers and rejects unknown attributes', () => {
     const doc = session();
     doc.set('markers', 'fill', 'blue');
     expect(doc.find('markers').describe()).toBe('fill=blue');
@@ -197,7 +197,7 @@ describe('set', () => {
 });
 
 describe('group', () => {
-  test('members keep document order and the group takes the first one place', () => {
+  test('the members keep document order, and the group takes the place of the first member', () => {
     const doc = letters();
     expectUndoable(doc, () => doc.group('g', ['e', 'a', 'c']), [
       'svg (800x600)',
@@ -211,7 +211,7 @@ describe('group', () => {
     ]);
   });
 
-  test('members may come from different parents', () => {
+  test('the members may come from different parents', () => {
     const doc = session();
     expectUndoable(doc, () => doc.group('mix', ['box', 'title']), [
       'svg (800x600)',
@@ -224,7 +224,7 @@ describe('group', () => {
     ]);
   });
 
-  test('spec error messages', () => {
+  test('group raises the spec error messages', () => {
     const doc = session();
     expectRejected(
       doc,
@@ -238,7 +238,7 @@ describe('group', () => {
 });
 
 describe('ungroup', () => {
-  test('children take the container place', () => {
+  test('the children take the place of the container', () => {
     const doc = letters();
     doc.create('g', 'inner', [], 'b');
     doc.create('rect', 'x', ['0', '0', '1', '1'], 'inner');
@@ -258,7 +258,7 @@ describe('ungroup', () => {
     ]);
   });
 
-  test('spec error messages', () => {
+  test('ungroup raises the spec error messages', () => {
     const doc = session();
     expectRejected(
       doc,
@@ -271,7 +271,7 @@ describe('ungroup', () => {
 });
 
 describe('addto, front and back', () => {
-  test('addto appends to the container', () => {
+  test('addto appends the shape to the container', () => {
     const doc = session();
     expectUndoable(doc, () => doc.addto('markers', 'bg'), [
       'svg (800x600)',
@@ -283,7 +283,7 @@ describe('addto, front and back', () => {
     ]);
   });
 
-  test('addto refuses to move a container into itself or its descendant', () => {
+  test('addto refuses to move a container into itself or into one of its descendants', () => {
     const doc = session();
     doc.create('g', 'inner', [], 'markers');
     const message = 'cannot group a container into its own descendant: markers';
@@ -293,7 +293,7 @@ describe('addto, front and back', () => {
     expectRejected(doc, () => doc.addto('bg', 'title'), 'not a container: bg');
   });
 
-  test('front moves to the end of the siblings, back to the start', () => {
+  test('front moves a shape to the end of its siblings, and back moves it to the start', () => {
     const doc = letters();
     const order = (): string =>
       doc.canvas

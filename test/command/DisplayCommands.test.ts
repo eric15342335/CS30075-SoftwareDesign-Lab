@@ -13,7 +13,7 @@ function grouped(): Session {
   return session;
 }
 
-test('tree prints spec 5.1 character for character', () => {
+test('tree prints the output of spec 5.1 character for character', () => {
   const session = grouped();
   expect(session.run(new TreeCommand(session.workspace))).toEqual([
     'svg (800x600)',
@@ -39,7 +39,7 @@ test('tree draws a vertical line past a group that has later siblings', () => {
   ]);
 });
 
-test('tree <id> prints that subtree; a leaf is a single line', () => {
+test('tree <id> prints that subtree, and a leaf takes a single line', () => {
   const session = grouped();
   expect(session.run(new TreeCommand(session.workspace, 'markers'))).toEqual([
     'g#markers',
@@ -51,7 +51,7 @@ test('tree <id> prints that subtree; a leaf is a single line', () => {
   ]);
 });
 
-test('show prints spec 5.2 character for character; a group lists its children', () => {
+test('show prints the output of spec 5.2 character for character, and a group lists its children', () => {
   const session = grouped();
   expect(session.run(new ShowCommand(session.workspace, 'c1'))).toEqual([
     'circle#c1  parent=g#markers',
@@ -64,7 +64,7 @@ test('show prints spec 5.2 character for character; a group lists its children',
   ]);
 });
 
-test('display commands leave the undo history alone', () => {
+test('display commands do not change the undo history', () => {
   const session = grouped();
   session.run(new TreeCommand(session.workspace));
   session.run(new ShowCommand(session.workspace, 'c1'));
@@ -72,7 +72,7 @@ test('display commands leave the undo history alone', () => {
   expect(session.undo()).toEqual(['g#markers ungrouped']);
 });
 
-test('tree and show need a document; help does not', () => {
+test('tree and show need a document, but help does not', () => {
   const session = new Session();
   expect(() => session.run(new TreeCommand(session.workspace))).toThrow(
     "no document. use 'init' or 'read' first",

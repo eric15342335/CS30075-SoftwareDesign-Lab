@@ -11,7 +11,7 @@ const fixtures = join(import.meta.dir, '..', 'fixtures');
 const dir = mkdtempSync(join(tmpdir(), 'svg-reader-'));
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
-test('the spec other.svg: rect1 is assigned with the spec warning', () => {
+test('reading the spec file other.svg assigns rect1 with the spec warning', () => {
   const reader = new SvgReader();
   const document = reader.read(join(fixtures, 'other.svg'));
   expect(reader.warnings()).toEqual(['assigned id rect1 to unnamed <rect>']);
@@ -21,7 +21,7 @@ test('the spec other.svg: rect1 is assigned with the spec warning', () => {
 });
 
 test.each(['sample.svg', 'demo.svg', 'flowchart.svg'])(
-  '%s, in the editor format, reads back and writes out byte for byte',
+  '%s, which uses the editor format, reads back and writes out byte for byte',
   (name) => {
     const text = readFileSync(join(fixtures, name), 'utf8');
     const reader = new SvgReader();
@@ -30,7 +30,7 @@ test.each(['sample.svg', 'demo.svg', 'flowchart.svg'])(
   },
 );
 
-test('the spec nested sample keeps transform and other attributes; comments are dropped', () => {
+test('the nested sample from the spec keeps transform and the other attributes, and the comments are dropped', () => {
   const reader = new SvgReader();
   const document = reader.read(join(fixtures, 'nested.svg'));
   expect(reader.warnings()).toEqual([
@@ -55,7 +55,7 @@ test('the spec nested sample keeps transform and other attributes; comments are 
   );
 });
 
-test('missing and duplicate ids get tag + number, never one that appears later', () => {
+test('a missing or duplicate id becomes the tag plus a number, and never an id that appears later', () => {
   const reader = new SvgReader();
   const document = reader.parse(
     [
@@ -75,7 +75,7 @@ test('missing and duplicate ids get tag + number, never one that appears later',
   ]);
 });
 
-test('unnamed elements of one type count up, and a reused reader starts over', () => {
+test('unnamed elements of one type get numbers in order, and a reused reader starts counting again', () => {
   const reader = new SvgReader();
   const text =
     '<svg width="10" height="10"><g><rect width="1" height="1"/><rect width="1" height="1"/></g></svg>';
@@ -98,7 +98,7 @@ test('the canvas size comes from width and height, or else from the size part of
   expect(() => reader.parse('<svg height="50"/>')).toThrow('<svg> has no width and height');
 });
 
-test('elements it cannot use are skipped with one warning each', () => {
+test('the reader skips the elements that it cannot use, with one warning for each', () => {
   const reader = new SvgReader();
   const document = reader.parse(
     [
@@ -125,7 +125,7 @@ test('elements it cannot use are skipped with one warning each', () => {
   expect(document.canvas.size()).toBe('300x200');
 });
 
-test('root: unknown attributes are kept; a byte order mark and digits-only text are fine', () => {
+test('the root keeps unknown attributes, and a byte order mark and text with only digits are accepted', () => {
   const reader = new SvgReader();
   const bom = String.fromCodePoint(0xfeff);
   const document = reader.parse(

@@ -28,7 +28,7 @@ function markers(): { group: Group; circle: Circle; rect: Rect } {
 }
 
 describe('leaf summaries match the spec tree lines', () => {
-  test('rect', () => {
+  test('a rect', () => {
     const rect = withAttributes(new Rect('bg'), {
       x: '0',
       y: '0',
@@ -40,17 +40,17 @@ describe('leaf summaries match the spec tree lines', () => {
     expect(rect.describe()).toBe('x=0 y=0 w=800 h=600 fill=#ffffff');
   });
 
-  test('circle', () => {
+  test('a circle', () => {
     const circle = withAttributes(new Circle('c1'), { cx: '100', cy: '100', r: '20', fill: 'red' });
     expect(circle.describe()).toBe('cx=100 cy=100 r=20 fill=red');
   });
 
-  test('ellipse without fill', () => {
+  test('an ellipse without fill', () => {
     const ellipse = withAttributes(new Ellipse('e1'), { cx: '1', cy: '2', rx: '3', ry: '4' });
     expect(ellipse.describe()).toBe('cx=1 cy=2 rx=3 ry=4');
   });
 
-  test('line shows both ends and no stroke', () => {
+  test('a line shows both ends and no stroke', () => {
     const line = withAttributes(new Line('arrow1'), {
       x1: '280',
       y1: '130',
@@ -61,7 +61,7 @@ describe('leaf summaries match the spec tree lines', () => {
     expect(line.describe()).toBe('(280,130) -> (520,130)');
   });
 
-  test('text shows position and quoted content', () => {
+  test('a text shows its position and its quoted content', () => {
     const text = withAttributes(new Text('title'), { x: '20', y: '40', text: 'My Diagram' });
     expect(text.describe()).toBe('(20,40) "My Diagram"');
     expect(text.textContent()).toBe('My Diagram');
@@ -70,7 +70,7 @@ describe('leaf summaries match the spec tree lines', () => {
 });
 
 describe('leaf editing', () => {
-  test('move shifts coordinates and reports the new position', () => {
+  test('move shifts the coordinates and reports the new position', () => {
     const circle = withAttributes(new Circle('c1'), { cx: '100', cy: '100', r: '20' });
     circle.move(n(30), n(0));
     expect(circle.describe()).toBe('cx=130 cy=100 r=20');
@@ -83,7 +83,7 @@ describe('leaf editing', () => {
     expect(line.describe()).toBe('(1,2) -> (11,7)');
   });
 
-  test('scale multiplies positions and sizes', () => {
+  test('scale multiplies the positions and the sizes', () => {
     const rect = withAttributes(new Rect('r'), { x: '10', y: '20', width: '100', height: '50' });
     rect.scale(n(2));
     expect(rect.describe()).toBe('x=20 y=40 w=200 h=100');
@@ -98,13 +98,13 @@ describe('leaf editing', () => {
     expect(text.describe()).toBe('(2,0) "b"');
   });
 
-  test('removing geometry resets it to the SVG default 0', () => {
+  test('removing a geometry attribute resets it to the SVG default of 0', () => {
     const rect = withAttributes(new Rect('r'), { x: '5' });
     rect.setAttribute('x', undefined);
     expect(rect.describe()).toBe('x=0 y=0 w=0 h=0');
   });
 
-  test('set accepts only whitelisted names', () => {
+  test('set accepts only the names on its whitelist', () => {
     const rect = new Rect('r');
     expect(() => rect.setAttribute('r', '1')).toThrow(EditorError);
     expect(() => rect.setAttribute('r', '1')).toThrow('unknown attribute: r');
@@ -120,7 +120,7 @@ describe('leaf editing', () => {
     expect(circle.describe()).toBe('cx=-5 cy=0 r=0');
   });
 
-  test('attributes list id, geometry, presentation, then kept extras', () => {
+  test('the attribute list has the id, the geometry, the presentation attributes and then the kept extras', () => {
     const rect = withAttributes(new Rect('r1'), {
       x: '10',
       y: '20',
@@ -156,14 +156,14 @@ describe('leaf editing', () => {
     expect(() => text.setAttribute('font-size', '20')).toThrow('unknown attribute: font-size');
   });
 
-  test('show details: geometry line, then style line', () => {
+  test('the details for show have a geometry line and then a style line', () => {
     const circle = withAttributes(new Circle('c1'), { cx: '100', cy: '100', r: '20', fill: 'red' });
     expect(circle.details()).toEqual(['cx=100 cy=100 r=20', 'fill=red']);
     const text = withAttributes(new Text('t1'), { x: '20', y: '40', text: 'hi' });
     expect(text.details()).toEqual(['x=20 y=40', 'text="hi"']);
   });
 
-  test('create signatures', () => {
+  test('each type declares its create signature', () => {
     expect(new Rect('r').createSignature()).toEqual({
       required: ['x', 'y', 'width', 'height'],
       optional: 'fill',
@@ -175,7 +175,7 @@ describe('leaf editing', () => {
 });
 
 describe('groups', () => {
-  test('insert, remove and indexOf keep parent links', () => {
+  test('insert, remove and indexOf keep the parent links up to date', () => {
     const { group, circle, rect } = markers();
     expect(circle.parent).toBe(group);
     expect(group.indexOf(rect)).toBe(1);
@@ -225,7 +225,7 @@ describe('groups', () => {
     ).toEqual(['outer', 'markers', 'c1', 'box', 't']);
   });
 
-  test('summary is empty unless a fill is set; details list the children', () => {
+  test('the summary is empty unless a fill is set, and the details list the children', () => {
     const { group } = markers();
     expect(group.describe()).toBe('');
     expect(group.details()).toEqual(['children: circle#c1, rect#box']);
@@ -239,7 +239,7 @@ describe('groups', () => {
     expect(new Group('empty').details()).toEqual(['children: (none)']);
   });
 
-  test('only groups answer asGroup', () => {
+  test('only a group returns itself from asGroup', () => {
     const { group, circle } = markers();
     expect(group.asGroup()).toBe(group);
     expect(circle.asGroup()).toBeNull();
@@ -247,14 +247,14 @@ describe('groups', () => {
 });
 
 describe('canvas', () => {
-  test('is the tree root labelled svg', () => {
+  test('the canvas is the tree root, labelled svg', () => {
     const canvas = new Canvas(n(800), n(600));
     expect(canvas.label()).toBe('svg');
     expect(canvas.describe()).toBe('(800x600)');
     expect(canvas.children()).toEqual([]);
   });
 
-  test('writes the root attributes with a matching viewBox', () => {
+  test('the canvas writes the root attributes with a matching viewBox', () => {
     const canvas = new Canvas(n(400), n(200));
     canvas.resize(n(500), n(300));
     expect(canvas.attributes()).toEqual([
@@ -265,7 +265,7 @@ describe('canvas', () => {
     ]);
   });
 
-  test('rejects sizes that are not positive', () => {
+  test('the canvas rejects sizes that are not positive', () => {
     expect(() => new Canvas(n(0), n(600))).toThrow('canvas size must be positive');
     expect(() => new Canvas(n(800), n(600)).resize(n(800), n(-1))).toThrow(
       'canvas size must be positive',

@@ -7,7 +7,7 @@ import { GroupCommand } from '#command/GroupCommand.ts';
 import { UngroupCommand } from '#command/UngroupCommand.ts';
 import { Session } from '#test/support/Session.ts';
 
-test('group: spec feedback, undo and redo', () => {
+test('group, undo and redo give the spec feedback', () => {
   const session = Session.spec();
   const before = session.fingerprint();
   expect(session.run(new GroupCommand(session.workspace, 'markers', ['c1', 'box']))).toEqual([
@@ -20,14 +20,14 @@ test('group: spec feedback, undo and redo', () => {
   expect(session.fingerprint()).toEqual(after);
 });
 
-test('group: one member reads as one child', () => {
+test('a group with one member reports "1 child"', () => {
   const session = Session.spec();
   expect(session.run(new GroupCommand(session.workspace, 'solo', ['bg']))).toEqual([
     'g#solo created with 1 child',
   ]);
 });
 
-test('group: the spec error leaves history alone', () => {
+test('the spec error for group does not change the history', () => {
   const session = Session.spec();
   session.run(new GroupCommand(session.workspace, 'markers', ['c1', 'box']));
   expect(() => session.run(new GroupCommand(session.workspace, 'bad', ['c1', 'markers']))).toThrow(
@@ -36,7 +36,7 @@ test('group: the spec error leaves history alone', () => {
   expect(session.undo()).toEqual(['g#markers ungrouped']);
 });
 
-test('ungroup: feedback and exact undo', () => {
+test('ungroup gives feedback, and undo puts the group back exactly', () => {
   const session = Session.spec();
   session.create('g', 'outer');
   session.create('g', 'inner', [], 'outer');
@@ -50,7 +50,7 @@ test('ungroup: feedback and exact undo', () => {
   expect(session.fingerprint()).toEqual(before);
 });
 
-test('addto: feedback names the new and the old parent', () => {
+test('the feedback for addto names the new parent and the old parent', () => {
   const session = Session.spec();
   session.create('g', 'markers');
   expect(session.run(new AddtoCommand(session.workspace, 'markers', 'bg'))).toEqual([
@@ -59,7 +59,7 @@ test('addto: feedback names the new and the old parent', () => {
   expect(session.undo()).toEqual(['rect#bg moved back into svg']);
 });
 
-test('front and back: feedback and undo', () => {
+test('front and back give feedback and can be undone', () => {
   const session = Session.spec();
   const before = session.fingerprint();
   expect(session.run(new FrontCommand(session.workspace, 'bg'))).toEqual([

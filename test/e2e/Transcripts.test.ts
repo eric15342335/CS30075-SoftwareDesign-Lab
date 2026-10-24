@@ -40,7 +40,7 @@ function normalize(text: string): string[] {
 test.each([
   ['session.txt', 'demo.svg'],
   ['flowchart.txt', 'flowchart.svg'],
-])('spec transcript %s replays line for line and saves %s', async (name, saved) => {
+])('the spec transcript %s replays line for line and saves %s', async (name, saved) => {
   const dir = mkdtempSync(join(tmpdir(), 'svg-e2e-'));
   dirs.push(dir);
   copyFileSync(join(fixtures, 'other.svg'), join(dir, 'other.svg'));

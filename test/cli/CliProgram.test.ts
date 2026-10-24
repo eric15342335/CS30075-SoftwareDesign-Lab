@@ -53,7 +53,7 @@ test('every verb reaches its command', () => {
   ]);
 });
 
-test('canvas, save and read reach their commands; a quoted path may contain spaces', () => {
+test('canvas, save and read reach their commands, and a quoted path may contain spaces', () => {
   const dir = mkdtempSync(join(tmpdir(), 'svg-cli-'));
   const file = join(dir, 'my drawing.svg');
   try {
@@ -67,21 +67,21 @@ test('canvas, save and read reach their commands; a quoted path may contain spac
   }
 });
 
-test('quoted words keep their spaces; a blank line does nothing', () => {
+test('quoted words keep their spaces, and a blank line does nothing', () => {
   const program = cli('init');
   expect(program.run('create text title 20 40 "My Diagram"')).toEqual(['text#title created']);
   expect(program.run('tree title')).toEqual(['text#title (20,40) "My Diagram"']);
   expect(program.run('   ')).toEqual([]);
 });
 
-test('negative numbers and dash-prefixed text are arguments, not options', () => {
+test('negative numbers and text that starts with a dash are arguments, not options', () => {
   const program = cli('init', 'create circle c1 100 100 20');
   expect(program.run('move c1 -30 -0.5')).toEqual(['circle#c1 moved to (70,99.5)']);
   expect(program.run('create text t 0 0 -hi')).toEqual(['text#t created']);
   expect(program.run('tree t')).toEqual(['text#t (0,0) "-hi"']);
 });
 
-test('a trailing "in <id>" names the container; "in" elsewhere is a plain word', () => {
+test('a trailing "in <id>" names the container, and "in" anywhere else is a plain word', () => {
   const program = cli('init', 'create g node1');
   expect(program.run('create rect start 120 100 160 60 #4a90d9 in node1')).toEqual([
     'rect#start created in g#node1',
@@ -95,7 +95,7 @@ test('a trailing "in <id>" names the container; "in" elsewhere is a plain word',
   ]);
 });
 
-test('syntax errors are one-line EditorErrors without commander prefix', () => {
+test('a syntax error becomes a one-line EditorError without the commander prefix', () => {
   const program = cli('init');
   expect(() => program.run('mvoe c1 1 2')).toThrow(EditorError);
   expect(() => program.run('mvoe c1 1 2')).toThrow(

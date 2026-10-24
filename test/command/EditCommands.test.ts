@@ -9,7 +9,7 @@ import { Session } from '#test/support/Session.ts';
 
 const n = (value: number): Decimal => new Decimal(value);
 
-test('move: spec feedback for a leaf, its undo and redo', () => {
+test('move, undo and redo give the spec feedback for a leaf', () => {
   const session = Session.spec();
   const before = session.fingerprint();
   expect(session.run(new MoveCommand(session.workspace, 'c1', n(30), n(0)))).toEqual([
@@ -22,7 +22,7 @@ test('move: spec feedback for a leaf, its undo and redo', () => {
   expect(session.fingerprint()).toEqual(after);
 });
 
-test('move: spec feedback for a container', () => {
+test('move gives the spec feedback for a container', () => {
   const session = Session.spec();
   session.create('g', 'node2');
   expect(session.run(new MoveCommand(session.workspace, 'node2', n(0), n(100)))).toEqual([
@@ -31,7 +31,7 @@ test('move: spec feedback for a container', () => {
   expect(session.undo()).toEqual(['g#node2 moved back by (0,-100)']);
 });
 
-test('set: spec feedback shows the new value, then the old one', () => {
+test('set reports the new value, and its undo reports the old one', () => {
   const session = Session.spec();
   expect(session.run(new SetCommand(session.workspace, 'title', 'text', 'My Diagram v2'))).toEqual([
     'text#title updated: text="My Diagram v2"',
@@ -39,7 +39,7 @@ test('set: spec feedback shows the new value, then the old one', () => {
   expect(session.undo()).toEqual(['text#title updated: text="My Diagram"']);
 });
 
-test('set: undoing a new attribute removes it', () => {
+test('undoing set on a new attribute removes the attribute', () => {
   const session = Session.spec();
   const before = session.fingerprint();
   session.run(new SetCommand(session.workspace, 'bg', 'stroke', 'black'));
@@ -51,7 +51,7 @@ test('set: undoing a new attribute removes it', () => {
   expect(session.fingerprint()).toEqual(before);
 });
 
-test('delete: spec feedback and restore into the old parent', () => {
+test('delete gives the spec feedback, and undo restores the shape into its old parent', () => {
   const session = Session.spec();
   session.create('g', 'markers');
   session.create('rect', 'inner', ['1', '2', '3', '4'], 'markers');
@@ -63,7 +63,7 @@ test('delete: spec feedback and restore into the old parent', () => {
   expect(session.fingerprint()).toEqual(before);
 });
 
-test('scale: feedback and exact undo', () => {
+test('scale gives feedback, and undo restores the exact values', () => {
   const session = Session.spec();
   const before = session.fingerprint();
   expect(session.run(new ScaleCommand(session.workspace, 'c1', n(3)))).toEqual([

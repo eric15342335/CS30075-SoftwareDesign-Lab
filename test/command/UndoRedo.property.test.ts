@@ -85,7 +85,7 @@ function start(): Session {
   return session;
 }
 
-test('random edits: failures change nothing, undo walks back every state, redo walks forward', () => {
+test('in random edit sequences, failures change nothing, undo walks back through every state, and redo walks forward again', () => {
   fc.assert(
     fc.property(fc.array(edit, { maxLength: 30 }), (edits) => {
       const session = start();

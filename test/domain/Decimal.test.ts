@@ -10,7 +10,7 @@ test('text hides float noise and negative zero', () => {
   expect(new Decimal(1234567).toString()).toBe('1234567');
 });
 
-test('parse accepts the SVG number grammar only', () => {
+test('parse accepts only the SVG number grammar', () => {
   expect(Decimal.parse('1e3').toString()).toBe('1000');
   expect(Decimal.parse('-.5').toString()).toBe('-0.5');
   expect(Decimal.parse('12.5').toString()).toBe('12.5');
@@ -22,7 +22,7 @@ test('parse accepts the SVG number grammar only', () => {
   }
 });
 
-test('sign checks and scaling', () => {
+test('the sign checks treat zero as neither negative nor positive, and times multiplies', () => {
   expect(new Decimal(-1).isNegative()).toBe(true);
   expect(new Decimal(0).isNegative()).toBe(false);
   expect(new Decimal(0).isPositive()).toBe(false);

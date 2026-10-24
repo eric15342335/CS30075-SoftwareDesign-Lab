@@ -14,7 +14,7 @@ const fixtures = join(import.meta.dir, '..', 'fixtures');
 const dir = mkdtempSync(join(tmpdir(), 'svg-writer-'));
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
-test('writes the spec section 0.1 sample byte for byte', () => {
+test('the writer reproduces the sample from spec section 0.1 byte for byte', () => {
   const session = new Session();
   session.run(new InitCommand(session.workspace, new Decimal(400), new Decimal(200)));
   session.create('g', 'flow');
@@ -48,7 +48,7 @@ test('markup characters are escaped and read back unchanged', () => {
   expect(new SvgWriter().serialize(reread)).toBe(text);
 });
 
-test('write puts the text in the file, or says it cannot', () => {
+test('write puts the text in the file, or reports that it cannot', () => {
   const document = Session.spec().document();
   const writer = new SvgWriter();
   const file = join(dir, 'out.svg');
