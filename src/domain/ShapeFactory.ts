@@ -28,4 +28,12 @@ export class ShapeFactory {
     }
     return new Type(id);
   }
+
+  /** The `create` syntax of each registered type, for `help`. */
+  usages(): string[] {
+    return this.#types
+      .values()
+      .map((Type) => new Type('').createUsage())
+      .toArray();
+  }
 }

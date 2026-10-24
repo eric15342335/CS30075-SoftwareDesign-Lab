@@ -37,6 +37,13 @@ export class SvgDocument {
     return this.#shapes().reduce((count) => count + 1, 0);
   }
 
+  /** Every id in document order, for tab completion. */
+  ids(): string[] {
+    return this.#shapes()
+      .map((shape) => shape.id)
+      .toArray();
+  }
+
   create(type: string, id: string, args: readonly string[], containerId?: string): Placement {
     const shape = this.#factory.create(type, id);
     this.#claim(id);
@@ -172,13 +179,7 @@ export class SvgDocument {
     const { required, optional } = shape.createSignature();
     const names = optional === undefined ? required : [...required, optional];
     if (args.length < required.length || args.length > names.length) {
-      const params = [
-        ...required.map((name) => `<${name}>`),
-        ...names.slice(required.length).map((name) => `[${name}]`),
-      ];
-      throw new EditorError(
-        `usage: ${['create', shape.tag, '<id>', ...params, '[in <containerId>]'].join(' ')}`,
-      );
+      throw new EditorError(`usage: ${shape.createUsage()}`);
     }
     for (const [index, name] of names.entries()) {
       const arg = args[index];

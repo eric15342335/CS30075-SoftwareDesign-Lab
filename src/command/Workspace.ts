@@ -12,6 +12,11 @@ export class Workspace {
     return this.#document;
   }
 
+  /** Ids for tab completion; none before init or read. */
+  ids(): string[] {
+    return this.#document?.ids() ?? [];
+  }
+
   init(width = new Decimal(800), height = new Decimal(600)): SvgDocument {
     this.#document = new SvgDocument(new Canvas(width, height));
     return this.#document;

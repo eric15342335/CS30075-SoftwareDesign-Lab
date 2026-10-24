@@ -51,6 +51,14 @@ export abstract class Shape {
   abstract details(): string[];
   abstract createSignature(): CreateSignature;
 
+  /** `create <type> <id> ...` with this shape's parameters, for `help` and argument errors. */
+  createUsage(): string {
+    const { required, optional } = this.createSignature();
+    const params = required.map((name) => `<${name}>`);
+    if (optional !== undefined) params.push(`[${optional}]`);
+    return ['create', this.tag, '<id>', ...params, '[in <containerId>]'].join(' ');
+  }
+
   /** The summary `tree` prints after the label: geometry, then fill when set. */
   describe(): string {
     const fill = this.#style.get('fill');

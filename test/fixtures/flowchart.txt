@@ -1,0 +1,46 @@
+$ npm run cli
+
+svg> init 800 600
+canvas 800x600 created
+
+# 先建容器骨架，再往里放图形：每一步都显式表达归属
+svg> create g flowchart
+g#flowchart created
+svg> create g node1 in flowchart
+g#node1 created in g#flowchart
+svg> create rect start 120 100 160 60 #4a90d9 in node1
+rect#start created in g#node1
+svg> create text start-label 155 135 "开始" in node1
+text#start-label created in g#node1
+
+svg> create g node2 in flowchart
+g#node2 created in g#flowchart
+svg> create rect process 520 100 160 60 #f5a623 in node2
+rect#process created in g#node2
+svg> create text process-label 545 135 "处理数据" in node2
+text#process-label created in g#node2
+
+# 连接线挂在流程图容器下
+svg> create line arrow1 280 130 520 130 black in flowchart
+line#arrow1 created in g#flowchart
+
+svg> tree
+svg (800x600)
+└── g#flowchart
+    ├── g#node1
+    │   ├── rect#start       x=120 y=100 w=160 h=60 fill=#4a90d9
+    │   └── text#start-label (155,135) "开始"
+    ├── g#node2
+    │   ├── rect#process     x=520 y=100 w=160 h=60 fill=#f5a623
+    │   └── text#process-label (545,135) "处理数据"
+    └── line#arrow1          (280,130) -> (520,130)
+
+# 容器移动：整个节点 2 下移 100，文字随行（容器的价值所在）
+svg> move node2 0 100
+g#node2 moved by (0,100)
+svg> undo
+g#node2 moved back by (0,-100)
+
+# 改节点内容：只动组内 text
+svg> set process-label text "处理数据 v2"
+text#process-label updated: text="处理数据 v2"
