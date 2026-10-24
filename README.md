@@ -20,6 +20,14 @@ bun run cli
 bun run check
 ```
 
-依次运行格式检查、lint（含模块依赖规则）、类型检查、knip 和带覆盖率阈值的测试。
+依次运行格式检查、lint（含模块依赖规则）、类型检查、knip 和带覆盖率阈值的测试。题目第 6 节和 6.1 节（版本 A）的会话由端到端测试 `test/e2e/Transcripts.test.ts` 用真实进程逐行回放。
+
+```bash
+bun run mutation
+```
+
+用 Stryker 做变异测试，约 3 分钟，报告在 `reports/mutation/index.html`。
+
+想手动试读入文件，可以在 REPL 里输入 `read test/fixtures/other.svg`，再输入 `tree`。
 
 Windows 终端中文乱码时，先执行 `chcp 65001`。

@@ -6,6 +6,8 @@ import { SvgReader } from '#io/SvgReader.ts';
 import { SvgWriter } from '#io/SvgWriter.ts';
 
 /** Receiver of the document commands: holds the current document and the file it belongs to. */
+// 待重构: command uses io directly (the spec allows IO without isolation in this phase).
+// Once a second storage format or a test double is needed, define a store interface here and implement it in io.
 export class Workspace {
   readonly #reader = new SvgReader();
   readonly #writer = new SvgWriter();
