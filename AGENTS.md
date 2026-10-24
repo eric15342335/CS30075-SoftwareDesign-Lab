@@ -17,15 +17,16 @@ SVG editor CLI for CS30075 Lab1 Phase 1. The spec is `phase_cli_1.md`. Architect
 - Containers and leaves support the same operations (Composite).
 - Command pattern: a concrete command only forwards to its receiver (`SvgDocument` or `Workspace`). Validation and the spec's error messages live in the receiver. Undo stores the minimum prior state (`GeometryMemento`, `Placement`, old values). Never snapshot the whole document.
 - Commands are synchronous and never print. They return feedback lines; only `src/cli/Repl.ts` and `src/main.ts` touch stdin/stdout.
+- No deprecated APIs: oxlint's `typescript/no-deprecated` fails the check. Use the replacement that the deprecation notice names.
 
 ## Module boundaries (oxlint `no-restricted-imports` enforces them)
 
-| Module  | May import                                            |
-| ------- | ----------------------------------------------------- |
-| domain  | nothing: no `node:*`, no Bun, no packages             |
-| io      | domain, `node:fs`, fast-xml-parser                    |
-| command | domain, io                                            |
-| cli     | command, domain, commander, `node:*` except `node:fs` |
+| Module  | May import                                                               |
+| ------- | ------------------------------------------------------------------------ |
+| domain  | nothing: no `node:*`, no Bun, no packages                                |
+| io      | domain, `node:fs`, fast-xml-parser, fast-xml-validator, fast-xml-builder |
+| command | domain, io                                                               |
+| cli     | command, domain, commander, `node:*` except `node:fs`                    |
 
 Cross-module imports use the `#domain/...`, `#command/...`, `#io/...`, `#cli/...` aliases. `../` imports are banned.
 

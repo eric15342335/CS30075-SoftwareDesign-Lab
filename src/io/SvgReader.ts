@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 
-import { XMLParser, XMLValidator } from 'fast-xml-parser';
+import { XMLParser } from 'fast-xml-parser';
+import { SyntaxValidator } from 'fast-xml-validator';
 
 import { Canvas } from '#domain/Canvas.ts';
 import { Decimal } from '#domain/Decimal.ts';
@@ -49,11 +50,7 @@ export class SvgReader {
   parse(text: string): SvgDocument {
     this.#given.clear();
     this.#warnings.length = 0;
-    // A leading byte order mark needs no handling: fast-xml-parser accepts it.
-    const verdict = XMLValidator.validate(text);
-    if (verdict !== true) {
-      throw new EditorError(`line ${verdict.err.line}: ${verdict.err.msg.replace(/\.$/, '')}`);
-    }
+    this.#validate(text);
     const parsed: unknown = SvgReader.#parser.parse(text);
     const nodes: readonly XmlNode[] = Array.isArray(parsed) ? parsed : [];
     const root = nodes.find((node) => this.#tag(node) === 'svg');
@@ -66,6 +63,18 @@ export class SvgReader {
     this.#written = new Set(this.#ids(nodes));
     this.#fill(canvas, this.#children(root));
     return new SvgDocument(canvas);
+  }
+
+  /** Throws EditorError with the line number when the text is not well-formed XML. A leading byte order mark is fine. */
+  #validate(text: string): void {
+    try {
+      SyntaxValidator.validate(text);
+    } catch (error) {
+      // The validator throws an Error with a numeric line property. Its type file still describes an older return value.
+      if (!(error instanceof Error && 'line' in error && typeof error.line === 'number'))
+        throw error;
+      throw new EditorError(`line ${error.line}: ${error.message.replace(/\.$/, '')}`);
+    }
   }
 
   /** What the last read skipped or renamed, one line each. */

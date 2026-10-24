@@ -1,6 +1,6 @@
 import { writeFileSync } from 'node:fs';
 
-import { XMLBuilder } from 'fast-xml-parser';
+import XMLBuilder from 'fast-xml-builder';
 
 import { EditorError } from '#domain/EditorError.ts';
 import type { Shape } from '#domain/Shape.ts';
@@ -36,7 +36,7 @@ export class SvgWriter {
     return `${SvgWriter.#builder.build(tree)}\n`;
   }
 
-  /** A shape in fast-xml-parser's preserveOrder form: its text or its children, plus its attributes. */
+  /** A shape in the preserveOrder form that fast-xml-builder expects: its text or its children, plus its attributes. */
   #node(shape: Shape): Record<string, unknown> {
     const text = shape.textContent();
     const content = text ? [{ '#text': text }] : shape.children().map((child) => this.#node(child));

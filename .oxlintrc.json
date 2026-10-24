@@ -24,6 +24,7 @@
     "typescript/consistent-type-imports": "error",
     "typescript/no-explicit-any": "error",
     "typescript/no-floating-promises": "error",
+    "typescript/no-deprecated": "error",
     "no-restricted-imports": [
       "error",
       {
@@ -60,7 +61,7 @@
                 "message": "domain must not depend on any other module."
               },
               {
-                "regex": "^(node:|bun(:|$)|commander$|fast-xml-parser$)",
+                "regex": "^(node:|bun(:|$)|commander$|@commander-js/|fast-xml-)",
                 "message": "domain does no IO and uses no libraries."
               }
             ]
@@ -85,7 +86,7 @@
               },
               {
                 "regex": "^(bun(:|$)|commander$)",
-                "message": "io uses node:fs and fast-xml-parser only."
+                "message": "io uses node:fs and the fast-xml packages only."
               }
             ]
           }
@@ -108,7 +109,7 @@
                 "message": "command must not depend on cli."
               },
               {
-                "regex": "^(node:|bun(:|$)|commander$|fast-xml-parser$)",
+                "regex": "^(node:|bun(:|$)|commander$|@commander-js/|fast-xml-)",
                 "message": "command reaches files and XML only through io."
               }
             ]
@@ -132,7 +133,7 @@
                 "message": "cli reaches files only through commands."
               },
               {
-                "regex": "^(node:fs|fast-xml-parser$)",
+                "regex": "^(node:fs|fast-xml-)",
                 "message": "cli does not touch files or XML."
               }
             ]

@@ -19,7 +19,7 @@ src/
 | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | domain  | 图形的类层次与文档级约束：id 唯一且区分大小写、容器关系不成环、题目 4.2 节的错误信息。不做 IO，不依赖任何库。                                                           | `Shape` `Leaf` `Rect` `Circle` `Ellipse` `Line` `Text` `Group` `Canvas` `SvgDocument` `ShapeFactory`            |
 | command | 每条命令一个类，tree、show、help 这些显示类命令也是命令，返回排好版的文本。`CommandExecutor` 负责执行、undo/redo 两个栈和 IO 屏障；`Workspace` 保存当前文档与文件路径。 | `Command` `EditCommand` `DocumentCommand` `MoveCommand` `TreeCommand` 等具体命令，`CommandExecutor` `Workspace` |
-| io      | SVG 文本与领域对象之间的转换（基于 fast-xml-parser），文件读写；读入时为缺失的 id 自动编号并给出警告。                                                                  | `SvgReader` `SvgWriter`                                                                                         |
+| io      | SVG 文本与领域对象之间的转换（解析用 fast-xml-parser，格式检查用 fast-xml-validator，写出用 fast-xml-builder），文件读写；读入时为缺失的 id 自动编号并给出警告。        | `SvgReader` `SvgWriter`                                                                                         |
 | cli     | 逐行读入（node:readline，Tab 补全命令名和 id），切分参数，交给 commander 找到对应命令，打印反馈；在终端上错误显示为红色。                                               | `Repl` `CliProgram`                                                                                             |
 
 模块关系（PlantUML 包图，由下方的源码在 plantuml.com 渲染）：
@@ -135,12 +135,12 @@ GoF 讨论过"透明"与"安全"两种 Composite 写法，本项目用安全写�
 
 ### 1.3 依赖方向规则
 
-| 模块    | 允许依赖                                                         | 理由                                                                 |
-| ------- | ---------------------------------------------------------------- | -------------------------------------------------------------------- |
-| domain  | 无（不引入 `node:*`、Bun API 或任何库）                          | 最稳定、复用最多，各种输入通道和插件阶段都建在它上面                 |
-| io      | domain、`node:fs`、fast-xml-parser                               | 文件格式和解析库的变化不影响模型                                     |
-| command | domain、io                                                       | 用例层。command 直接依赖 io 是有意保留的（题目允许本阶段 IO 未隔离） |
-| cli     | command、domain、commander、`node:readline` 等（`node:fs` 除外） | 只是输入通道之一，不直接读写文件                                     |
+| 模块    | 允许依赖                                                                 | 理由                                                                 |
+| ------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| domain  | 无（不引入 `node:*`、Bun API 或任何库）                                  | 最稳定、复用最多，各种输入通道和插件阶段都建在它上面                 |
+| io      | domain、`node:fs`、fast-xml-parser、fast-xml-validator、fast-xml-builder | 文件格式和解析库的变化不影响模型                                     |
+| command | domain、io                                                               | 用例层。command 直接依赖 io 是有意保留的（题目允许本阶段 IO 未隔离） |
+| cli     | command、domain、commander、`node:readline` 等（`node:fs` 除外）         | 只是输入通道之一，不直接读写文件                                     |
 
 规则：依赖只能指向更稳定的模块；不允许循环依赖；跨模块导入一律写成 `#domain/…`、`#command/…` 这样的路径别名（package.json 的 `imports` 字段），禁止 `../` 相对导入，这样每一行 import 都能直接看出依赖方向。
 
@@ -168,12 +168,13 @@ GoF 讨论过"透明"与"安全"两种 Composite 写法，本项目用安全写�
 
 ### 1.6 修订记录
 
-| 日期       | 改动                                                         | 原因                                                                                                                  |
-| ---------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| 2026-10-24 | 初版方案                                                     |                                                                                                                       |
-| 2026-10-24 | 数值处理从静态工具类改为 `Decimal` 值对象                    | oxlint 报告只有静态成员的类，见过程记录 5                                                                             |
-| 2026-10-24 | tree、show 的排版从 cli 移到 command，成为显示类命令         | 它们和编辑命令一样是用例，agent 等其他输入通道也要用。留在 cli 的话，别的通道只能依赖 cli 或者重写一遍                |
-| 2026-10-24 | 端到端测试从"进程内回放加一个冒烟测试"改为全部用真实进程回放 | 会话里有 save 和 read，每个会话需要自己的工作目录。子进程可以单独指定工作目录，进程内回放只能改全局的 `process.chdir` |
+| 日期       | 改动                                                                                    | 原因                                                                                                                  |
+| ---------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| 2026-10-24 | 初版方案                                                                                |                                                                                                                       |
+| 2026-10-24 | 数值处理从静态工具类改为 `Decimal` 值对象                                               | oxlint 报告只有静态成员的类，见过程记录 5                                                                             |
+| 2026-10-24 | tree、show 的排版从 cli 移到 command，成为显示类命令                                    | 它们和编辑命令一样是用例，agent 等其他输入通道也要用。留在 cli 的话，别的通道只能依赖 cli 或者重写一遍                |
+| 2026-10-24 | 端到端测试从"进程内回放加一个冒烟测试"改为全部用真实进程回放                            | 会话里有 save 和 read，每个会话需要自己的工作目录。子进程可以单独指定工作目录，进程内回放只能改全局的 `process.chdir` |
+| 2026-10-25 | io 改用 fast-xml-validator 检查 XML 格式、fast-xml-builder 写出；lint 开启弃用 API 检查 | fast-xml-parser 的 `XMLValidator` 和 `XMLBuilder` 已标记为弃用，见过程记录 14                                         |
 
 ## 2 过程记录
 
@@ -192,6 +193,7 @@ GoF 讨论过"透明"与"安全"两种 Composite 写法，本项目用安全写�
 11. 读写实现：去掉 UTF-8 BOM 的正则里，AI 两次把 `\uFEFF` 写成了真正的 BOM 字符。第一次是编辑工具把转义解码了；第二次想用 sed 修正，GNU sed 又把替换文本里的 `\u` 理解成"下一个字母大写"，得到 `FEFF`。代码的行为没有错，但源码里多了一个看不见的字符，是用 `od -c` 查看字节时才发现的。oxlint 的 `no-irregular-whitespace` 不检查正则和字符串内部，抓不到这种情况。最后改用 `trimStart()`：JavaScript 把 U+FEFF 算作空白，源码里不必出现这个字符。之后扫描了全部源码和测试，没有别的不可见字符。后来变异测试（过程记录 13）显示，把 `trimStart()` 换成 `trimEnd()` 测试照样通过。用小脚本验证后确认 fast-xml-parser 本身就接受开头的 BOM，这行代码从一开始就不需要，已删除；BOM 测试保留，库的行为如果变了它会失败。
 12. 变异测试：方案中的 Stryker 社区 Bun 运行器要求 `typescript <7`，所以改用 Stryker 自带的 command 运行器，每个变异体跑一遍 `bun test`。第一次运行在测试开始前就崩溃了：`TypeError: ts.parseConfigFileTextToJson is not a function`。原因在 Stryker core：它会在沙箱里改写 tsconfig.json 中指向沙箱外的 `extends` 和 `references`，这一步要调用 TypeScript 的编译器 API，而 TypeScript 7 没有这个 API（与过程记录 2 同一原因）。当时最新的 10.1.1 这部分代码没有变，升级解决不了。本项目的 tsconfig.json 没有 `extends` 和 `references`，改写不会改动任何内容，所以在 `stryker.config.json` 里用 `ignorePatterns` 不把它复制进沙箱，预处理器找不到文件就会跳过。Bun 运行测试不做类型检查，沙箱里少了这个文件，测试照样全部通过（Stryker 植入变异之前会先完整跑一遍测试确认）。另外 knip 把配置里的 command 运行器报成了缺失的依赖 `@stryker-mutator/command-runner`。npm 上没有这个包，运行器就在 core 里，所以在 knip.json 里忽略它并注明原因。
 13. 变异测试：第一次运行得分 92.01%（1102 个变异体，存活 88 个），而行覆盖率是 100%。逐个看了存活的变异体，其中 22 个对应测试真正漏掉的地方。没有测试解析过 `12.5`、`.25`、`1E-3`、`2e10` 这类数，SVG 数值语法的正则改坏了也发现不了；没有测试设置过 `stroke-width`；读入时同一类型的两个无 id 元素（应编为 rect1、rect2）、只写了 width 或只写了 height 的根元素、用同一个 `SvgReader` 读第二个文件（`Workspace` 正是这样用的）都没有测试；所有执行器测试都先执行 init，执行器刚创建时的状态从来没有被检查过。终端模式的测试有一个不容易看出的问题：它一次送进全部按键，readline 在 REPL 处理第一行之前就因为 Ctrl+C 关闭了，所以"每条命令之后重新出现提示符"从来没有被检查过。新加的测试像人一样，等 REPL 回答之后才结束输入。commander 自己也会往 stderr 打印错误，`configureOutput` 把它关掉了，但没有测试确认，于是端到端测试加了一个语法错误的脚本，检查 stderr 为空。另外有两行代码删掉后测试照样通过：去掉 BOM 的 `trimStart()`（见过程记录 11），以及 Ctrl+C 时关闭 readline 的监听器。用小脚本验证过，readline 没有监听器时自己就会关闭，所以两行都删了。补测试、删代码之后重新运行，得分 94.27%，剩下 63 个存活变异体的分类见 4.2 节。
+14. 弃用 API：用户在编辑器里看到了 `XMLValidator` 的弃用提示（TypeScript 6385）。第 8 步 AI 选用了 fast-xml-parser 自带的 `XMLValidator` 和 `XMLBuilder`，当时没有发现它们已被标记为弃用。TypeScript 只在编辑器里把弃用显示为提示，`tsc` 不会报错，lint 也没有开启相应的规则，所以检查一直是绿的。随后用 oxlint 的 `typescript/no-deprecated` 扫描了全部源码和测试，只找到这两处，分别换成了弃用说明里推荐的 fast-xml-validator 和 fast-xml-builder（fast-xml-parser 自己就依赖 fast-xml-builder）。新的校验器出错时会抛出带行号的异常，而它的类型声明还是旧的"返回错误对象"的写法，所以捕获代码按实际行为编写。这条规则现在设为 error，以后再用到弃用的 API，提交和 CI 都会失败。依赖规则里按包名写的 `fast-xml-parser` 也改成了 `fast-xml-`，新加的两个包同样受模块边界约束；domain 和 command 还补上了之前漏掉的 `@commander-js/`。
 
 ## 3 一致性自查
 
@@ -202,7 +204,7 @@ GoF 讨论过"透明"与"安全"两种 Composite 写法，本项目用安全写�
 | 模块    | 实际导入（`grep -rhoE "from '[^']+'" src/<模块>`，去重）                                   | 结论                                                                                                        |
 | ------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
 | domain  | `#domain`                                                                                  | 与 1.3 节一致，没有 `node:*`、Bun API 或任何库                                                              |
-| io      | `#domain`、fast-xml-parser、`node:fs`                                                      | 一致                                                                                                        |
+| io      | `#domain`、fast-xml-builder、fast-xml-parser、fast-xml-validator、`node:fs`                | 一致                                                                                                        |
 | command | `#command`、`#domain`、`#io`                                                               | 一致                                                                                                        |
 | cli     | `#cli`、`#command`、`#domain`、`@commander-js/extra-typings`、`node:readline`、`node:util` | 一致，没有 `node:fs`。`@commander-js/extra-typings` 是 commander 官方的类型增强包，运行时用的就是 commander |
 | main.ts | `#cli`、`#command`                                                                         | 组装入口，不受 1.3 节限制                                                                                   |
@@ -258,7 +260,7 @@ src/domain/Probe.ts:5:1: error eslint(no-restricted-imports): '../command/Worksp
 | 命令与执行器 | 每条编辑命令：执行前的 SVG 文本等于 undo 后的文本，执行后的文本等于 redo 后的文本；栈规则与 IO 屏障；随机命令序列的性质测试                                                  | bun:test、fast-check         |
 | IO           | 自动补 id 不与文件中后出现的 id 冲突、重复 id、读写往返、题目示例逐字节一致                                                                                                  | bun:test                     |
 | 端到端       | 题目第 6 节和 6.1 节（版本 A）的会话原样作为测试数据，用真实进程逐行回放；保存出的文件与按题目推导的期望文件逐字节比较。另有一个语法错误的脚本，确认错误只在 stdout 打印一行 | bun:test、`Bun.spawn`        |
-| 静态检查     | 格式、lint（含依赖规则）、TypeScript 严格模式、无用代码检查、覆盖率阈值（行与函数 90%）                                                                                      | oxfmt、oxlint、tsc、knip     |
+| 静态检查     | 格式、lint（含依赖规则和弃用 API 检查）、TypeScript 严格模式、无用代码检查、覆盖率阈值（行与函数 90%）                                                                       | oxfmt、oxlint、tsc、knip     |
 | 变异测试     | 在源码里逐个植入小改动（变异体），每个变异体跑一遍全部测试，看测试能否发现。它检验的是测试本身：覆盖率只说明代码被执行过，不说明结果被检查过                                 | Stryker 10（command 运行器） |
 
 pre-commit 钩子运行格式检查、lint 和类型检查；GitHub Actions 在每次推送时运行 `bun run check`。变异测试要跑约 3 分钟，没有放进钩子和 CI，用 `bun run mutation` 手动运行。
