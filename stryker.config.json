@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "command",
+  "commandRunner": { "command": "bun test" },
+  "coverageAnalysis": "off",
+  "mutate": ["src/**/*.ts", "!src/main.ts"],
+  "ignorePatterns": ["/tsconfig.json"],
+  "reporters": ["clear-text", "progress", "html", "json"],
+  "htmlReporter": { "fileName": "reports/mutation/index.html" },
+  "jsonReporter": { "fileName": "reports/mutation/mutation.json" },
+  "concurrency": 8,
+  "tempDirName": ".stryker-tmp"
+}

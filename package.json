@@ -20,6 +20,7 @@
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
     "knip": "knip",
+    "mutation": "stryker run",
     "check": "bun run fmt:check && bun run lint && bun run typecheck && bun run knip && bun run coverage",
     "prepare": "lefthook install"
   },
@@ -31,6 +32,7 @@
   "devDependencies": {
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
+    "@stryker-mutator/core": "10.0.0",
     "@types/bun": "^1.4.4",
     "fast-check": "^4.10.2",
     "knip": "^6.43.0",
