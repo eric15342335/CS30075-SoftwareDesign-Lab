@@ -1,4 +1,7 @@
-/** The minimum prior state of one edit. Commands keep it opaque and only call restore() on undo. */
+/**
+ * A memento holds the minimum state from before one edit. Commands do not look inside it. They
+ * only call restore() on undo.
+ */
 export interface Memento {
   restore(): void;
 }

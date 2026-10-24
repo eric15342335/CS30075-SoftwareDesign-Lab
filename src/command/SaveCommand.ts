@@ -1,7 +1,7 @@
 import { DocumentCommand } from '#command/DocumentCommand.ts';
 import type { Workspace } from '#command/Workspace.ts';
 
-/** `save [file]`: without a file name it writes to the file last read or saved. */
+/** The `save [file]` command. Without a file name, it writes to the last file read or saved. */
 export class SaveCommand extends DocumentCommand {
   readonly #workspace: Workspace;
   readonly #path: string | undefined;

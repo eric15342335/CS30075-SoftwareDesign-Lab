@@ -1,7 +1,7 @@
 import { Command } from '#command/Command.ts';
 import type { Workspace } from '#command/Workspace.ts';
 
-/** `show <id>`: one shape's parent and attributes. */
+/** The `show <id>` command. It shows the parent and the attributes of one shape. */
 export class ShowCommand extends Command {
   readonly #workspace: Workspace;
   readonly #id: string;

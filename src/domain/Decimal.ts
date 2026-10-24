@@ -1,8 +1,9 @@
 import { EditorError } from '#domain/EditorError.ts';
 
 /**
- * Immutable value object for every number the editor handles. It reads SVG's number grammar
- * and writes at most 6 fraction digits, so float noise such as 0.30000000000000004 never shows.
+ * Decimal is an immutable value object for every number that the editor handles. It reads the
+ * number grammar of SVG and writes at most 6 fraction digits, so float noise such as
+ * 0.30000000000000004 never shows.
  */
 export class Decimal {
   static readonly #grammar = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i;

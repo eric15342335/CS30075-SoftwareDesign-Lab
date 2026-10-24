@@ -17,7 +17,7 @@ function empty(): SvgDocument {
   return new SvgDocument(new Canvas(n(800), n(600)));
 }
 
-/** The spec's section 6 document right after `group markers c1 box`. */
+/** The document from section 6 of the spec, right after `group markers c1 box`. */
 function session(): SvgDocument {
   const doc = empty();
   doc.create('rect', 'bg', ['0', '0', '800', '600', '#ffffff']);
@@ -28,7 +28,10 @@ function session(): SvgDocument {
   return doc;
 }
 
-/** Root children a..f, for checking that structural undo puts every shape back at its index. */
+/**
+ * A document whose root has the children a to f. The tests use it to check that structural undo
+ * puts every shape back at its index.
+ */
 function letters(): SvgDocument {
   const doc = empty();
   for (const id of 'abcdef') doc.create('g', id, []);

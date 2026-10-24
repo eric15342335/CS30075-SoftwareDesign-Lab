@@ -2,7 +2,7 @@ import type { Decimal } from '#domain/Decimal.ts';
 import { Journal } from '#domain/Journal.ts';
 import { type CreateSignature, Shape } from '#domain/Shape.ts';
 
-/** Composite container: an operation on a group reaches every descendant. */
+/** Group is the Composite container. An operation on a group reaches every descendant. */
 export class Group extends Shape {
   override readonly tag: string = 'g';
   readonly #children: Shape[] = [];
@@ -15,14 +15,17 @@ export class Group extends Shape {
     return this;
   }
 
-  /** Adds a child at index (default: last), first taking it out of its current parent. */
+  /**
+   * Adds a child at index, or at the end when there is no index. The child first leaves its
+   * current parent.
+   */
   insert(child: Shape, index?: number): void {
     child.parent?.remove(child);
     this.#children.splice(index ?? this.#children.length, 0, child);
     Shape.link(child, this);
   }
 
-  /** Takes a child out and returns the index it had. */
+  /** Removes a child and returns the index that it had. */
   remove(child: Shape): number {
     const index = this.#children.indexOf(child);
     if (index < 0) throw new Error(`${child.label()} is not a child of ${this.label()}`);

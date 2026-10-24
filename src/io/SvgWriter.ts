@@ -6,7 +6,10 @@ import { EditorError } from '#domain/EditorError.ts';
 import type { Shape } from '#domain/Shape.ts';
 import type { SvgDocument } from '#domain/SvgDocument.ts';
 
-/** Writes a document as indented SVG text, in the format of the spec's section 0.1 sample. */
+/**
+ * SvgWriter writes a document as indented SVG text. The format follows the sample in section 0.1
+ * of the spec.
+ */
 export class SvgWriter {
   static readonly #builder = new XMLBuilder({
     preserveOrder: true,
@@ -21,7 +24,7 @@ export class SvgWriter {
     ':@': { version: '1.0', encoding: 'UTF-8' },
   };
 
-  /** Throws EditorError when the file cannot be written. */
+  /** Writes the document to path. Throws an EditorError when the file cannot be written. */
   write(path: string, document: SvgDocument): void {
     const text = this.serialize(document);
     try {
@@ -36,7 +39,10 @@ export class SvgWriter {
     return `${SvgWriter.#builder.build(tree)}\n`;
   }
 
-  /** A shape in the preserveOrder form that fast-xml-builder expects: its text or its children, plus its attributes. */
+  /**
+   * Converts a shape into the preserveOrder form that fast-xml-builder expects. The node holds the
+   * text or the children of the shape, plus its attributes.
+   */
   #node(shape: Shape): Record<string, unknown> {
     const text = shape.textContent();
     const content = text ? [{ '#text': text }] : shape.children().map((child) => this.#node(child));

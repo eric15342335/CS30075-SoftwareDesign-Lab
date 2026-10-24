@@ -1,7 +1,7 @@
 import { Command } from '#command/Command.ts';
 import type { Workspace } from '#command/Workspace.ts';
 
-/** `canvas` without arguments: shows the canvas size. */
+/** The `canvas` command without arguments. It shows the canvas size. */
 export class CanvasCommand extends Command {
   readonly #workspace: Workspace;
 

@@ -3,13 +3,13 @@ import { EditorError } from '#domain/EditorError.ts';
 import type { Group } from '#domain/Group.ts';
 import type { Memento } from '#domain/Memento.ts';
 
-/** Positional parameters of `create <type> <id> ...`; `help` lists them too. */
+/** The positional parameters of `create <type> <id> ...`. The `help` command lists them too. */
 export interface CreateSignature {
   readonly required: readonly string[];
   readonly optional?: string;
 }
 
-/** Composite component: every edit works on leaves and groups alike. */
+/** Shape is the component in the Composite pattern. Every edit works on leaves and groups alike. */
 export abstract class Shape {
   static readonly #styleNames: readonly string[] = ['fill', 'stroke', 'stroke-width'];
 
@@ -17,14 +17,17 @@ export abstract class Shape {
   readonly #id: string;
   #parent: Group | null = null;
   readonly #style = new Map<string, string>();
-  /** Attributes the editor does not edit (transform, font-size, data-kind...), kept so read then save loses nothing. */
+  /**
+   * The attributes that the editor does not edit, such as transform, font-size and data-kind.
+   * The shape keeps them, so a read followed by a save loses nothing.
+   */
   readonly #extras = new Map<string, string>();
 
   constructor(id: string) {
     this.#id = id;
   }
 
-  /** Group calls this so parent links always match child lists. */
+  /** Group calls this method, so the parent links always match the child lists. */
   protected static link(child: Shape, parent: Group | null): void {
     child.#parent = parent;
   }
@@ -45,13 +48,13 @@ export abstract class Shape {
   abstract scale(factor: Decimal): void;
   /** Saves the exact geometry of this shape and its descendants, for undoing move and scale. */
   abstract saveGeometry(): Memento;
-  /** How `move` reports the result: leaves give their new position, groups the offset. */
+  /** Describes the result of `move`: a leaf gives its new position, and a group gives the offset. */
   abstract movedPhrase(dx: Decimal, dy: Decimal): string;
-  /** The lines `show` prints under the header. */
+  /** Returns the lines that `show` prints under the header. */
   abstract details(): string[];
   abstract createSignature(): CreateSignature;
 
-  /** `create <type> <id> ...` with this shape's parameters, for `help` and argument errors. */
+  /** Returns `create <type> <id> ...` with this shape's parameters, for `help` and argument errors. */
   createUsage(): string {
     const { required, optional } = this.createSignature();
     const params = required.map((name) => `<${name}>`);
@@ -59,7 +62,7 @@ export abstract class Shape {
     return ['create', this.tag, '<id>', ...params, '[in <containerId>]'].join(' ');
   }
 
-  /** The summary `tree` prints after the label: geometry, then fill when set. */
+  /** Returns the summary that `tree` prints after the label: the geometry, then the fill if set. */
   describe(): string {
     const fill = this.#style.get('fill');
     return [this.summary(), fill === undefined ? '' : `fill=${fill}`].filter(Boolean).join(' ');
@@ -77,7 +80,7 @@ export abstract class Shape {
     return undefined;
   }
 
-  /** Puts sibling right before this shape in this shape's parent, like DOM `before()`. */
+  /** Puts sibling right before this shape, in this shape's parent, like the DOM method `before()`. */
   before(sibling: Shape): void {
     const parent = this.#parent;
     if (parent === null) return;
@@ -85,28 +88,34 @@ export abstract class Shape {
     parent.insert(sibling, parent.indexOf(this));
   }
 
-  /** This shape, then its descendants in document order. */
+  /** Yields this shape, then its descendants in document order. */
   *walk(): Generator<Shape> {
     yield this;
     for (const child of this.children()) yield* child.walk();
   }
 
-  /** `set`: changes an editable attribute (undefined removes it) and returns the old value. */
+  /**
+   * Changes an editable attribute for `set` and returns the old value. The value undefined
+   * removes the attribute.
+   */
   setAttribute(name: string, value: string | undefined): string | undefined {
     const change = this.assign(name, value);
     if (change === null) throw new EditorError(`unknown attribute: ${name}`);
     return change.old;
   }
 
-  /** `read`: editable names go through set, anything else is kept as it is. */
+  /**
+   * Loads an attribute for `read`. An editable attribute goes through set, and the shape keeps
+   * any other attribute as it is.
+   */
   loadAttribute(name: string, value: string): void {
     if (this.assign(name, value) === null) this.#extras.set(name, value);
   }
 
-  /** `read`: the element's text children. Only shapes with text content keep them. */
+  /** Loads the text children of the element for `read`. Only shapes with text content keep them. */
   loadText(_text: string): void {}
 
-  /** What `save` writes, in order: id, geometry, fill, stroke, stroke-width, kept extras. */
+  /** Returns what `save` writes, in order: id, geometry, fill, stroke, stroke-width, kept extras. */
   attributes(): Array<[string, string]> {
     return [...this.ownAttributes(), ...this.#styleEntries(), ...this.#extras];
   }
@@ -119,7 +128,10 @@ export abstract class Shape {
     return [['id', this.#id]];
   }
 
-  /** Writes an attribute this shape edits and returns the old value; null means the name is not editable here. */
+  /**
+   * Writes an attribute that this shape edits and returns the old value. The result null means
+   * that this shape cannot edit an attribute with that name.
+   */
   protected assign(name: string, value: string | undefined): { old: string | undefined } | null {
     if (!Shape.#styleNames.includes(name)) return null;
     const old = this.#style.get(name);
@@ -128,7 +140,7 @@ export abstract class Shape {
     return { old };
   }
 
-  /** Style and kept extras as name=value words: the last line of `show`. */
+  /** Returns the style and kept extras as name=value words, which form the last line of `show`. */
   protected styleText(): string {
     return [...this.#styleEntries(), ...this.#extras]
       .map(([name, value]) => `${name}=${value}`)

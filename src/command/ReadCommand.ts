@@ -1,7 +1,7 @@
 import { DocumentCommand } from '#command/DocumentCommand.ts';
 import type { Workspace } from '#command/Workspace.ts';
 
-/** `read <file>`: the file replaces the current document. */
+/** The `read <file>` command. The file replaces the current document. */
 export class ReadCommand extends DocumentCommand {
   readonly #workspace: Workspace;
   readonly #path: string;

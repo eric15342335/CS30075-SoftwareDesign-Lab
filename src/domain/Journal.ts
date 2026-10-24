@@ -1,6 +1,9 @@
 import type { Memento } from '#domain/Memento.ts';
 
-/** Mementos of a multi-step edit, each taken right before its step. Restoring newest first undoes the steps exactly. */
+/**
+ * A journal holds the mementos of an edit with several steps. Each memento is taken right before
+ * its step. Restoring them from newest to oldest undoes the steps exactly.
+ */
 export class Journal implements Memento {
   readonly #steps: readonly Memento[];
 

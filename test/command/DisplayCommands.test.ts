@@ -6,7 +6,7 @@ import { ShowCommand } from '#command/ShowCommand.ts';
 import { TreeCommand } from '#command/TreeCommand.ts';
 import { Session } from '#test/support/Session.ts';
 
-/** The spec's section 6 document right after `group markers c1 box`. */
+/** The document from section 6 of the spec, right after `group markers c1 box`. */
 function grouped(): Session {
   const session = Session.spec();
   session.run(new GroupCommand(session.workspace, 'markers', ['c1', 'box']));

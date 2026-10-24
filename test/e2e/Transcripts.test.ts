@@ -11,7 +11,10 @@ afterAll(() => {
   for (const dir of dirs) rmSync(dir, { recursive: true, force: true });
 });
 
-/** What the user typed: prompt lines without the prompt, plus the blank and comment lines between them. */
+/**
+ * Returns what the user typed: the prompt lines without the prompt, plus the blank lines and
+ * comment lines between them.
+ */
 function script(transcript: string): string {
   return transcript
     .split(/\r?\n/)
@@ -20,7 +23,10 @@ function script(transcript: string): string {
     .join('\n');
 }
 
-/** Lines to compare: no shell line, banner or blank lines, and whitespace runs collapsed (spec gap 1). */
+/**
+ * Returns the lines to compare. It drops the shell line, the banner and blank lines, and it
+ * collapses runs of whitespace (spec gap 1).
+ */
 function normalize(text: string): string[] {
   return stripVTControlCharacters(text)
     .split(/\r?\n/)
@@ -28,8 +34,9 @@ function normalize(text: string): string[] {
     .filter((line) => line !== '' && !line.startsWith('$ ') && !line.startsWith('svg-editor '));
 }
 
-// The transcripts are copied verbatim from the spec (section 6 and section 6.1 version A).
-// Each runs the real program, as `bun run cli < script` would, in a fresh directory holding other.svg.
+// The transcripts are copied word for word from the spec (section 6 and version A of section 6.1).
+// Each one runs the real program, as `bun run cli < script` would, in a new directory that holds
+// other.svg.
 test.each([
   ['session.txt', 'demo.svg'],
   ['flowchart.txt', 'flowchart.svg'],

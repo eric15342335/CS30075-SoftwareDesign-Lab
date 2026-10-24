@@ -20,7 +20,8 @@ import { Session } from '#test/support/Session.ts';
 
 type Edit = (workspace: Workspace) => Command;
 
-// Ids of the start document plus new ones, so edits hit leaves, containers and unused ids.
+// These are the ids of the start document plus some new ones, so the edits hit leaves,
+// containers and unused ids.
 const id = fc.constantFrom('bg', 'title', 'c1', 'box', 'markers', 'inner', 'deep', 'g1', 'r1');
 const delta = fc.integer({ min: -100, max: 100 }).map((value) => new Decimal(value));
 const created = fc.constantFrom<readonly [string, readonly string[]]>(
@@ -75,7 +76,7 @@ const edit: fc.Arbitrary<Edit> = fc.oneof(
   id.map((shapeId) => (workspace: Workspace) => new BackCommand(workspace, shapeId)),
 );
 
-/** The spec session plus a nested group, so ungroup and addto have targets from the start. */
+/** The spec session plus a nested group, so that ungroup and addto have targets from the start. */
 function start(): Session {
   const session = Session.spec();
   session.run(new GroupCommand(session.workspace, 'markers', ['c1', 'box']));

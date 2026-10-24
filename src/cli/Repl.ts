@@ -7,12 +7,13 @@ import { EditorError } from '#domain/EditorError.ts';
 type Output = NodeJS.WritableStream & { readonly isTTY?: boolean };
 
 /**
- * The read-eval-print loop. On a terminal it prompts and completes with Tab.
- * Fed a script through a pipe, it echoes every line, so the output reads like the spec's transcripts.
+ * Repl is the read-eval-print loop. On a terminal, it shows a prompt and completes words with Tab.
+ * When it reads a script through a pipe, it echoes every line, so the output looks like the
+ * transcripts in the spec.
  */
 export class Repl {
   static readonly #banner = "svg-editor 0.1 — type 'help' for commands";
-  /** Blank lines and # comments: echoed, never run. */
+  /** Matches blank lines and # comments. The loop echoes them but never runs them. */
   static readonly #quiet = /^\s*(?:#|$)/;
   readonly #program: CliProgram;
   readonly #input: NodeJS.ReadableStream;
@@ -24,7 +25,7 @@ export class Repl {
     this.#output = output;
   }
 
-  /** Resolves when the input ends (EOF, Ctrl+D or Ctrl+C). */
+  /** Starts the loop. The promise resolves when the input ends with EOF, Ctrl+D or Ctrl+C. */
   async start(): Promise<void> {
     const terminal = this.#output.isTTY === true;
     const lines = createInterface({
@@ -44,7 +45,8 @@ export class Repl {
       const quiet = Repl.#quiet.test(line);
       if (!terminal) this.#print(quiet ? line : `svg> ${line}`);
       if (!quiet) this.#print(...this.#evaluate(line));
-      // Lines pasted before Ctrl+C still run, but a closed interface must not prompt again.
+      // Lines that were pasted before Ctrl+C still run. However, the loop must not show the
+      // prompt again after the interface has closed.
       if (terminal && open) lines.prompt();
     }
   }
@@ -53,7 +55,8 @@ export class Repl {
     try {
       return this.#program.run(line);
     } catch (error) {
-      // Spec 2: every error is one line starting with "error:". A bug still says so, and the session goes on.
+      // Spec 2 says that every error is one line that starts with "error:". A bug also gets
+      // such a line, and the session goes on.
       const message = error instanceof EditorError ? error.message : `internal: ${String(error)}`;
       return [styleText('red', `error: ${message}`, { stream: this.#output })];
     }

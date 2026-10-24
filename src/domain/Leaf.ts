@@ -3,15 +3,18 @@ import { EditorError } from '#domain/EditorError.ts';
 import { GeometryMemento } from '#domain/GeometryMemento.ts';
 import { type CreateSignature, Shape } from '#domain/Shape.ts';
 
-/** What `move` adds to a geometry attribute: dx, dy, or nothing (sizes). */
+/** Says what `move` adds to a geometry attribute: dx, dy, or nothing for a size. */
 type Axis = 'x' | 'y' | 'size';
 
-/** Template Method: move, scale, set and output live here once; subclasses declare their geometry. */
+/**
+ * Leaf applies the Template Method pattern. Move, scale, set and output are written once here,
+ * and each subclass declares its geometry.
+ */
 export abstract class Leaf extends Shape {
   static readonly #zero = new Decimal(0);
   readonly #geometry = new Map(Object.keys(this.geometry()).map((key) => [key, Leaf.#zero]));
 
-  /** Geometry attributes in SVG order. The first two are the anchor point `move` reports. */
+  /** The geometry attributes in SVG order. The first two form the anchor point that `move` reports. */
   protected abstract geometry(): Readonly<Record<string, Axis>>;
 
   override move(dx: Decimal, dy: Decimal): void {
@@ -53,7 +56,7 @@ export abstract class Leaf extends Shape {
   protected override assign(name: string, value: string | undefined) {
     const old = this.#geometry.get(name);
     if (old === undefined) return super.assign(name, value);
-    // Absent geometry means 0 in SVG.
+    // In SVG, a missing geometry attribute means 0.
     const number = value === undefined ? Leaf.#zero : Decimal.parse(value);
     if (number.isNegative() && this.geometry()[name] === 'size') {
       throw new EditorError(`${name} must not be negative`);

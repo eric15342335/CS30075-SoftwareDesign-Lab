@@ -7,7 +7,7 @@ import { Repl } from '#cli/Repl.ts';
 import { CommandExecutor } from '#command/CommandExecutor.ts';
 import { Workspace } from '#command/Workspace.ts';
 
-/** A program whose `boom` line hits a bug, to see how the loop reports one. */
+/** A program whose `boom` line hits a bug. The tests use it to see how the loop reports a bug. */
 class BuggyProgram extends CliProgram {
   override run(line: string): string[] {
     if (line === 'boom') throw new TypeError('x is undefined');
@@ -30,7 +30,7 @@ function recorder(terminal: boolean) {
   return { output, text: () => text };
 }
 
-/** Feeds chunks of input to a Repl and returns everything it wrote. */
+/** Feeds chunks of input to a Repl and returns everything that the Repl wrote. */
 async function replay(chunks: string[], terminal = false): Promise<string> {
   const { output, text } = recorder(terminal);
   const program = new BuggyProgram(new Workspace(), new CommandExecutor());
@@ -60,19 +60,20 @@ test('a piped script is echoed like the spec transcripts', async () => {
 });
 
 test('on a terminal it prompts, completes with Tab, paints errors red and quits on Ctrl+C', async () => {
-  // Readline completes only on a Tab that ends a chunk (a lone keypress), so each key is its own chunk.
+  // Readline completes only when a Tab ends a chunk, as a single keypress does. So the test
+  // sends each key as its own chunk.
   const output = await replay(['ini', '\t', '\n', 'move r9 1 1\n', '\u0003', 'tree\n'], true);
   expect(output).toContain('\u001B[31merror: no such shape: r9\u001B[39m');
   const screen = stripVTControlCharacters(output);
   expect(screen).toStartWith("svg-editor 0.1 — type 'help' for commands\n\nsvg> ");
   expect(screen).toContain('svg> init');
   expect(screen).toContain('canvas 800x600 created');
-  // The tree typed after Ctrl+C never runs.
+  // The tree command that is typed after Ctrl+C never runs.
   expect(screen).not.toContain('(800x600)');
 });
 
 test('on a terminal the prompt comes back after each command, and the typed line is not echoed twice', async () => {
-  // Typed at human speed: the input ends only after the Repl has answered the first line.
+  // This input comes at human speed: it ends only after the Repl has answered the first line.
   const input = new PassThrough();
   const { output, text } = recorder(true);
   const program = new CliProgram(new Workspace(), new CommandExecutor());

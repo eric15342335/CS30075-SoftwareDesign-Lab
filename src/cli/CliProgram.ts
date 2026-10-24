@@ -27,16 +27,23 @@ import { Decimal } from '#domain/Decimal.ts';
 import { EditorError } from '#domain/EditorError.ts';
 import { ShapeFactory } from '#domain/ShapeFactory.ts';
 
-/** Client of the Command pattern: parses one input line into a command object and hands it to the executor. */
+/**
+ * CliProgram is the client in the Command pattern. It parses one input line into a command object
+ * and hands the command to the executor.
+ */
 export class CliProgram {
-  /** A word is a double-quoted run without its quotes, or a run of non-spaces. */
-  // ponytail: no escapes, so quoted text cannot contain a double quote. Add \" handling if text needs one.
+  /**
+   * A word is either the text between two double quotes, without the quotes, or a run of
+   * characters that are not spaces.
+   */
+  // ponytail: This pattern has no escapes, so quoted text cannot contain a double quote.
+  // Add support for \" if the text ever needs one.
   static readonly #word = /"([^"]*)"|(\S+)/g;
   static readonly #number = (value: string): Decimal => Decimal.parse(value);
   readonly #workspace: Workspace;
   readonly #executor: CommandExecutor;
   readonly #program: Program;
-  /** Set by the action of whichever command the parse matched. */
+  /** The action of the matched command stores the new command object here. */
   #pending: Command | null = null;
 
   constructor(workspace: Workspace, executor: CommandExecutor) {
@@ -45,7 +52,7 @@ export class CliProgram {
     this.#program = this.#define();
   }
 
-  /** Runs one line and returns its feedback. Bad syntax and refused edits throw EditorError. */
+  /** Runs one line and returns its feedback. Bad syntax or a refused edit throws an EditorError. */
   run(line: string): string[] {
     const words = line
       .matchAll(CliProgram.#word)
@@ -56,7 +63,8 @@ export class CliProgram {
       this.#program.parse(words, { from: 'user' });
     } catch (error) {
       if (!(error instanceof CommanderError)) throw error;
-      // "error: unknown command 'mvoe'\n(Did you mean move?)" becomes one line without the prefix.
+      // Commander's message "error: unknown command 'mvoe'\n(Did you mean move?)" becomes one
+      // line without the "error: " prefix.
       throw new EditorError(error.message.replace(/^error: /, '').replaceAll('\n', ' '));
     }
     const command = this.#pending;
@@ -64,7 +72,10 @@ export class CliProgram {
     return command === null ? [] : this.#executor.execute(command);
   }
 
-  /** readline completer: command names for the first word, shape ids after it. */
+  /**
+   * Completes input for readline. It offers command names for the first word and shape ids for
+   * the words after it.
+   */
   complete(line: string): [string[], string] {
     const word = line.split(' ').at(-1) ?? '';
     const candidates = line.includes(' ')
@@ -73,8 +84,9 @@ export class CliProgram {
     return [candidates.filter((candidate) => candidate.startsWith(word)), word];
   }
 
-  // 待重构: dispatch point 1 of 2 (spec 2.1), command name to command class.
-  // A new verb means editing this method; the plugin phase can replace it with a command registry.
+  // 待重构: This is dispatch point 1 of 2 (spec 2.1). It maps a command name to a command class.
+  // Each new verb needs an edit in this method. The plugin phase can replace the method with a
+  // command registry.
   #define(): Program {
     const workspace = this.#workspace;
     const program = new Program()
@@ -193,7 +205,7 @@ export class CliProgram {
       .command('redo')
       .description('redo the last undone edit')
       .action(() => this.#queue(new RedoCommand(workspace, this.#executor)));
-    // Values such as "-hi" are text here, never options.
+    // Here, a value such as "-hi" is ordinary text. Commander never reads it as an option.
     for (const command of program.commands) command.allowUnknownOption();
     return program;
   }
@@ -202,7 +214,7 @@ export class CliProgram {
     this.#pending = command;
   }
 
-  /** A trailing `in <containerId>` names the container; "in" anywhere else is an ordinary word. */
+  /** A trailing `in <containerId>` names the container. Anywhere else, "in" is an ordinary word. */
   #create(type: string, id: string, params: string[]): CreateCommand {
     if (params.at(-2) !== 'in') return new CreateCommand(this.#workspace, type, id, params);
     return new CreateCommand(this.#workspace, type, id, params.slice(0, -2), params.at(-1));

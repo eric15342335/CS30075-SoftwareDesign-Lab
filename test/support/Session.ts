@@ -7,12 +7,15 @@ import { UndoCommand } from '#command/UndoCommand.ts';
 import { Workspace } from '#command/Workspace.ts';
 import type { SvgDocument } from '#domain/SvgDocument.ts';
 
-/** A workspace and executor wired the way the CLI wires them, for command-level tests. */
+/** A workspace and an executor, wired the same way as in the CLI, for the command tests. */
 export class Session {
   readonly workspace = new Workspace();
   readonly executor = new CommandExecutor();
 
-  /** The spec's section 6 document just before `group markers c1 box`; history holds the creates. */
+  /**
+   * Returns a session with the document from section 6 of the spec, just before
+   * `group markers c1 box`. The history holds the create commands.
+   */
   static spec(): Session {
     const session = new Session();
     session.run(new InitCommand(session.workspace));
@@ -43,7 +46,10 @@ export class Session {
     return this.workspace.document();
   }
 
-  /** Every shape with its parent, attributes and text: equal fingerprints mean equal saved files. */
+  /**
+   * Lists every shape with its parent, attributes and text. When two fingerprints are equal, the
+   * saved files are equal too.
+   */
   fingerprint(): string[] {
     return this.document()
       .canvas.walk()

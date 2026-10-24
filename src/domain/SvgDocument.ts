@@ -10,8 +10,9 @@ import type { Shape } from '#domain/Shape.ts';
 import { ShapeFactory } from '#domain/ShapeFactory.ts';
 
 /**
- * Receiver of every edit command. It validates each request, raises the spec's error messages,
- * and returns a memento with only the state that undo needs. A failed request changes nothing.
+ * SvgDocument is the receiver of every edit command. It validates each request, raises the error
+ * messages from the spec, and returns a memento with only the state that undo needs. A failed
+ * request changes nothing.
  */
 export class SvgDocument {
   static readonly #idPattern = /^\S+$/;
@@ -32,12 +33,12 @@ export class SvgDocument {
     return shape;
   }
 
-  /** Elements below the root, as `save` and `read` count them. */
+  /** Counts the elements below the root, the way that `save` and `read` count them. */
   count(): number {
     return this.#shapes().reduce((count) => count + 1, 0);
   }
 
-  /** Every id in document order, for tab completion. */
+  /** Returns every id in document order, for tab completion. */
   ids(): string[] {
     return this.#shapes()
       .map((shape) => shape.id)
@@ -81,7 +82,10 @@ export class SvgDocument {
     return new AttributeMemento(shape, name, shape.setAttribute(name, value));
   }
 
-  /** Members leave their parents in document order; the new group takes the first member's place. */
+  /**
+   * Puts the members into a new group. They leave their parents in document order, and the new
+   * group takes the place of the first member.
+   */
   group(id: string, memberIds: readonly string[]): Journal {
     this.#claim(id);
     const chosen = new Set(memberIds.map((memberId) => this.find(memberId)));
@@ -110,7 +114,7 @@ export class SvgDocument {
     return new Journal(steps);
   }
 
-  /** The children take the container's place in its parent, in their order. */
+  /** Removes a container. Its children take its place in its parent and keep their order. */
   ungroup(id: string): Journal {
     const container = this.find(id).asGroup();
     if (container === null) throw new EditorError(`not a container: ${id}`);
@@ -138,7 +142,7 @@ export class SvgDocument {
     return placement;
   }
 
-  /** Later siblings paint on top, so the front is the end of the child list. */
+  /** Later siblings are painted on top, so the front is the end of the child list. */
   front(id: string): Placement {
     const shape = this.find(id);
     const placement = new Placement(shape);
@@ -153,7 +157,7 @@ export class SvgDocument {
     return placement;
   }
 
-  // ponytail: every lookup walks the whole tree, O(n). Add an id index if documents get large.
+  // ponytail: Each lookup walks the whole tree in O(n). Add an id index if documents get large.
   #shapes() {
     return this.#canvas.walk().drop(1);
   }

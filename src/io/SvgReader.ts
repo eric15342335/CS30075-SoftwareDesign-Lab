@@ -10,33 +10,36 @@ import type { Shape } from '#domain/Shape.ts';
 import { ShapeFactory } from '#domain/ShapeFactory.ts';
 import { SvgDocument } from '#domain/SvgDocument.ts';
 
-/** fast-xml-parser's preserveOrder form: one key names the tag (or #text), and ':@' holds the attributes. */
+/**
+ * A node in the preserveOrder form of fast-xml-parser. One key names the tag (or #text), and the
+ * key ':@' holds the attributes.
+ */
 type XmlNode = Readonly<Record<string, unknown>>;
 
 /**
- * Turns SVG text into a document. Elements it cannot use are skipped and ids it cannot keep are
- * replaced; after each read, warnings() says what happened.
+ * SvgReader turns SVG text into a document. It skips the elements that it cannot use and replaces
+ * the ids that it cannot keep. After each read, warnings() tells what happened.
  */
 export class SvgReader {
   static readonly #parser = new XMLParser({
     preserveOrder: true,
     ignoreAttributes: false,
     attributeNamePrefix: '',
-    // Keeps "007" as text instead of the number 7.
+    // This option keeps "007" as text instead of turning it into the number 7.
     parseTagValue: false,
     ignoreDeclaration: true,
     ignorePiTags: true,
   });
-  /** Root attributes that the canvas writes itself. */
+  /** The root attributes that the canvas writes by itself. */
   static readonly #canvasOwned = new Set(['xmlns', 'width', 'height', 'viewBox']);
   readonly #factory = new ShapeFactory();
-  /** Every id written in the file, so an assigned id never takes one that appears later. */
+  /** Every id in the file. With this set, an assigned id never takes an id that appears later. */
   #written = new Set<string>();
-  /** Ids given to shapes so far. */
+  /** The ids that the reader has given to shapes so far. */
   readonly #given = new Set<string>();
   readonly #warnings: string[] = [];
 
-  /** Throws EditorError when the file is missing or is not usable SVG. */
+  /** Reads the file at path. Throws an EditorError when the file is missing or is not usable SVG. */
   read(path: string): SvgDocument {
     const text = this.#load(path);
     try {
@@ -65,19 +68,23 @@ export class SvgReader {
     return new SvgDocument(canvas);
   }
 
-  /** Throws EditorError with the line number when the text is not well-formed XML. A leading byte order mark is fine. */
+  /**
+   * Throws an EditorError with the line number when the text is not well-formed XML. A byte order
+   * mark at the start is allowed.
+   */
   #validate(text: string): void {
     try {
       SyntaxValidator.validate(text);
     } catch (error) {
-      // The validator throws an Error with a numeric line property. Its type file still describes an older return value.
+      // The validator throws an Error with a numeric line property. Its type file still describes
+      // the return value of an older version.
       if (!(error instanceof Error && 'line' in error && typeof error.line === 'number'))
         throw error;
       throw new EditorError(`line ${error.line}: ${error.message.replace(/\.$/, '')}`);
     }
   }
 
-  /** What the last read skipped or renamed, one line each. */
+  /** Returns what the last read skipped or renamed, one line for each item. */
   warnings(): string[] {
     return [...this.#warnings];
   }
@@ -90,7 +97,10 @@ export class SvgReader {
     }
   }
 
-  /** Size from width and height, or from the size part of viewBox when they are missing. */
+  /**
+   * Creates the canvas. Its size comes from width and height, or from the size part of viewBox
+   * when they are missing.
+   */
   #canvas(attributes: ReadonlyMap<string, string>): Canvas {
     const [, , boxWidth, boxHeight] = (attributes.get('viewBox') ?? '').trim().split(/[\s,]+/);
     const width = attributes.get('width') ?? boxWidth;
@@ -101,7 +111,7 @@ export class SvgReader {
     return new Canvas(Decimal.parse(width), Decimal.parse(height));
   }
 
-  /** Adds the usable elements among nodes to parent, in document order. */
+  /** Adds the usable elements in nodes to parent, in document order. */
   #fill(parent: Shape, nodes: readonly XmlNode[]): void {
     const group = parent.asGroup();
     for (const node of nodes) {
@@ -118,7 +128,7 @@ export class SvgReader {
     }
   }
 
-  /** One element as a shape, or null with a warning when it cannot be used. */
+  /** Turns one element into a shape, or returns null with a warning when the element is unusable. */
   #shape(tag: string, node: XmlNode): Shape | null {
     const attributes = this.#attributes(node);
     if (!this.#factory.supports(tag)) {
@@ -141,7 +151,10 @@ export class SvgReader {
     return shape;
   }
 
-  /** The file's id unless an earlier element has it; otherwise the tag plus the first free number. */
+  /**
+   * Returns the id from the file, unless an earlier element already has it. In that case, it
+   * returns the tag name plus the first free number.
+   */
   #id(tag: string, written: string | undefined): string {
     if (written && !this.#given.has(written)) {
       this.#given.add(written);
@@ -163,7 +176,7 @@ export class SvgReader {
     return id ? `<${tag} id="${id}">` : `<${tag}>`;
   }
 
-  /** Every id attribute in the tree, skipped elements included. */
+  /** Yields every id attribute in the tree, including those of skipped elements. */
   *#ids(nodes: readonly XmlNode[]): Generator<string> {
     for (const node of nodes) {
       const id = this.#attributes(node).get('id');
@@ -172,7 +185,7 @@ export class SvgReader {
     }
   }
 
-  /** The tag name, or #text for character data. */
+  /** Returns the tag name, or #text for character data. */
   #tag(node: XmlNode): string {
     return Object.keys(node).find((key) => key !== ':@') ?? '#text';
   }
@@ -192,7 +205,7 @@ export class SvgReader {
     );
   }
 
-  /** Character data directly inside the element: the content of a <text>. */
+  /** Returns the character data directly inside the element, which is the content of a <text>. */
   #text(node: XmlNode): string {
     return this.#children(node)
       .map((child) => child['#text'])

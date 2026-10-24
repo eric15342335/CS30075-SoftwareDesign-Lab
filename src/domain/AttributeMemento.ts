@@ -1,7 +1,7 @@
 import type { Memento } from '#domain/Memento.ts';
 import type { Shape } from '#domain/Shape.ts';
 
-/** The value one attribute had before `set`; undefined means it was absent. */
+/** Holds the value that one attribute had before `set`. The value undefined means it was absent. */
 export class AttributeMemento implements Memento {
   readonly #shape: Shape;
   readonly #name: string;

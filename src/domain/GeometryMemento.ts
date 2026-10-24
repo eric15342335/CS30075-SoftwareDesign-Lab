@@ -1,7 +1,10 @@
 import type { Decimal } from '#domain/Decimal.ts';
 import type { Memento } from '#domain/Memento.ts';
 
-/** Exact geometry of one leaf. Undo restores the saved values instead of running move/scale backwards, which would drift with floats. */
+/**
+ * Holds the exact geometry of one leaf. Undo restores these saved values. Running move or scale
+ * backwards would drift because of floating-point rounding.
+ */
 export class GeometryMemento implements Memento {
   readonly #target: Map<string, Decimal>;
   readonly #saved: ReadonlyMap<string, Decimal>;

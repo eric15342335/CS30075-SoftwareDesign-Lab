@@ -2,7 +2,10 @@ import { DocumentCommand } from '#command/DocumentCommand.ts';
 import type { Workspace } from '#command/Workspace.ts';
 import type { Decimal } from '#domain/Decimal.ts';
 
-/** `canvas <w> [h]`: changes the canvas size. Like the other document commands, it ends undo (spec 4.3). */
+/**
+ * The `canvas <w> [h]` command. It changes the canvas size. Like the other document commands, it
+ * blocks undo until the next edit (spec 4.3).
+ */
 export class ResizeCommand extends DocumentCommand {
   readonly #workspace: Workspace;
   readonly #width: Decimal;

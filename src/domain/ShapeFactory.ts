@@ -9,9 +9,10 @@ import { Text } from '#domain/Text.ts';
 
 type ShapeClass = new (id: string) => Shape;
 
-/** Type name to shape class, shared by `create` and `read`. */
+/** ShapeFactory maps a type name to a shape class. Both `create` and `read` use it. */
 export class ShapeFactory {
-  // 待重构: one of the two allowed name dispatch points. The plugin phase replaces this table with a ShapeProvider registry.
+  // 待重构: This is one of the two allowed name dispatch points. The plugin phase will replace
+  // this table with a ShapeProvider registry.
   readonly #types = new Map<string, ShapeClass>([
     ['rect', Rect],
     ['circle', Circle],
@@ -21,7 +22,7 @@ export class ShapeFactory {
     ['g', Group],
   ]);
 
-  /** `read` skips elements of other types. */
+  /** Tells whether the type is registered. The `read` command skips elements of other types. */
   supports(type: string): boolean {
     return this.#types.has(type);
   }
@@ -34,7 +35,7 @@ export class ShapeFactory {
     return new Type(id);
   }
 
-  /** The `create` syntax of each registered type, for `help`. */
+  /** Returns the `create` syntax of each registered type, for `help`. */
   usages(): string[] {
     return this.#types
       .values()

@@ -1,7 +1,7 @@
 import { Leaf } from '#domain/Leaf.ts';
 import type { CreateSignature } from '#domain/Shape.ts';
 
-/** In SVG the content is the element's child text, so it counts as an attribute only for `set`. */
+/** In SVG, the content is the element's child text, so it counts as an attribute only for `set`. */
 export class Text extends Leaf {
   override readonly tag = 'text';
   #content = '';

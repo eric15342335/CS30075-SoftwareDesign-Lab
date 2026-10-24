@@ -5,14 +5,18 @@ import { SvgDocument } from '#domain/SvgDocument.ts';
 import { SvgReader } from '#io/SvgReader.ts';
 import { SvgWriter } from '#io/SvgWriter.ts';
 
-/** Receiver of the document commands: holds the current document and the file it belongs to. */
-// 待重构: command uses io directly (the spec allows IO without isolation in this phase).
-// Once a second storage format or a test double is needed, define a store interface here and implement it in io.
+/**
+ * Workspace is the receiver of the document commands. It holds the current document and the file
+ * that the document belongs to.
+ */
+// 待重构: The command module uses io directly. The spec allows IO without isolation in this phase.
+// When a second storage format or a test double becomes necessary, define a store interface here
+// and implement it in io.
 export class Workspace {
   readonly #reader = new SvgReader();
   readonly #writer = new SvgWriter();
   #document: SvgDocument | null = null;
-  /** Where `save` without a file name writes: the file last read or saved. */
+  /** The file that `save` writes to when it gets no file name: the last file read or saved. */
   #path: string | null = null;
 
   document(): SvgDocument {
@@ -20,7 +24,7 @@ export class Workspace {
     return this.#document;
   }
 
-  /** Ids for tab completion; none before init or read. */
+  /** Returns the ids for tab completion. Before init or read, there are none. */
   ids(): string[] {
     return this.#document?.ids() ?? [];
   }
@@ -38,7 +42,7 @@ export class Workspace {
     return this.#reader.warnings();
   }
 
-  /** Writes to path, or else to the file last read or saved, and returns the file written. */
+  /** Writes to path, or else to the last file read or saved. Returns the file that it wrote. */
   save(path?: string): string {
     const document = this.document();
     const target = path ?? this.#path;

@@ -9,7 +9,7 @@ import { UndoCommand } from '#command/UndoCommand.ts';
 import { Workspace } from '#command/Workspace.ts';
 import { Decimal } from '#domain/Decimal.ts';
 
-/** A workspace and executor wired the way the CLI wires them. */
+/** Creates a workspace and an executor, wired the same way as in the CLI. */
 function editor() {
   const workspace = new Workspace();
   const executor = new CommandExecutor();
