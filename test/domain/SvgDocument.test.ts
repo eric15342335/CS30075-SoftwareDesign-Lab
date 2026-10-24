@@ -263,7 +263,7 @@ describe('ungroup', () => {
       'cannot ungroup top-level container: markers',
     );
     expectRejected(doc, () => doc.ungroup('bg'), 'not a container: bg');
-    expectRejected(doc, () => doc.ungroup('zz'), 'no such container: zz');
+    expectRejected(doc, () => doc.ungroup('zz'), 'no such shape: zz');
   });
 });
 

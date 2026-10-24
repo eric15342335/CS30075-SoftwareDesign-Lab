@@ -2,12 +2,17 @@ import { expect, test } from 'bun:test';
 
 import * as fc from 'fast-check';
 
+import { AddtoCommand } from '#command/AddtoCommand.ts';
+import { BackCommand } from '#command/BackCommand.ts';
 import type { Command } from '#command/Command.ts';
 import { CreateCommand } from '#command/CreateCommand.ts';
 import { DeleteCommand } from '#command/DeleteCommand.ts';
+import { FrontCommand } from '#command/FrontCommand.ts';
+import { GroupCommand } from '#command/GroupCommand.ts';
 import { MoveCommand } from '#command/MoveCommand.ts';
 import { ScaleCommand } from '#command/ScaleCommand.ts';
 import { SetCommand } from '#command/SetCommand.ts';
+import { UngroupCommand } from '#command/UngroupCommand.ts';
 import type { Workspace } from '#command/Workspace.ts';
 import { Decimal } from '#domain/Decimal.ts';
 import { EditorError } from '#domain/EditorError.ts';
@@ -15,8 +20,8 @@ import { Session } from '#test/support/Session.ts';
 
 type Edit = (workspace: Workspace) => Command;
 
-// Ids of the spec document plus new ones, so edits hit existing shapes, containers and gaps.
-const id = fc.constantFrom('bg', 'title', 'c1', 'box', 'g1', 'g2', 'r1');
+// Ids of the start document plus new ones, so edits hit leaves, containers and unused ids.
+const id = fc.constantFrom('bg', 'title', 'c1', 'box', 'markers', 'inner', 'deep', 'g1', 'r1');
 const delta = fc.integer({ min: -100, max: 100 }).map((value) => new Decimal(value));
 const created = fc.constantFrom<readonly [string, readonly string[]]>(
   ['rect', ['1', '2', '30', '40', 'red']],
@@ -28,7 +33,7 @@ const created = fc.constantFrom<readonly [string, readonly string[]]>(
 );
 
 const edit: fc.Arbitrary<Edit> = fc.oneof(
-  fc.tuple(created, id, fc.option(id, { nil: undefined })).map(
+  fc.tuple(created, id, fc.option(id, { nil: undefined, freq: 2 })).map(
     ([[type, args], shapeId, containerId]) =>
       (workspace: Workspace) =>
         new CreateCommand(workspace, type, shapeId, args, containerId),
@@ -55,12 +60,34 @@ const edit: fc.Arbitrary<Edit> = fc.oneof(
         (workspace: Workspace) =>
           new SetCommand(workspace, shapeId, name, value),
     ),
+  fc.tuple(id, fc.array(id, { minLength: 1, maxLength: 4 })).map(
+    ([groupId, memberIds]) =>
+      (workspace: Workspace) =>
+        new GroupCommand(workspace, groupId, memberIds),
+  ),
+  id.map((groupId) => (workspace: Workspace) => new UngroupCommand(workspace, groupId)),
+  fc.tuple(id, id).map(
+    ([groupId, shapeId]) =>
+      (workspace: Workspace) =>
+        new AddtoCommand(workspace, groupId, shapeId),
+  ),
+  id.map((shapeId) => (workspace: Workspace) => new FrontCommand(workspace, shapeId)),
+  id.map((shapeId) => (workspace: Workspace) => new BackCommand(workspace, shapeId)),
 );
+
+/** The spec session plus a nested group, so ungroup and addto have targets from the start. */
+function start(): Session {
+  const session = Session.spec();
+  session.run(new GroupCommand(session.workspace, 'markers', ['c1', 'box']));
+  session.create('g', 'inner', [], 'markers');
+  session.create('rect', 'deep', ['1', '1', '2', '2'], 'inner');
+  return session;
+}
 
 test('random edits: failures change nothing, undo walks back every state, redo walks forward', () => {
   fc.assert(
     fc.property(fc.array(edit, { maxLength: 30 }), (edits) => {
-      const session = Session.spec();
+      const session = start();
       const states = [session.fingerprint()];
       for (const makeEdit of edits) {
         try {
@@ -80,6 +107,6 @@ test('random edits: failures change nothing, undo walks back every state, redo w
         expect(session.fingerprint()).toEqual(expected);
       }
     }),
-    { numRuns: 300 },
+    { numRuns: 500 },
   );
 });

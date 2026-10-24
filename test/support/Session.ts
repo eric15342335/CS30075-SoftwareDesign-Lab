@@ -12,7 +12,7 @@ export class Session {
   readonly workspace = new Workspace();
   readonly executor = new CommandExecutor();
 
-  /** The spec's section 6 document right after `group markers c1 box`; history holds the edits. */
+  /** The spec's section 6 document just before `group markers c1 box`; history holds the creates. */
   static spec(): Session {
     const session = new Session();
     session.run(new InitCommand(session.workspace));

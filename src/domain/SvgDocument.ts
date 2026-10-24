@@ -105,7 +105,8 @@ export class SvgDocument {
 
   /** The children take the container's place in its parent, in their order. */
   ungroup(id: string): Journal {
-    const container = this.#container(id);
+    const container = this.find(id).asGroup();
+    if (container === null) throw new EditorError(`not a container: ${id}`);
     if (container.parent === this.#canvas) {
       throw new EditorError(`cannot ungroup top-level container: ${id}`);
     }
