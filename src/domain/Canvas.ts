@@ -25,8 +25,13 @@ export class Canvas extends Group {
     return 'svg';
   }
 
+  /** Width x height, as `init` and `canvas` report it. */
+  size(): string {
+    return `${this.#width.toString()}x${this.#height.toString()}`;
+  }
+
   override describe(): string {
-    return `(${this.#width.toString()}x${this.#height.toString()})`;
+    return `(${this.size()})`;
   }
 
   protected override ownAttributes(): Array<[string, string]> {
