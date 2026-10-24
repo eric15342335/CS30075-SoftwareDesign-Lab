@@ -1,12 +1,15 @@
-import { expect, test } from 'bun:test';
+import { afterAll, expect, test } from 'bun:test';
+import { copyFileSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { Readable, Writable } from 'node:stream';
 import { stripVTControlCharacters } from 'node:util';
 
-import { CliProgram } from '#cli/CliProgram.ts';
-import { Repl } from '#cli/Repl.ts';
-import { CommandExecutor } from '#command/CommandExecutor.ts';
-import { Workspace } from '#command/Workspace.ts';
+const fixtures = join(import.meta.dir, '..', 'fixtures');
+const main = join(import.meta.dir, '..', '..', 'src', 'main.ts');
+const dirs: string[] = [];
+afterAll(() => {
+  for (const dir of dirs) rmSync(dir, { recursive: true, force: true });
+});
 
 /** What the user typed: prompt lines without the prompt, plus the blank and comment lines between them. */
 function script(transcript: string): string {
@@ -25,27 +28,22 @@ function normalize(text: string): string[] {
     .filter((line) => line !== '' && !line.startsWith('$ ') && !line.startsWith('svg-editor '));
 }
 
-/** Pipes the input through a fresh CLI, as `bun run cli < script` would, and returns its output. */
-async function replay(input: string): Promise<string> {
-  let output = '';
-  const sink = new Writable({
-    write(chunk, _encoding, done) {
-      output += String(chunk);
-      done();
-    },
+// The transcripts are copied verbatim from the spec (section 6 and section 6.1 version A).
+// Each runs the real program, as `bun run cli < script` would, in a fresh directory holding other.svg.
+test.each([
+  ['session.txt', 'demo.svg'],
+  ['flowchart.txt', 'flowchart.svg'],
+])('spec transcript %s replays line for line and saves %s', async (name, saved) => {
+  const dir = mkdtempSync(join(tmpdir(), 'svg-e2e-'));
+  dirs.push(dir);
+  copyFileSync(join(fixtures, 'other.svg'), join(dir, 'other.svg'));
+  const transcript = readFileSync(join(fixtures, name), 'utf8');
+  const child = Bun.spawn([process.execPath, main], {
+    cwd: dir,
+    stdin: new Blob([script(transcript)]),
   });
-  const program = new CliProgram(new Workspace(), new CommandExecutor());
-  await new Repl(program, Readable.from([input]), sink).start();
-  return output;
-}
-
-// Copied verbatim from the spec: section 6 and section 6.1 version A, each cut before `save` until io lands.
-test.each(['session', 'flowchart'])(
-  'spec transcript %s.txt replays line for line',
-  async (name) => {
-    const transcript = await Bun.file(
-      join(import.meta.dir, '..', 'fixtures', `${name}.txt`),
-    ).text();
-    expect(normalize(await replay(script(transcript)))).toEqual(normalize(transcript));
-  },
-);
+  const output = await new Response(child.stdout).text();
+  expect(await child.exited).toBe(0);
+  expect(normalize(output)).toEqual(normalize(transcript));
+  expect(readFileSync(join(dir, saved), 'utf8')).toBe(readFileSync(join(fixtures, saved), 'utf8'));
+});

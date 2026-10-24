@@ -1,4 +1,7 @@
 import { expect, test } from 'bun:test';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 import { CliProgram } from '#cli/CliProgram.ts';
 import { CommandExecutor } from '#command/CommandExecutor.ts';
@@ -50,6 +53,20 @@ test('every verb reaches its command', () => {
   ]);
 });
 
+test('canvas, save and read reach their commands; a quoted path may contain spaces', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'svg-cli-'));
+  const file = join(dir, 'my drawing.svg');
+  try {
+    const program = cli('init', 'create rect r1 0 0 10 10');
+    expect(program.run('canvas')).toEqual(['canvas 800x600']);
+    expect(program.run('canvas 400 300')).toEqual(['canvas resized to 400x300']);
+    expect(program.run(`save "${file}"`)).toEqual([`saved to ${file} (1 element)`]);
+    expect(cli().run(`read "${file}"`)).toEqual([`read ${file} (1 element)`]);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('quoted words keep their spaces; a blank line does nothing', () => {
   const program = cli('init');
   expect(program.run('create text title 20 40 "My Diagram"')).toEqual(['text#title created']);
@@ -96,6 +113,9 @@ test('help lists every command and the create syntax of every shape type', () =>
     '',
     'Commands:',
     '  init [w] [h]                    new empty canvas, 800x600 by default',
+    '  read <file>                     open an .svg file as the document',
+    '  save [file]                     save to a file (default: last read or saved)',
+    '  canvas [w] [h]                  show the canvas size, or change it',
     '  create <type> <id> [params...]  new shape, see shape types below',
     '  delete <id>                     delete a shape and everything inside it',
     '  move <id> <dx> <dy>             move by an offset',

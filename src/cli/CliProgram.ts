@@ -2,6 +2,7 @@ import { Command as Program, CommanderError } from '@commander-js/extra-typings'
 
 import { AddtoCommand } from '#command/AddtoCommand.ts';
 import { BackCommand } from '#command/BackCommand.ts';
+import { CanvasCommand } from '#command/CanvasCommand.ts';
 import type { Command } from '#command/Command.ts';
 import type { CommandExecutor } from '#command/CommandExecutor.ts';
 import { CreateCommand } from '#command/CreateCommand.ts';
@@ -11,7 +12,10 @@ import { GroupCommand } from '#command/GroupCommand.ts';
 import { HelpCommand } from '#command/HelpCommand.ts';
 import { InitCommand } from '#command/InitCommand.ts';
 import { MoveCommand } from '#command/MoveCommand.ts';
+import { ReadCommand } from '#command/ReadCommand.ts';
 import { RedoCommand } from '#command/RedoCommand.ts';
+import { ResizeCommand } from '#command/ResizeCommand.ts';
+import { SaveCommand } from '#command/SaveCommand.ts';
 import { ScaleCommand } from '#command/ScaleCommand.ts';
 import { SetCommand } from '#command/SetCommand.ts';
 import { ShowCommand } from '#command/ShowCommand.ts';
@@ -86,6 +90,28 @@ export class CliProgram {
       .argument('[w]', 'width', CliProgram.#number)
       .argument('[h]', 'height', CliProgram.#number)
       .action((width, height) => this.#queue(new InitCommand(workspace, width, height)));
+    program
+      .command('read')
+      .description('open an .svg file as the document')
+      .argument('<file>')
+      .action((path) => this.#queue(new ReadCommand(workspace, path)));
+    program
+      .command('save')
+      .description('save to a file (default: last read or saved)')
+      .argument('[file]')
+      .action((path) => this.#queue(new SaveCommand(workspace, path)));
+    program
+      .command('canvas')
+      .description('show the canvas size, or change it')
+      .argument('[w]', 'width', CliProgram.#number)
+      .argument('[h]', 'height', CliProgram.#number)
+      .action((width, height) =>
+        this.#queue(
+          width === undefined
+            ? new CanvasCommand(workspace)
+            : new ResizeCommand(workspace, width, height),
+        ),
+      );
     program
       .command('create')
       .description('new shape, see shape types below')

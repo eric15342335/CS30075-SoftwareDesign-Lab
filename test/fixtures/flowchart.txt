@@ -44,3 +44,6 @@ g#node2 moved back by (0,-100)
 # 改节点内容：只动组内 text
 svg> set process-label text "处理数据 v2"
 text#process-label updated: text="处理数据 v2"
+
+svg> save flowchart.svg
+saved to flowchart.svg (8 elements)

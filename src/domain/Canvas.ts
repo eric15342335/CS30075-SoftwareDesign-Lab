@@ -13,7 +13,8 @@ export class Canvas extends Group {
     this.resize(width, height);
   }
 
-  resize(width: Decimal, height: Decimal): void {
+  /** Without a height only the width changes, as in `canvas 1024`. */
+  resize(width: Decimal, height = this.#height): void {
     if (!width.isPositive() || !height.isPositive()) {
       throw new EditorError('canvas size must be positive');
     }

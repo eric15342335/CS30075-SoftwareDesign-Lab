@@ -103,6 +103,9 @@ export abstract class Shape {
     if (this.assign(name, value) === null) this.#extras.set(name, value);
   }
 
+  /** `read`: the element's text children. Only shapes with text content keep them. */
+  loadText(_text: string): void {}
+
   /** What `save` writes, in order: id, geometry, fill, stroke, stroke-width, kept extras. */
   attributes(): Array<[string, string]> {
     return [...this.ownAttributes(), ...this.#styleEntries(), ...this.#extras];

@@ -10,6 +10,10 @@ export class Text extends Leaf {
     return this.#content;
   }
 
+  override loadText(text: string): void {
+    this.#content = text;
+  }
+
   override details(): string[] {
     return [...super.details(), `text="${this.#content}"`];
   }

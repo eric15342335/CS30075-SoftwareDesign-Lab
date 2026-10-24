@@ -21,6 +21,11 @@ export class ShapeFactory {
     ['g', Group],
   ]);
 
+  /** `read` skips elements of other types. */
+  supports(type: string): boolean {
+    return this.#types.has(type);
+  }
+
   create(type: string, id: string): Shape {
     const Type = this.#types.get(type);
     if (Type === undefined) {
