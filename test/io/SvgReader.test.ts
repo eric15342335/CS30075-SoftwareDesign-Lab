@@ -3,6 +3,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import { EditorError } from '#domain/EditorError.ts';
 import { SvgReader } from '#io/SvgReader.ts';
 import { SvgWriter } from '#io/SvgWriter.ts';
 
@@ -74,6 +75,29 @@ test('missing and duplicate ids get tag + number, never one that appears later',
   ]);
 });
 
+test('unnamed elements of one type count up, and a reused reader starts over', () => {
+  const reader = new SvgReader();
+  const text =
+    '<svg width="10" height="10"><g><rect width="1" height="1"/><rect width="1" height="1"/></g></svg>';
+  const warnings = [
+    'assigned id g1 to unnamed <g>',
+    'assigned id rect1 to unnamed <rect>',
+    'assigned id rect2 to unnamed <rect>',
+  ];
+  expect(reader.parse(text).ids()).toEqual(['g1', 'rect1', 'rect2']);
+  expect(reader.warnings()).toEqual(warnings);
+  expect(reader.parse(text).ids()).toEqual(['g1', 'rect1', 'rect2']);
+  expect(reader.warnings()).toEqual(warnings);
+});
+
+test('the canvas size comes from width and height, or else from the size part of viewBox', () => {
+  const reader = new SvgReader();
+  expect(reader.parse('<svg viewBox=" 0,0  30,20 "/>').canvas.size()).toBe('30x20');
+  expect(reader.parse('<svg width="50" viewBox="0 0 30 20"/>').canvas.size()).toBe('50x20');
+  expect(() => reader.parse('<svg width="50"/>')).toThrow('<svg> has no width and height');
+  expect(() => reader.parse('<svg height="50"/>')).toThrow('<svg> has no width and height');
+});
+
 test('elements it cannot use are skipped with one warning each', () => {
   const reader = new SvgReader();
   const document = reader.parse(
@@ -116,7 +140,9 @@ test('root: unknown attributes are kept; a byte order mark and digits-only text 
 test('text that is not usable SVG is rejected', () => {
   const reader = new SvgReader();
   expect(() => reader.parse('<svg><g></svg>')).toThrow(
-    "line 1: Expected closing tag 'g' (opened in line 1, col 6) instead of closing tag 'svg'",
+    new EditorError(
+      "line 1: Expected closing tag 'g' (opened in line 1, col 6) instead of closing tag 'svg'",
+    ),
   );
   expect(() => reader.parse('<html/>')).toThrow('no <svg> root element');
   expect(() => reader.parse('<svg/>')).toThrow('<svg> has no width and height');

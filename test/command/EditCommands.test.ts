@@ -43,6 +43,10 @@ test('set: undoing a new attribute removes it', () => {
   const session = Session.spec();
   const before = session.fingerprint();
   session.run(new SetCommand(session.workspace, 'bg', 'stroke', 'black'));
+  expect(session.run(new SetCommand(session.workspace, 'bg', 'stroke-width', '2'))).toEqual([
+    'rect#bg updated: stroke-width="2"',
+  ]);
+  expect(session.undo()).toEqual(['rect#bg updated: stroke-width removed']);
   expect(session.undo()).toEqual(['rect#bg updated: stroke removed']);
   expect(session.fingerprint()).toEqual(before);
 });

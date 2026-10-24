@@ -13,6 +13,10 @@ test('text hides float noise and negative zero', () => {
 test('parse accepts the SVG number grammar only', () => {
   expect(Decimal.parse('1e3').toString()).toBe('1000');
   expect(Decimal.parse('-.5').toString()).toBe('-0.5');
+  expect(Decimal.parse('12.5').toString()).toBe('12.5');
+  expect(Decimal.parse('.25').toString()).toBe('0.25');
+  expect(Decimal.parse('1E-3').toString()).toBe('0.001');
+  expect(Decimal.parse('+2e10').toString()).toBe('20000000000');
   for (const text of ['', ' 1', '12px', '0x10', 'Infinity', '1e999']) {
     expect(() => Decimal.parse(text)).toThrow(`invalid number: ${text}`);
   }

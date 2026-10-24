@@ -47,3 +47,20 @@ test.each([
   expect(normalize(output)).toEqual(normalize(transcript));
   expect(readFileSync(join(dir, saved), 'utf8')).toBe(readFileSync(join(fixtures, saved), 'utf8'));
 });
+
+test('a syntax error prints one line on stdout and nothing on stderr', async () => {
+  const child = Bun.spawn([process.execPath, main], {
+    stdin: new Blob(['mvoe c1 1 2\n']),
+    stderr: 'pipe',
+  });
+  const [output, errors] = await Promise.all([
+    new Response(child.stdout).text(),
+    new Response(child.stderr).text(),
+  ]);
+  expect(await child.exited).toBe(0);
+  expect(normalize(output)).toEqual([
+    'svg> mvoe c1 1 2',
+    "error: unknown command 'mvoe' (Did you mean move?)",
+  ]);
+  expect(errors).toBe('');
+});

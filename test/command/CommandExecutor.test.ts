@@ -64,6 +64,12 @@ describe('documents', () => {
 });
 
 describe('history', () => {
+  test('a new executor has nothing to undo or redo', () => {
+    const executor = new CommandExecutor();
+    expect(() => executor.undo()).toThrow('nothing to undo');
+    expect(() => executor.redo()).toThrow('nothing to redo');
+  });
+
   test('undo and redo walk the history with the spec feedback', () => {
     const { init, create, undo, redo, ids } = editor();
     init();

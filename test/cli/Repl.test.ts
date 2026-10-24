@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test';
-import { Readable, Writable } from 'node:stream';
+import { PassThrough, Readable, Writable } from 'node:stream';
 import { stripVTControlCharacters } from 'node:util';
 
 import { CliProgram } from '#cli/CliProgram.ts';
@@ -15,8 +15,8 @@ class BuggyProgram extends CliProgram {
   }
 }
 
-/** Feeds chunks of input to a Repl and returns everything it wrote. */
-async function replay(chunks: string[], terminal = false): Promise<string> {
+/** An output stream that keeps everything written to it. */
+function recorder(terminal: boolean) {
   let text = '';
   const output = Object.assign(
     new Writable({
@@ -27,9 +27,15 @@ async function replay(chunks: string[], terminal = false): Promise<string> {
     }),
     { isTTY: terminal },
   );
+  return { output, text: () => text };
+}
+
+/** Feeds chunks of input to a Repl and returns everything it wrote. */
+async function replay(chunks: string[], terminal = false): Promise<string> {
+  const { output, text } = recorder(terminal);
   const program = new BuggyProgram(new Workspace(), new CommandExecutor());
   await new Repl(program, Readable.from(chunks), output).start();
-  return text;
+  return text();
 }
 
 test('a piped script is echoed like the spec transcripts', async () => {
@@ -55,10 +61,27 @@ test('a piped script is echoed like the spec transcripts', async () => {
 
 test('on a terminal it prompts, completes with Tab, paints errors red and quits on Ctrl+C', async () => {
   // Readline completes only on a Tab that ends a chunk (a lone keypress), so each key is its own chunk.
-  const output = await replay(['ini', '\t', '\n', 'move r9 1 1\n', '\u0003'], true);
+  const output = await replay(['ini', '\t', '\n', 'move r9 1 1\n', '\u0003', 'tree\n'], true);
   expect(output).toContain('\u001B[31merror: no such shape: r9\u001B[39m');
   const screen = stripVTControlCharacters(output);
   expect(screen).toStartWith("svg-editor 0.1 — type 'help' for commands\n\nsvg> ");
   expect(screen).toContain('svg> init');
   expect(screen).toContain('canvas 800x600 created');
+  // The tree typed after Ctrl+C never runs.
+  expect(screen).not.toContain('(800x600)');
+});
+
+test('on a terminal the prompt comes back after each command, and the typed line is not echoed twice', async () => {
+  // Typed at human speed: the input ends only after the Repl has answered the first line.
+  const input = new PassThrough();
+  const { output, text } = recorder(true);
+  const program = new CliProgram(new Workspace(), new CommandExecutor());
+  const session = new Repl(program, input, output).start();
+  input.write('init\n');
+  await new Promise((resolve) => setImmediate(resolve));
+  input.end();
+  await session;
+  expect(stripVTControlCharacters(text())).toBe(
+    "svg-editor 0.1 — type 'help' for commands\n\nsvg> init\r\ncanvas 800x600 created\nsvg> ",
+  );
 });
