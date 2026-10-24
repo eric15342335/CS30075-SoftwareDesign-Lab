@@ -1,0 +1,37 @@
+{
+  "name": "svg-editor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CS30075 Lab1 Phase 1: an SVG editor driven from the command line",
+  "type": "module",
+  "imports": {
+    "#domain/*": "./src/domain/*",
+    "#command/*": "./src/command/*",
+    "#io/*": "./src/io/*",
+    "#cli/*": "./src/cli/*"
+  },
+  "scripts": {
+    "cli": "bun src/main.ts",
+    "test": "bun test",
+    "coverage": "bun test --coverage",
+    "typecheck": "tsc",
+    "lint": "oxlint --type-aware --deny-warnings",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "knip": "knip",
+    "check": "bun run fmt:check && bun run lint && bun run typecheck && bun run knip && bun run coverage",
+    "prepare": "lefthook install"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
+    "@types/bun": "^1.4.4",
+    "knip": "^6.43.0",
+    "lefthook": "^2.2.2",
+    "oxfmt": "0.74.0",
+    "oxlint": "^1.89.0",
+    "oxlint-tsgolint": "^7.0.2005",
+    "typescript": "7.0.2"
+  },
+  "packageManager": "bun@1.4.4"
+}

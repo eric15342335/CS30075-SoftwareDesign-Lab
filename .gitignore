@@ -1,0 +1,8 @@
+node_modules/
+coverage/
+reports/
+.stryker-tmp/
+*.log
+
+# files written by manual CLI sessions in the repo root
+/*.svg

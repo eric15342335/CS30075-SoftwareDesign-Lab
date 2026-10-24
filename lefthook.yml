@@ -1,0 +1,17 @@
+pre-commit:
+  parallel: true
+  jobs:
+    - name: format
+      glob: '*.{ts,json,jsonc,md,yml,yaml}'
+      run: bunx oxfmt --check {staged_files}
+    - name: lint
+      glob: '*.ts'
+      run: bunx oxlint --type-aware --deny-warnings {staged_files}
+    - name: typecheck
+      glob: '*.ts'
+      run: bunx tsc
+
+commit-msg:
+  jobs:
+    - name: commitlint
+      run: bunx commitlint --edit {1}

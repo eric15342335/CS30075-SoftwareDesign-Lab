@@ -1,0 +1,144 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "import"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "perf": "error"
+  },
+  "options": {
+    "typeAware": true,
+    "denyWarnings": true,
+    "reportUnusedDisableDirectives": "error"
+  },
+  "env": {
+    "builtin": true
+  },
+  "ignorePatterns": ["coverage/**", "reports/**", ".stryker-tmp/**"],
+  "rules": {
+    "eqeqeq": "error",
+    "max-classes-per-file": ["error", 1],
+    "no-console": "error",
+    "import/no-cycle": "error",
+    "unicorn/prefer-node-protocol": "error",
+    "typescript/consistent-type-imports": "error",
+    "typescript/no-explicit-any": "error",
+    "typescript/no-floating-promises": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "regex": "^\\.\\./",
+            "message": "Cross-module imports must use the #domain/ #command/ #io/ #cli/ aliases."
+          }
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["src/**/*.ts"],
+      "excludeFiles": ["src/main.ts"],
+      "rules": {
+        "unicorn/filename-case": ["error", { "case": "pascalCase" }]
+      }
+    },
+    {
+      "files": ["src/domain/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "regex": "^\\.\\./",
+                "message": "Cross-module imports must use the #domain/ #command/ #io/ #cli/ aliases."
+              },
+              {
+                "regex": "^#(command|io|cli)/",
+                "message": "domain must not depend on any other module."
+              },
+              {
+                "regex": "^(node:|bun(:|$)|commander$|fast-xml-parser$)",
+                "message": "domain does no IO and uses no libraries."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/io/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "regex": "^\\.\\./",
+                "message": "Cross-module imports must use the #domain/ #command/ #io/ #cli/ aliases."
+              },
+              {
+                "regex": "^#(command|cli)/",
+                "message": "io may only depend on domain."
+              },
+              {
+                "regex": "^(bun(:|$)|commander$)",
+                "message": "io uses node:fs and fast-xml-parser only."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/command/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "regex": "^\\.\\./",
+                "message": "Cross-module imports must use the #domain/ #command/ #io/ #cli/ aliases."
+              },
+              {
+                "regex": "^#cli/",
+                "message": "command must not depend on cli."
+              },
+              {
+                "regex": "^(node:|bun(:|$)|commander$|fast-xml-parser$)",
+                "message": "command reaches files and XML only through io."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/cli/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "regex": "^\\.\\./",
+                "message": "Cross-module imports must use the #domain/ #command/ #io/ #cli/ aliases."
+              },
+              {
+                "regex": "^#io/",
+                "message": "cli reaches files only through commands."
+              },
+              {
+                "regex": "^(node:fs|fast-xml-parser$)",
+                "message": "cli does not touch files or XML."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
