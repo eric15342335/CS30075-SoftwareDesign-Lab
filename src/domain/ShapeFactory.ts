@@ -1,0 +1,31 @@
+import { Circle } from '#domain/Circle.ts';
+import { EditorError } from '#domain/EditorError.ts';
+import { Ellipse } from '#domain/Ellipse.ts';
+import { Group } from '#domain/Group.ts';
+import { Line } from '#domain/Line.ts';
+import { Rect } from '#domain/Rect.ts';
+import type { Shape } from '#domain/Shape.ts';
+import { Text } from '#domain/Text.ts';
+
+type ShapeClass = new (id: string) => Shape;
+
+/** Type name to shape class, shared by `create` and `read`. */
+export class ShapeFactory {
+  // 待重构: one of the two allowed name dispatch points. The plugin phase replaces this table with a ShapeProvider registry.
+  readonly #types = new Map<string, ShapeClass>([
+    ['rect', Rect],
+    ['circle', Circle],
+    ['ellipse', Ellipse],
+    ['line', Line],
+    ['text', Text],
+    ['g', Group],
+  ]);
+
+  create(type: string, id: string): Shape {
+    const Type = this.#types.get(type);
+    if (Type === undefined) {
+      throw new EditorError(`unknown shape type: ${type} (is the plugin loaded?)`);
+    }
+    return new Type(id);
+  }
+}

@@ -1,6 +1,7 @@
 import type { Decimal } from '#domain/Decimal.ts';
 import { EditorError } from '#domain/EditorError.ts';
 import type { Group } from '#domain/Group.ts';
+import type { Memento } from '#domain/Memento.ts';
 
 /** Positional parameters of `create <type> <id> ...`; `help` lists them too. */
 export interface CreateSignature {
@@ -42,6 +43,8 @@ export abstract class Shape {
 
   abstract move(dx: Decimal, dy: Decimal): void;
   abstract scale(factor: Decimal): void;
+  /** Saves the exact geometry of this shape and its descendants, for undoing move and scale. */
+  abstract saveGeometry(): Memento;
   /** How `move` reports the result: leaves give their new position, groups the offset. */
   abstract movedPhrase(dx: Decimal, dy: Decimal): string;
   /** The lines `show` prints under the header. */
@@ -64,6 +67,14 @@ export abstract class Shape {
 
   textContent(): string | undefined {
     return undefined;
+  }
+
+  /** Puts sibling right before this shape in this shape's parent, like DOM `before()`. */
+  before(sibling: Shape): void {
+    const parent = this.#parent;
+    if (parent === null) return;
+    sibling.#parent?.remove(sibling);
+    parent.insert(sibling, parent.indexOf(this));
   }
 
   /** This shape, then its descendants in document order. */

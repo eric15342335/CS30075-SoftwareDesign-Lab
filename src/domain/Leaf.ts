@@ -1,5 +1,6 @@
 import { Decimal } from '#domain/Decimal.ts';
 import { EditorError } from '#domain/EditorError.ts';
+import { GeometryMemento } from '#domain/GeometryMemento.ts';
 import { type CreateSignature, Shape } from '#domain/Shape.ts';
 
 /** What `move` adds to a geometry attribute: dx, dy, or nothing (sizes). */
@@ -22,6 +23,10 @@ export abstract class Leaf extends Shape {
 
   override scale(factor: Decimal): void {
     for (const [key, value] of this.#geometry) this.#geometry.set(key, value.times(factor));
+  }
+
+  override saveGeometry(): GeometryMemento {
+    return new GeometryMemento(this.#geometry);
   }
 
   override movedPhrase(): string {

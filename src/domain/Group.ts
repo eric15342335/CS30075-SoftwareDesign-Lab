@@ -1,4 +1,5 @@
 import type { Decimal } from '#domain/Decimal.ts';
+import { Journal } from '#domain/Journal.ts';
 import { type CreateSignature, Shape } from '#domain/Shape.ts';
 
 /** Composite container: an operation on a group reaches every descendant. */
@@ -40,6 +41,10 @@ export class Group extends Shape {
 
   override scale(factor: Decimal): void {
     for (const child of this.#children) child.scale(factor);
+  }
+
+  override saveGeometry(): Journal {
+    return new Journal(this.#children.map((child) => child.saveGeometry()));
   }
 
   override movedPhrase(dx: Decimal, dy: Decimal): string {
