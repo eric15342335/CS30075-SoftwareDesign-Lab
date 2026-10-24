@@ -38,7 +38,6 @@ export class Repl {
     lines.on('close', () => {
       open = false;
     });
-    lines.on('SIGINT', () => lines.close());
     this.#print(Repl.#banner, '');
     if (terminal) lines.prompt();
     for await (const line of lines) {

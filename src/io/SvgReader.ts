@@ -49,13 +49,12 @@ export class SvgReader {
   parse(text: string): SvgDocument {
     this.#given.clear();
     this.#warnings.length = 0;
-    // trimStart also drops a byte order mark, since JavaScript counts U+FEFF as white space.
-    const source = text.trimStart();
-    const verdict = XMLValidator.validate(source);
+    // A leading byte order mark needs no handling: fast-xml-parser accepts it.
+    const verdict = XMLValidator.validate(text);
     if (verdict !== true) {
       throw new EditorError(`line ${verdict.err.line}: ${verdict.err.msg.replace(/\.$/, '')}`);
     }
-    const parsed: unknown = SvgReader.#parser.parse(source);
+    const parsed: unknown = SvgReader.#parser.parse(text);
     const nodes: readonly XmlNode[] = Array.isArray(parsed) ? parsed : [];
     const root = nodes.find((node) => this.#tag(node) === 'svg');
     if (root === undefined) throw new EditorError('no <svg> root element');
