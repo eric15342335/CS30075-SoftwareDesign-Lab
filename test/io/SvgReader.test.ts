@@ -152,7 +152,7 @@ test('text that is not usable SVG is rejected', () => {
 test('read names the file in its errors', () => {
   const reader = new SvgReader();
   const missing = join(dir, 'missing.svg');
-  expect(() => reader.read(missing)).toThrow(`cannot read file: ${missing}`);
+  expect(() => reader.read(missing)).toThrow(new EditorError(`cannot read file: ${missing}`));
   const broken = join(dir, 'broken.svg');
   writeFileSync(broken, '<svg><g></svg>');
   expect(() => reader.read(broken)).toThrow(`cannot read file: ${broken} (line 1: Expected`);
