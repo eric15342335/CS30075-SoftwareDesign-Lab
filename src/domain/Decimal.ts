@@ -34,6 +34,10 @@ export class Decimal {
     return new Decimal(this.#value * other.#value);
   }
 
+  negated(): Decimal {
+    return new Decimal(-this.#value);
+  }
+
   isNegative(): boolean {
     return this.#value < 0;
   }

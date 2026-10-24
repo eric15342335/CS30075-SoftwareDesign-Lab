@@ -8,7 +8,8 @@
     "#domain/*": "./src/domain/*",
     "#command/*": "./src/command/*",
     "#io/*": "./src/io/*",
-    "#cli/*": "./src/cli/*"
+    "#cli/*": "./src/cli/*",
+    "#test/*": "./test/*"
   },
   "scripts": {
     "cli": "bun src/main.ts",
@@ -26,6 +27,7 @@
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
     "@types/bun": "^1.4.4",
+    "fast-check": "^4.10.2",
     "knip": "^6.43.0",
     "lefthook": "^2.2.2",
     "oxfmt": "0.74.0",
