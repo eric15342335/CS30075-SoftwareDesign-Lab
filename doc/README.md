@@ -22,7 +22,12 @@ src/
 | io      | SVG 文本与领域对象之间的转换（基于 fast-xml-parser），文件读写；读入时为缺失的 id 自动编号并给出警告。                                                                  | `SvgReader` `SvgWriter`                                                                                         |
 | cli     | 逐行读入（node:readline，Tab 补全命令名和 id），切分参数，交给 commander 找到对应命令，打印反馈；在终端上错误显示为红色。                                               | `Repl` `CliProgram`                                                                                             |
 
-模块关系（PlantUML 包图）：
+模块关系（PlantUML 包图，由下方的源码在 plantuml.com 渲染）：
+
+![模块关系图：cli 依赖 command 和 domain，command 依赖 io 和 domain，io 依赖 domain](architecture.svg)
+
+<details>
+<summary>PlantUML 源码</summary>
 
 ```plantuml
 @startuml
@@ -52,6 +57,8 @@ command ..> io
 io ..> domain
 @enduml
 ```
+
+</details>
 
 ### 1.2 设计模式的选择
 
