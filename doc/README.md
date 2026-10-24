@@ -189,6 +189,15 @@ GoF 讨论过"透明"和"安全"两种 Composite 写法，本项目采用安全�
 5. 变异测试：AI 第一次运行 Stryker 时，行覆盖率已经是 100%，变异测试的得分却只有 92.01%（1102 个变异体，存活 88 个）。AI 逐个查看了存活的变异体，发现其中 22 个对应测试真正漏掉的地方。例如，没有测试解析过 `12.5`、`.25`、`1E-3` 这类数，所以数值语法的正则即使改坏了，测试也发现不了。又如，所有执行器测试都先执行 init，所以执行器刚创建时的状态从来没有被检查过。另外还有两行代码，删掉以后测试照样通过。AI 用小脚本确认它们确实多余，就把它们删掉了。补了测试、删了代码之后，得分升到了 94.27%。换用 fast-xml-validator 和 fast-xml-builder（过程记录 6）之后，AI 又运行了一次，并把"文件不存在"的测试改成比较完整的错误信息。现在还剩 69 个存活变异体，分类见 4.2 节。
 6. 弃用 API：我在编辑器里看到了 `XMLValidator` 的弃用提示，于是请 AI 扫描全部代码，替换弃用的 API。原来 AI 在实现读写功能时，选用了 fast-xml-parser 自带的 `XMLValidator` 和 `XMLBuilder`，当时没有发现它们已经被标记为弃用。TypeScript 只在编辑器里把弃用显示为提示，`tsc` 不会因此报错，lint 也没有开启相应的规则，所以所有检查一直都能通过。AI 用 oxlint 的 `typescript/no-deprecated` 规则扫描了全部源码和测试，只找到这两处，于是把它们换成了弃用说明里推荐的 fast-xml-validator 和 fast-xml-builder。这条规则现在设为 error，以后如果再用到弃用的 API，提交和 CI 都会失败。另外，依赖规则里原来按包名写的是 `fast-xml-parser`，现在改成了 `fast-xml-`，这样新加的两个包也受模块边界的约束。domain 和 command 的规则还补上了之前漏掉的 `@commander-js/`。
 
+### 2.2 我的体会
+
+下面几点是我自己的体会。
+
+- 使用现代、先进、维护良好的库和框架，以确保代码质量、可维护性和长期可靠性。
+- 测试极其重要，最好遵循测试驱动开发（TDD）的原则。Bun 内置的测试运行器（`bun test`）、Vitest、Playwright、axe-core 和 StrykerJS（用于变异测试）等工具，可以为 AI 编程智能体建立可执行的约束和护栏，从而减少回归问题，促成更可靠的实现。Knip、Oxlint 和 Oxfmt 等代码质量和维护工具也很有价值。
+- 强大的模型配合能力强的智能体编程工具非常重要，例如在 Claude Code（包括 Claude Desktop 中的 Code 标签页）里以最高推理强度使用 Claude Opus 5.5。
+- 始终鼓励模型上网搜索，查阅最新的官方文档和可靠的资料，以获取更多上下文、核实最佳实践，并找到合适的实现模式。这样做也能帮助模型发现有用的测试库和开发工具。
+
 ## 3 一致性自查
 
 2026-10-25 实现完成以后，对照第 1 节逐条检查了代码。每一项都写明了检查方法，可以在仓库根目录重新运行这些检查。
@@ -337,3 +346,114 @@ pre-commit 钩子运行格式检查、lint 和类型检查，GitHub Actions 在�
 | read        | 先逐行输出警告 `warning: ...`（格式见本附录第 4 行），最后一行 `read other.svg (7 elements)` | 不能 undo                                                                                              | 题目                                     |
 
 redo 会重新执行命令，所以反馈与执行时相同，题目第 6 节也是这样。没有可以 undo 或 redo 的操作时，分别报 `error: nothing to undo` 和 `error: nothing to redo`（本实现）；文档类命令之后，报题目规定的 `error: undo not allowed after io command`。
+
+## 附录 B 提示词原文
+
+下面按时间顺序，原样列出截至 2026-10-25 03:49 我在 Claude Code 中输入的全部文字。时间是 UTC+8。
+
+2026-10-24 21:55：
+
+```text
+read phase_cli_1.md and make a proposal base on your understanding and online research. load ponytail, i-have-adhd and humanizer agent skill.
+```
+
+2026-10-24 22:18：
+
+```text
+if the lecturer does not explicitly disallow bun, then use bun (e.g. if it does not say "use npm or node.js"). also, install code linting, formatting, qol tools, like knip, oxlint, oxfmt, etc. to ensure code quality. also make sure to use the latest modern language features, syntactic sugars, stdlib features etc. third party libs are unrestricted and explicitly allowed by the lecturer. so always do research and avoid reinventing the wheel at all. your project, code and dependencies and architecture can be state of the art, bleeding edge, cutting edge, modern. but always research online.
+```
+
+2026-10-24 23:31：
+
+```text
+Tried bun run cli, it works. Go on with step 8.
+```
+
+2026-10-25 00:12：
+
+```text
+Retry the commit now. I'm watching for the GPG passphrase dialog.
+```
+
+2026-10-25 00:40：
+
+```text
+I'm watching for the GPG passphrase dialog. Run the four step 9 commits now.
+```
+
+2026-10-25 00:41：
+
+```text
+Yes, send the PlantUML source to plantuml.com and commit doc/architecture.svg.
+```
+
+2026-10-25 00:46：
+
+````text
+What notes?
+
+Also,
+
+
+```
+
+'XMLValidator' is deprecated.ts(6385)
+fxp.d.ts(731, 4): The declaration was marked as deprecated here.
+(alias) class XMLValidator
+import XMLValidator
+@deprecated — Use fast-xml-validator instead
+
+@see — https://www.npmjs.com/package/fast-xml-validator
+
+```
+
+
+You might want to scan whole codebase and watch for deprecated methods for replacement. Replace them with modern alternatives.
+
+Make that a commit (since we would really trying to avoid "a huge commit with everything bundled together").
+
+Also, load humanizer agent skill and apply it to 1) code comments 2) test descriptions 3) README and docs that are not from the original project instructions 4) optionally AGENTS.md if appropriate; Make additional slight change to wordings too: Try to use more complete sentences, fill in missing subjectives, adjectives, nouns, pronouns, etc. when appropriate; Use proper tenses to make it easier for humans to read, understand and comprehend; Aim for ESL speaker with entry-college proficiency.
+````
+
+2026-10-25 00:53：
+
+```text
+Continue: load the humanizer skill and do the comments, test names, README and doc, and AGENTS.md passes as separate commits. Update the 4.2 mutation numbers from the latest Stryker run first.
+```
+
+2026-10-25 03:13：
+
+```text
+Try again
+```
+
+2026-10-25 03:37：
+
+````text
+I pushed already, check git remote!
+
+Also:
+
+
+```
+
+For the notes, I would write the following:
+Include all my original prompts, verbatim. You may be able to retrieve them from Claude Code's local session history files.
+Utilize modern, state-of-the-art, well-maintained libraries and frameworks to ensure code quality, maintainability, and long-term reliability.
+Tests are extremely important, ideally following the principles of test-driven development (TDD). Tools such as Bun's built-in test runner (`bun test`), Vitest, Playwright, axe-core, and StrykerJS (for mutation testing) help establish executable constraints and guardrails for AI coding agents, reducing regressions and encouraging more reliable implementations. Code quality and maintenance tools such as Knip, Oxlint, and Oxfmt are also valuable.
+A strong model combined with a capable agentic coding harness matters a lot, such as Claude Opus 5.5 with maximum reasoning effort in Claude Code (including the Code tab in Claude Desktop).
+Always encourage models to search the web and consult up-to-date official documentation and reliable sources to gather additional context, verify best practices, and identify appropriate implementation patterns. This also helps discover useful testing libraries and development tools.
+Help me to write the report. With my own words preserved as much as you can, but fixing all the grammars, make sentence more complete, replace word with correct word choice, while be cautious with large scale rephrasing.
+
+```
+````
+
+2026-10-25 03:49：
+
+```text
+For the edit note commit, soft reset it first, since I found some issues:
+
+* 2.1 与 AI 协作中的讨论和修正 is fake because I did not discuss such with you ever. Even if we did, it is too long and should be trimmed via removing Software Design-irrelevant discussion topics.
+* 2.2 Should be translated to simplified Chinese.
+* You should minimally rephrase README after all above these changes, i order to achieve one thing: make sentences easier for humans to read without changing words. You could do that by inserting filler words dynamically base on sentence existing information density, to make every sentence contains the same or very similar information density level (you could research online on what it means or latest 2026 research "why do AI ... so hard to understand?") or via other methods. But you should not do it too aggressively. Keep in mind humanizer agent skill mentioned principles too.
+```
