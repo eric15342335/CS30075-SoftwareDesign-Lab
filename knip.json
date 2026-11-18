@@ -2,8 +2,8 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {
-      "entry": ["test/**/*.test.ts"],
-      "project": ["src/**/*.ts", "app/**/*.ts", "test/**/*.ts"],
+      "entry": ["test/**/*.test.ts", "scripts/*.ts"],
+      "project": ["src/**/*.ts", "app/**/*.ts", "test/**/*.ts", "scripts/**/*.ts"],
       // Stryker's "command" test runner ships inside @stryker-mutator/core; this package name does not exist on npm.
       "ignoreDependencies": ["@stryker-mutator/command-runner"]
     },

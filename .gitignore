@@ -11,3 +11,6 @@ reports/
 vscode-extension/dist/
 vscode-extension/out/
 vscode-extension/.vscode-test/
+
+# the worktree of the tag final that scripts/baseline.ts makes for a short time
+.baseline/

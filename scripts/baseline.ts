@@ -1,0 +1,48 @@
+// Records the output of the tag `final` (Phase 1) for the transcripts in doc/transcript/. The e2e
+// tests compare the Phase 2 editor without plugins against these files byte for byte.
+//
+//   bun scripts/baseline.ts
+//
+// The script checks out `final` into .baseline/final inside the repository, so that the old code
+// finds the same node_modules, and removes the worktree again at the end.
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { TranscriptRunner } from '#test/support/TranscriptRunner.ts';
+
+const root = join(import.meta.dir, '..');
+const transcripts = join(root, 'doc', 'transcript');
+const worktree = join(root, '.baseline', 'final');
+const scratch = mkdtempSync(join(tmpdir(), 'svg-baseline-'));
+const git = (...args: string[]): void => {
+  const result = Bun.spawnSync(['git', ...args], {
+    cwd: root,
+    stdout: 'inherit',
+    stderr: 'inherit',
+  });
+  if (!result.success) throw new Error(`git ${args.join(' ')} failed`);
+};
+
+git('worktree', 'add', '--detach', worktree, 'final');
+try {
+  const runner = new TranscriptRunner(join(scratch, 'cwd'));
+  for (const name of ['cli-1', 'cli-2']) {
+    const input = readFileSync(join(transcripts, `${name}.txt`), 'utf8');
+    // The runs share one working folder, so they must not overlap.
+    // oxlint-disable-next-line no-await-in-loop
+    const result = await runner.run(join(worktree, 'src', 'main.ts'), [], input);
+    const expected = join(transcripts, 'expected', name);
+    rmSync(expected, { recursive: true, force: true });
+    mkdirSync(expected, { recursive: true });
+    writeFileSync(join(transcripts, 'expected', `${name}.out`), result.stdout);
+    for (const [file, text] of Object.entries(result.files))
+      writeFileSync(join(expected, file), text);
+    process.stdout.write(`${name}: saved ${Object.keys(result.files).join(', ')}
+`);
+  }
+} finally {
+  git('worktree', 'remove', '--force', worktree);
+  rmSync(join(root, '.baseline'), { recursive: true, force: true });
+  rmSync(scratch, { recursive: true, force: true });
+}
