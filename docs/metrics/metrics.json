@@ -511,7 +511,7 @@
   },
   "to": {
     "ref": "HEAD",
-    "commit": "5da3b4f",
+    "commit": "01aa37b",
     "files": [
       {
         "path": "app/host/Assembly.ts",
@@ -532,9 +532,9 @@
       {
         "path": "app/host/PluginHost.ts",
         "role": "assembly",
-        "lines": 84,
-        "functions": 11,
-        "complexity": 24,
+        "lines": 89,
+        "functions": 12,
+        "complexity": 26,
         "responsibility": "PluginHost installs plugins into the extensions."
       },
       {
@@ -548,9 +548,9 @@
       {
         "path": "app/host/PluginManifest.ts",
         "role": "assembly",
-        "lines": 54,
-        "functions": 9,
-        "complexity": 23,
+        "lines": 57,
+        "functions": 10,
+        "complexity": 25,
         "responsibility": "PluginManifest is the part of a plugin's package.json that the host reads: the package `name` and the `contributes` lists, which declare every extension that the plugin registers."
       },
       {
@@ -572,26 +572,274 @@
       {
         "path": "app/host/StagedContext.ts",
         "role": "assembly",
-        "lines": 69,
-        "functions": 14,
-        "complexity": 17,
+        "lines": 74,
+        "functions": 15,
+        "complexity": 19,
         "responsibility": "StagedContext is the context that one plugin activates into."
       },
       {
         "path": "app/main.ts",
         "role": "assembly",
-        "lines": 29,
+        "lines": 50,
+        "functions": 8,
+        "complexity": 8,
+        "responsibility": "This file is the composition root."
+      },
+      {
+        "path": "plugins/command-dir/src/DirCommand.ts",
+        "role": "plugins",
+        "lines": 16,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": "DirCommand forwards `dir` to its receiver."
+      },
+      {
+        "path": "plugins/command-dir/src/DirPlugin.test.ts",
+        "role": "tests",
+        "lines": 46,
+        "functions": 9,
+        "complexity": 9,
+        "responsibility": ""
+      },
+      {
+        "path": "plugins/command-dir/src/DirPlugin.ts",
+        "role": "plugins",
+        "lines": 12,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": "The dir plugin adds the `dir` command."
+      },
+      {
+        "path": "plugins/command-dir/src/DirProvider.ts",
+        "role": "plugins",
+        "lines": 16,
+        "functions": 5,
+        "complexity": 5,
+        "responsibility": "Registers the `dir` command."
+      },
+      {
+        "path": "plugins/command-dir/src/Directory.ts",
+        "role": "plugins",
+        "lines": 11,
         "functions": 0,
         "complexity": 0,
-        "responsibility": "This file is the composition root."
+        "responsibility": "The target interface of the Adapter pattern."
+      },
+      {
+        "path": "plugins/command-dir/src/DirectoryEntry.ts",
+        "role": "plugins",
+        "lines": 6,
+        "functions": 0,
+        "complexity": 0,
+        "responsibility": "One direct child of a directory, as the listing needs it."
+      },
+      {
+        "path": "plugins/command-dir/src/DirectoryListing.test.ts",
+        "role": "tests",
+        "lines": 51,
+        "functions": 11,
+        "complexity": 12,
+        "responsibility": ""
+      },
+      {
+        "path": "plugins/command-dir/src/DirectoryListing.ts",
+        "role": "plugins",
+        "lines": 29,
+        "functions": 4,
+        "complexity": 10,
+        "responsibility": "DirectoryListing is the receiver of `dir`."
+      },
+      {
+        "path": "plugins/command-dir/src/NodeDirectory.test.ts",
+        "role": "tests",
+        "lines": 39,
+        "functions": 9,
+        "complexity": 9,
+        "responsibility": ""
+      },
+      {
+        "path": "plugins/command-dir/src/NodeDirectory.ts",
+        "role": "plugins",
+        "lines": 25,
+        "functions": 4,
+        "complexity": 4,
+        "responsibility": "The adapter of the Adapter pattern."
+      },
+      {
+        "path": "plugins/command-stats/src/ShapeStatistics.ts",
+        "role": "plugins",
+        "lines": 25,
+        "functions": 4,
+        "complexity": 7,
+        "responsibility": "ShapeStatistics counts the shapes of the current document."
+      },
+      {
+        "path": "plugins/command-stats/src/StatsCommand.ts",
+        "role": "plugins",
+        "lines": 16,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": "StatsCommand forwards `stats` to its receiver."
+      },
+      {
+        "path": "plugins/command-stats/src/StatsPlugin.test.ts",
+        "role": "tests",
+        "lines": 44,
+        "functions": 8,
+        "complexity": 8,
+        "responsibility": ""
+      },
+      {
+        "path": "plugins/command-stats/src/StatsPlugin.ts",
+        "role": "plugins",
+        "lines": 8,
+        "functions": 1,
+        "complexity": 1,
+        "responsibility": "The stats plugin adds the `stats` command, which counts the shapes of the document by type."
+      },
+      {
+        "path": "plugins/command-stats/src/StatsProvider.ts",
+        "role": "plugins",
+        "lines": 12,
+        "functions": 4,
+        "complexity": 4,
+        "responsibility": "Registers the `stats` command."
+      },
+      {
+        "path": "plugins/shape-box/src/Box.ts",
+        "role": "plugins",
+        "lines": 59,
+        "functions": 11,
+        "complexity": 20,
+        "responsibility": "Box is a titled rectangle: a container on the tag g that owns two parts, the rect <id>-rect and the text <id>-label."
+      },
+      {
+        "path": "plugins/shape-box/src/BoxAttributes.ts",
+        "role": "plugins",
+        "lines": 35,
+        "functions": 5,
+        "complexity": 10,
+        "responsibility": "BoxAttributes gives two attributes of a box their meaning."
+      },
+      {
+        "path": "plugins/shape-box/src/BoxPlugin.test.ts",
+        "role": "tests",
+        "lines": 145,
+        "functions": 28,
+        "complexity": 34,
+        "responsibility": ""
+      },
+      {
+        "path": "plugins/shape-box/src/BoxPlugin.ts",
+        "role": "plugins",
+        "lines": 16,
+        "functions": 1,
+        "complexity": 2,
+        "responsibility": "The box plugin adds the shape type box, the attribute handler for its fill and label, and the \"(box)\" tree label."
+      },
+      {
+        "path": "plugins/shape-box/src/BoxProvider.ts",
+        "role": "plugins",
+        "lines": 13,
+        "functions": 3,
+        "complexity": 3,
+        "responsibility": "Registers the shape type \"box\"."
+      },
+      {
+        "path": "plugins/shape-box/src/BoxTypeLabel.ts",
+        "role": "plugins",
+        "lines": 8,
+        "functions": 2,
+        "complexity": 3,
+        "responsibility": "BoxTypeLabel adds \"(box)\" to the tree row of a box, whose element is a plain g."
+      },
+      {
+        "path": "plugins/tree-star/src/ModifiedStar.test.ts",
+        "role": "tests",
+        "lines": 82,
+        "functions": 15,
+        "complexity": 16,
+        "responsibility": ""
+      },
+      {
+        "path": "plugins/tree-star/src/ModifiedStar.ts",
+        "role": "plugins",
+        "lines": 49,
+        "functions": 10,
+        "complexity": 13,
+        "responsibility": "ModifiedStar adds \"*\" to a row of `tree` when the shape changed since the document was last opened or saved (ADR 3)."
+      },
+      {
+        "path": "plugins/tree-star/src/ModifiedStarPlugin.ts",
+        "role": "plugins",
+        "lines": 13,
+        "functions": 1,
+        "complexity": 1,
+        "responsibility": "The modified-star plugin marks the rows of `tree` that differ from the last opened or saved document."
       },
       {
         "path": "scripts/baseline.ts",
         "role": "scripts",
-        "lines": 45,
+        "lines": 49,
         "functions": 1,
         "complexity": 2,
         "responsibility": "Records the output of the tag `final` (Phase 1) for the transcripts in doc/transcript/."
+      },
+      {
+        "path": "scripts/metrics.ts",
+        "role": "scripts",
+        "lines": 47,
+        "functions": 3,
+        "complexity": 6,
+        "responsibility": "Writes docs/metrics/ from the git history: the file list with responsibilities, the lines split into kernel, assembly and plugins, and the change in cyclomatic complexity between two refs."
+      },
+      {
+        "path": "scripts/metrics/FileMetric.ts",
+        "role": "scripts",
+        "lines": 17,
+        "functions": 0,
+        "complexity": 0,
+        "responsibility": "What the metrics know about one file of one tree."
+      },
+      {
+        "path": "scripts/metrics/MetricsReport.ts",
+        "role": "scripts",
+        "lines": 108,
+        "functions": 22,
+        "complexity": 33,
+        "responsibility": "The measured files of one git ref."
+      },
+      {
+        "path": "scripts/metrics/Role.ts",
+        "role": "scripts",
+        "lines": 2,
+        "functions": 0,
+        "complexity": 0,
+        "responsibility": "The categories that the metrics count apart."
+      },
+      {
+        "path": "scripts/metrics/RoleMap.ts",
+        "role": "scripts",
+        "lines": 31,
+        "functions": 5,
+        "complexity": 9,
+        "responsibility": "RoleMap puts each TypeScript file of a tree into one category by its directory."
+      },
+      {
+        "path": "scripts/metrics/TreeMetrics.ts",
+        "role": "scripts",
+        "lines": 113,
+        "functions": 16,
+        "complexity": 38,
+        "responsibility": "TreeMetrics measures every TypeScript file in one checked-out tree: its category, its lines, its function units with their cyclomatic complexity (from oxlint) and its responsibility."
+      },
+      {
+        "path": "scripts/stryker-sandbox.ts",
+        "role": "scripts",
+        "lines": 17,
+        "functions": 0,
+        "complexity": 0,
+        "responsibility": "Stryker runs this script inside its sandbox, .stryker-tmp/sandbox-<id>/, before the dry run."
       },
       {
         "path": "src/api/Plugin.ts",
@@ -612,7 +860,7 @@
       {
         "path": "src/api/index.ts",
         "role": "kernel",
-        "lines": 6,
+        "lines": 20,
         "functions": 0,
         "complexity": 0,
         "responsibility": "This file is the only import surface for plugins."
@@ -980,9 +1228,9 @@
       {
         "path": "src/domain/Catalog.ts",
         "role": "kernel",
-        "lines": 40,
-        "functions": 11,
-        "complexity": 16,
+        "lines": 47,
+        "functions": 12,
+        "complexity": 19,
         "responsibility": "Catalog holds the shape types and the attribute handlers that the document knows."
       },
       {
@@ -1116,7 +1364,7 @@
       {
         "path": "src/domain/SvgDocument.ts",
         "role": "kernel",
-        "lines": 209,
+        "lines": 210,
         "functions": 32,
         "complexity": 64,
         "responsibility": "SvgDocument is the receiver of every edit command."
@@ -1236,17 +1484,17 @@
       {
         "path": "test/domain/Catalog.test.ts",
         "role": "tests",
-        "lines": 58,
-        "functions": 11,
-        "complexity": 11,
+        "lines": 67,
+        "functions": 12,
+        "complexity": 12,
         "responsibility": ""
       },
       {
         "path": "test/domain/CompositeShapes.test.ts",
         "role": "tests",
-        "lines": 97,
-        "functions": 24,
-        "complexity": 27,
+        "lines": 105,
+        "functions": 26,
+        "complexity": 30,
         "responsibility": ""
       },
       {
@@ -1276,15 +1524,31 @@
       {
         "path": "test/e2e/Assembly.test.ts",
         "role": "tests",
-        "lines": 44,
-        "functions": 6,
-        "complexity": 6,
+        "lines": 65,
+        "functions": 8,
+        "complexity": 8,
+        "responsibility": ""
+      },
+      {
+        "path": "test/e2e/BoxSession.test.ts",
+        "role": "tests",
+        "lines": 70,
+        "functions": 11,
+        "complexity": 16,
+        "responsibility": ""
+      },
+      {
+        "path": "test/e2e/Plugins.test.ts",
+        "role": "tests",
+        "lines": 23,
+        "functions": 2,
+        "complexity": 2,
         "responsibility": ""
       },
       {
         "path": "test/e2e/Transcripts.test.ts",
         "role": "tests",
-        "lines": 77,
+        "lines": 78,
         "functions": 11,
         "complexity": 14,
         "responsibility": ""
@@ -1356,9 +1620,9 @@
       {
         "path": "test/host/PluginHost.test.ts",
         "role": "tests",
-        "lines": 174,
-        "functions": 38,
-        "complexity": 41,
+        "lines": 209,
+        "functions": 48,
+        "complexity": 51,
         "responsibility": ""
       },
       {
@@ -1383,6 +1647,14 @@
         "lines": 54,
         "functions": 6,
         "complexity": 11,
+        "responsibility": ""
+      },
+      {
+        "path": "test/scripts/Metrics.test.ts",
+        "role": "tests",
+        "lines": 140,
+        "functions": 10,
+        "complexity": 13,
         "responsibility": ""
       },
       {
@@ -1418,6 +1690,14 @@
         "responsibility": ""
       },
       {
+        "path": "test/support/PluginHarness.ts",
+        "role": "tests",
+        "lines": 29,
+        "functions": 3,
+        "complexity": 5,
+        "responsibility": ""
+      },
+      {
         "path": "test/support/RecordingObserver.ts",
         "role": "tests",
         "lines": 22,
@@ -1439,6 +1719,14 @@
         "lines": 76,
         "functions": 13,
         "complexity": 16,
+        "responsibility": ""
+      },
+      {
+        "path": "test/support/Testing.ts",
+        "role": "tests",
+        "lines": 4,
+        "functions": 0,
+        "complexity": 0,
         "responsibility": ""
       },
       {
