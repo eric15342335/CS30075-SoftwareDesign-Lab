@@ -8,6 +8,10 @@
       // Stryker's "command" test runner ships inside @stryker-mutator/core; this package name does not exist on npm.
       "ignoreDependencies": ["@stryker-mutator/command-runner"]
     },
+    "plugins/*": {
+      "entry": ["src/**/*.test.ts"],
+      "project": ["src/**/*.ts"]
+    },
     "test/fixtures/plugins/*": {
       "project": ["src/**/*.ts"]
     },

@@ -25,6 +25,10 @@
         "typescript": "7.0.2",
       },
     },
+    "plugins/command-stats": {
+      "name": "@svgframe/plugin-stats",
+      "version": "0.1.0",
+    },
     "test/fixtures/plugins/bad-activate": {
       "name": "@svgframe/fixture-bad-activate",
       "version": "0.0.0",
@@ -442,6 +446,8 @@
     "@svgframe/fixture-spike": ["@svgframe/fixture-spike@workspace:test/fixtures/plugins/spike"],
 
     "@svgframe/fixture-throws-on-load": ["@svgframe/fixture-throws-on-load@workspace:test/fixtures/plugins/throws-on-load"],
+
+    "@svgframe/plugin-stats": ["@svgframe/plugin-stats@workspace:plugins/command-stats"],
 
     "@tybys/wasm-util": ["@tybys/wasm-util@0.10.4", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-W3c4gRigFS0T/Ma4qIYF3GDAc5AQdHb1yL5znJT1Zv1YaD9Kitx656wBjvr19qbiosmZT8lWDM5BEMynUqX65A=="],
 

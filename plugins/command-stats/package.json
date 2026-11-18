@@ -1,0 +1,16 @@
+{
+  "name": "@svgframe/plugin-stats",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/StatsPlugin.ts",
+  "exports": {
+    ".": "./src/StatsPlugin.ts",
+    "./package.json": "./package.json"
+  },
+  "contributes": {
+    "commands": [
+      "stats"
+    ]
+  }
+}
