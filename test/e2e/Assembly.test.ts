@@ -50,10 +50,9 @@ test.each(['cli-1', 'cli-2'])(
 );
 
 // cli-3 needs the stats and dir plugins. Its expected output was recorded once from the code
-// assembly and checked by hand. The shipped config must give the same bytes.
-const shipped = join(root, 'plugins.config.json');
-
-test.each([[[]], [['--config', shipped]], [['--config', assembly]]])(
+// assembly and checked by hand. Between a mode B commit and the matching mode A commit, the
+// shipped plugins.config.json may list one plugin more, so the final test compares it instead.
+test.each([[[]], [['--config', assembly]]])(
   'cli-3 (stats, dir and help) prints and saves the recorded bytes with %j',
   async (flags) => {
     expect(await runner.run(main, flags, input('cli-3'))).toEqual(baseline('cli-3'));
