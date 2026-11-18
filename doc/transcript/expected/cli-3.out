@@ -34,6 +34,7 @@ Shape types:
   create line <id> <x1> <y1> <x2> <y2> [stroke] [in <containerId>]
   create text <id> <x> <y> <text> [in <containerId>]
   create g <id> [in <containerId>]
+  create box <id> <x> <y> <width> <height> <label> [in <containerId>]
 
 Quote text that has spaces: "My Diagram". Lines starting with # are comments.
 Ctrl+C or Ctrl+D quits.
