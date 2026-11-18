@@ -1,6 +1,8 @@
 [test]
 coverageThreshold = { lines = 0.9, functions = 0.9 }
 coverageSkipTestFiles = true
+# The fixture plugins are test data. Most of their code exists only to be registered, never run.
+coveragePathIgnorePatterns = ["test/fixtures/**"]
 
 [install]
 linker = "hoisted"

@@ -1,0 +1,16 @@
+{
+  "name": "@svgframe/fixture-duplicate",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "contributes": {
+    "shapes": [
+      "rect"
+    ]
+  }
+}

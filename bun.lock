@@ -25,8 +25,32 @@
         "typescript": "7.0.2",
       },
     },
+    "test/fixtures/plugins/bad-activate": {
+      "name": "@svgframe/fixture-bad-activate",
+      "version": "0.0.0",
+    },
+    "test/fixtures/plugins/duplicate": {
+      "name": "@svgframe/fixture-duplicate",
+      "version": "0.0.0",
+    },
+    "test/fixtures/plugins/mark": {
+      "name": "@svgframe/fixture-mark",
+      "version": "0.0.0",
+    },
+    "test/fixtures/plugins/mismatch": {
+      "name": "@svgframe/fixture-mismatch",
+      "version": "0.0.0",
+    },
+    "test/fixtures/plugins/no-default": {
+      "name": "@svgframe/fixture-no-default",
+      "version": "0.0.0",
+    },
     "test/fixtures/plugins/spike": {
       "name": "@svgframe/fixture-spike",
+      "version": "0.0.0",
+    },
+    "test/fixtures/plugins/throws-on-load": {
+      "name": "@svgframe/fixture-throws-on-load",
       "version": "0.0.0",
     },
     "vscode-extension": {
@@ -405,7 +429,19 @@
 
     "@stryker-mutator/util": ["@stryker-mutator/util@10.0.0", "", {}, "sha512-LzOpHiJaCp2ABQgnPMlrQQcsK43bd5Vo/2FGL78aN62yDoeRQ+4j3tzeuXxK5OAHdC3fUz6TDoy4IsoAuLAd3w=="],
 
+    "@svgframe/fixture-bad-activate": ["@svgframe/fixture-bad-activate@workspace:test/fixtures/plugins/bad-activate"],
+
+    "@svgframe/fixture-duplicate": ["@svgframe/fixture-duplicate@workspace:test/fixtures/plugins/duplicate"],
+
+    "@svgframe/fixture-mark": ["@svgframe/fixture-mark@workspace:test/fixtures/plugins/mark"],
+
+    "@svgframe/fixture-mismatch": ["@svgframe/fixture-mismatch@workspace:test/fixtures/plugins/mismatch"],
+
+    "@svgframe/fixture-no-default": ["@svgframe/fixture-no-default@workspace:test/fixtures/plugins/no-default"],
+
     "@svgframe/fixture-spike": ["@svgframe/fixture-spike@workspace:test/fixtures/plugins/spike"],
+
+    "@svgframe/fixture-throws-on-load": ["@svgframe/fixture-throws-on-load@workspace:test/fixtures/plugins/throws-on-load"],
 
     "@tybys/wasm-util": ["@tybys/wasm-util@0.10.4", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-W3c4gRigFS0T/Ma4qIYF3GDAc5AQdHb1yL5znJT1Zv1YaD9Kitx656wBjvr19qbiosmZT8lWDM5BEMynUqX65A=="],
 

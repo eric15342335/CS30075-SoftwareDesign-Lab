@@ -61,6 +61,8 @@ export class PluginHost {
     try {
       return await load();
     } catch (error) {
+      // A source reports a module that it cannot find with its own message: "plugin not found".
+      if (error instanceof EditorError) throw error;
       throw new EditorError(`plugin failed to load: ${module} (${PluginHost.#reason(error)})`);
     }
   }

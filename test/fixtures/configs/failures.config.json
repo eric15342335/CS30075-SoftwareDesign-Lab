@@ -1,0 +1,12 @@
+{
+  "plugins": [
+    { "module": "missing-plugin" },
+    { "module": "@svgframe/fixture-throws-on-load" },
+    { "module": "@svgframe/fixture-no-default" },
+    { "module": "@svgframe/fixture-mismatch" },
+    { "module": "@svgframe/fixture-bad-activate", "enabled": true },
+    { "module": "@svgframe/fixture-duplicate" },
+    { "module": "missing-but-disabled", "enabled": false },
+    { "module": "../plugins/mark", "options": { "text": "A" } }
+  ]
+}
