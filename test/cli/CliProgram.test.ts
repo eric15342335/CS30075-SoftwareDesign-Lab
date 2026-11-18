@@ -73,6 +73,8 @@ test('negative numbers and text that starts with a dash are arguments, not optio
   expect(program.run('move c1 -30 -0.5')).toEqual(['circle#c1 moved to (70,99.5)']);
   expect(program.run('create text t 0 0 -hi')).toEqual(['text#t created']);
   expect(program.run('tree t')).toEqual(['text#t (0,0) "-hi"']);
+  expect(program.run('create text u 0 0 "--"')).toEqual(['text#u created']);
+  expect(program.run('set u text --')).toEqual(['text#u updated: text="--"']);
 });
 
 test('a trailing "in <id>" names the container, and "in" anywhere else is a plain word', () => {

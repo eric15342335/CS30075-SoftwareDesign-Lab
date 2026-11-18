@@ -40,14 +40,15 @@ export class CliProgram {
       .matchAll(CliProgram.#word)
       .map(([, quoted, plain]) => quoted ?? plain ?? '')
       .toArray();
-    const [name] = words;
+    const [name, ...args] = words;
     if (name === undefined) return [];
     // The registry decides which commands exist, before commander looks at the words.
     if (this.#extensions.commands.get(name) === undefined) {
       throw new EditorError(`unknown command: ${name}`);
     }
     try {
-      this.#program.parse(words, { from: 'user' });
+      // The `--` makes commander read every word after the name as an argument, even a word "--".
+      this.#program.parse([name, '--', ...args], { from: 'user' });
     } catch (error) {
       if (!(error instanceof CommanderError)) throw error;
       // Commander's message "error: missing required argument 'dy'" becomes one line without the
