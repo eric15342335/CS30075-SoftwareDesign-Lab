@@ -1,0 +1,1526 @@
+{
+  "from": {
+    "ref": "final",
+    "commit": "3084d36",
+    "files": [
+      {
+        "path": "src/cli/CliProgram.ts",
+        "role": "kernel",
+        "lines": 225,
+        "functions": 37,
+        "complexity": 48,
+        "responsibility": ""
+      },
+      {
+        "path": "src/cli/Repl.ts",
+        "role": "kernel",
+        "lines": 61,
+        "functions": 8,
+        "complexity": 18,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/AddtoCommand.ts",
+        "role": "kernel",
+        "lines": 28,
+        "functions": 5,
+        "complexity": 7,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/BackCommand.ts",
+        "role": "kernel",
+        "lines": 22,
+        "functions": 4,
+        "complexity": 5,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/CanvasCommand.ts",
+        "role": "kernel",
+        "lines": 13,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/Command.ts",
+        "role": "kernel",
+        "lines": 11,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/CommandExecutor.ts",
+        "role": "kernel",
+        "lines": 48,
+        "functions": 9,
+        "complexity": 12,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/CreateCommand.ts",
+        "role": "kernel",
+        "lines": 37,
+        "functions": 4,
+        "complexity": 6,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/DeleteCommand.ts",
+        "role": "kernel",
+        "lines": 24,
+        "functions": 4,
+        "complexity": 6,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/DocumentCommand.ts",
+        "role": "kernel",
+        "lines": 11,
+        "functions": 1,
+        "complexity": 1,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/EditCommand.ts",
+        "role": "kernel",
+        "lines": 10,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/FrontCommand.ts",
+        "role": "kernel",
+        "lines": 22,
+        "functions": 4,
+        "complexity": 5,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/GroupCommand.ts",
+        "role": "kernel",
+        "lines": 27,
+        "functions": 4,
+        "complexity": 6,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/HelpCommand.ts",
+        "role": "kernel",
+        "lines": 15,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/InitCommand.ts",
+        "role": "kernel",
+        "lines": 18,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/MoveCommand.ts",
+        "role": "kernel",
+        "lines": 30,
+        "functions": 4,
+        "complexity": 5,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/ReadCommand.ts",
+        "role": "kernel",
+        "lines": 17,
+        "functions": 3,
+        "complexity": 4,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/RedoCommand.ts",
+        "role": "kernel",
+        "lines": 16,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/ResizeCommand.ts",
+        "role": "kernel",
+        "lines": 23,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/SaveCommand.ts",
+        "role": "kernel",
+        "lines": 17,
+        "functions": 2,
+        "complexity": 3,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/ScaleCommand.ts",
+        "role": "kernel",
+        "lines": 26,
+        "functions": 4,
+        "complexity": 5,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/SetCommand.ts",
+        "role": "kernel",
+        "lines": 31,
+        "functions": 5,
+        "complexity": 8,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/ShowCommand.ts",
+        "role": "kernel",
+        "lines": 19,
+        "functions": 3,
+        "complexity": 4,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/TreeCommand.ts",
+        "role": "kernel",
+        "lines": 37,
+        "functions": 5,
+        "complexity": 10,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/UndoCommand.ts",
+        "role": "kernel",
+        "lines": 17,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/UngroupCommand.ts",
+        "role": "kernel",
+        "lines": 23,
+        "functions": 4,
+        "complexity": 5,
+        "responsibility": ""
+      },
+      {
+        "path": "src/command/Workspace.ts",
+        "role": "kernel",
+        "lines": 48,
+        "functions": 9,
+        "complexity": 16,
+        "responsibility": ""
+      },
+      {
+        "path": "src/domain/AttributeMemento.ts",
+        "role": "kernel",
+        "lines": 19,
+        "functions": 3,
+        "complexity": 3,
+        "responsibility": ""
+      },
+      {
+        "path": "src/domain/Canvas.ts",
+        "role": "kernel",
+        "lines": 41,
+        "functions": 9,
+        "complexity": 12,
+        "responsibility": ""
+      },
+      {
+        "path": "src/domain/Circle.ts",
+        "role": "kernel",
+        "lines": 7,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": ""
+      },
+      {
+        "path": "src/domain/Decimal.ts",
+        "role": "kernel",
+        "lines": 43,
+        "functions": 10,
+        "complexity": 12,
+        "responsibility": ""
+      },
+      {
+        "path": "src/domain/EditorError.ts",
+        "role": "kernel",
+        "lines": 7,
+        "functions": 1,
+        "complexity": 1,
+        "responsibility": ""
+      },
+      {
+        "path": "src/domain/Ellipse.ts",
+        "role": "kernel",
+        "lines": 7,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": ""
+      },
+      {
+        "path": "src/domain/GeometryMemento.ts",
+        "role": "kernel",
+        "lines": 17,
+        "functions": 2,
+        "complexity": 3,
+        "responsibility": ""
+      },
+      {
+        "path": "src/domain/Group.ts",
+        "role": "kernel",
+        "lines": 53,
+        "functions": 15,
+        "complexity": 21,
+        "responsibility": ""
+      },
+      {
+        "path": "src/domain/Journal.ts",
+        "role": "kernel",
+        "lines": 14,
+        "functions": 2,
+        "complexity": 3,
+        "responsibility": ""
+      },
+      {
+        "path": "src/domain/Leaf.ts",
+        "role": "kernel",
+        "lines": 70,
+        "functions": 18,
+        "complexity": 28,
+        "responsibility": ""
+      },
+      {
+        "path": "src/domain/Line.ts",
+        "role": "kernel",
+        "lines": 14,
+        "functions": 4,
+        "complexity": 4,
+        "responsibility": ""
+      },
+      {
+        "path": "src/domain/Memento.ts",
+        "role": "kernel",
+        "lines": 7,
+        "functions": 0,
+        "complexity": 0,
+        "responsibility": ""
+      },
+      {
+        "path": "src/domain/Placement.ts",
+        "role": "kernel",
+        "lines": 21,
+        "functions": 2,
+        "complexity": 6,
+        "responsibility": ""
+      },
+      {
+        "path": "src/domain/Rect.ts",
+        "role": "kernel",
+        "lines": 10,
+        "functions": 3,
+        "complexity": 3,
+        "responsibility": ""
+      },
+      {
+        "path": "src/domain/Shape.ts",
+        "role": "kernel",
+        "lines": 131,
+        "functions": 33,
+        "complexity": 44,
+        "responsibility": ""
+      },
+      {
+        "path": "src/domain/ShapeFactory.ts",
+        "role": "kernel",
+        "lines": 40,
+        "functions": 5,
+        "complexity": 6,
+        "responsibility": ""
+      },
+      {
+        "path": "src/domain/SvgDocument.ts",
+        "role": "kernel",
+        "lines": 172,
+        "functions": 29,
+        "complexity": 53,
+        "responsibility": ""
+      },
+      {
+        "path": "src/domain/Text.ts",
+        "role": "kernel",
+        "lines": 31,
+        "functions": 9,
+        "complexity": 11,
+        "responsibility": ""
+      },
+      {
+        "path": "src/io/SvgReader.ts",
+        "role": "kernel",
+        "lines": 196,
+        "functions": 26,
+        "complexity": 63,
+        "responsibility": ""
+      },
+      {
+        "path": "src/io/SvgWriter.ts",
+        "role": "kernel",
+        "lines": 45,
+        "functions": 6,
+        "complexity": 8,
+        "responsibility": ""
+      },
+      {
+        "path": "src/main.ts",
+        "role": "assembly",
+        "lines": 8,
+        "functions": 0,
+        "complexity": 0,
+        "responsibility": ""
+      },
+      {
+        "path": "test/cli/CliProgram.test.ts",
+        "role": "tests",
+        "lines": 143,
+        "functions": 16,
+        "complexity": 17,
+        "responsibility": ""
+      },
+      {
+        "path": "test/cli/Repl.test.ts",
+        "role": "tests",
+        "lines": 81,
+        "functions": 9,
+        "complexity": 11,
+        "responsibility": ""
+      },
+      {
+        "path": "test/command/CommandExecutor.test.ts",
+        "role": "tests",
+        "lines": 111,
+        "functions": 23,
+        "complexity": 26,
+        "responsibility": ""
+      },
+      {
+        "path": "test/command/DisplayCommands.test.ts",
+        "role": "tests",
+        "lines": 74,
+        "functions": 9,
+        "complexity": 9,
+        "responsibility": ""
+      },
+      {
+        "path": "test/command/DocumentCommands.test.ts",
+        "role": "tests",
+        "lines": 99,
+        "functions": 17,
+        "complexity": 17,
+        "responsibility": ""
+      },
+      {
+        "path": "test/command/EditCommands.test.ts",
+        "role": "tests",
+        "lines": 81,
+        "functions": 11,
+        "complexity": 11,
+        "responsibility": ""
+      },
+      {
+        "path": "test/command/StructureCommands.test.ts",
+        "role": "tests",
+        "lines": 65,
+        "functions": 7,
+        "complexity": 8,
+        "responsibility": ""
+      },
+      {
+        "path": "test/command/UndoRedo.property.test.ts",
+        "role": "tests",
+        "lines": 106,
+        "functions": 24,
+        "complexity": 30,
+        "responsibility": ""
+      },
+      {
+        "path": "test/domain/Decimal.test.ts",
+        "role": "tests",
+        "lines": 26,
+        "functions": 4,
+        "complexity": 5,
+        "responsibility": ""
+      },
+      {
+        "path": "test/domain/Shapes.test.ts",
+        "role": "tests",
+        "lines": 244,
+        "functions": 44,
+        "complexity": 45,
+        "responsibility": ""
+      },
+      {
+        "path": "test/domain/SvgDocument.test.ts",
+        "role": "tests",
+        "lines": 283,
+        "functions": 68,
+        "complexity": 71,
+        "responsibility": ""
+      },
+      {
+        "path": "test/e2e/Transcripts.test.ts",
+        "role": "tests",
+        "lines": 68,
+        "functions": 9,
+        "complexity": 12,
+        "responsibility": ""
+      },
+      {
+        "path": "test/io/SvgReader.test.ts",
+        "role": "tests",
+        "lines": 147,
+        "functions": 19,
+        "complexity": 19,
+        "responsibility": ""
+      },
+      {
+        "path": "test/io/SvgWriter.test.ts",
+        "role": "tests",
+        "lines": 53,
+        "functions": 6,
+        "complexity": 6,
+        "responsibility": ""
+      },
+      {
+        "path": "test/support/Session.ts",
+        "role": "tests",
+        "lines": 53,
+        "functions": 10,
+        "complexity": 12,
+        "responsibility": ""
+      }
+    ]
+  },
+  "to": {
+    "ref": "HEAD",
+    "commit": "5da3b4f",
+    "files": [
+      {
+        "path": "app/host/Assembly.ts",
+        "role": "assembly",
+        "lines": 25,
+        "functions": 2,
+        "complexity": 8,
+        "responsibility": "Assembly reads the command line and picks the plugins."
+      },
+      {
+        "path": "app/host/PluginConfig.ts",
+        "role": "assembly",
+        "lines": 58,
+        "functions": 6,
+        "complexity": 24,
+        "responsibility": "PluginConfig is the config file of mode B."
+      },
+      {
+        "path": "app/host/PluginHost.ts",
+        "role": "assembly",
+        "lines": 84,
+        "functions": 11,
+        "complexity": 24,
+        "responsibility": "PluginHost installs plugins into the extensions."
+      },
+      {
+        "path": "app/host/PluginLoader.ts",
+        "role": "assembly",
+        "lines": 36,
+        "functions": 4,
+        "complexity": 5,
+        "responsibility": "PluginLoader is the source of one plugin from a config file."
+      },
+      {
+        "path": "app/host/PluginManifest.ts",
+        "role": "assembly",
+        "lines": 54,
+        "functions": 9,
+        "complexity": 23,
+        "responsibility": "PluginManifest is the part of a plugin's package.json that the host reads: the package `name` and the `contributes` lists, which declare every extension that the plugin registers."
+      },
+      {
+        "path": "app/host/PluginSource.ts",
+        "role": "assembly",
+        "lines": 14,
+        "functions": 0,
+        "complexity": 0,
+        "responsibility": "Tells the host where one plugin comes from."
+      },
+      {
+        "path": "app/host/StagedBatch.ts",
+        "role": "assembly",
+        "lines": 23,
+        "functions": 6,
+        "complexity": 7,
+        "responsibility": "StagedBatch holds the extensions of one category that a plugin registered, until the commit."
+      },
+      {
+        "path": "app/host/StagedContext.ts",
+        "role": "assembly",
+        "lines": 69,
+        "functions": 14,
+        "complexity": 17,
+        "responsibility": "StagedContext is the context that one plugin activates into."
+      },
+      {
+        "path": "app/main.ts",
+        "role": "assembly",
+        "lines": 29,
+        "functions": 0,
+        "complexity": 0,
+        "responsibility": "This file is the composition root."
+      },
+      {
+        "path": "scripts/baseline.ts",
+        "role": "scripts",
+        "lines": 45,
+        "functions": 1,
+        "complexity": 2,
+        "responsibility": "Records the output of the tag `final` (Phase 1) for the transcripts in doc/transcript/."
+      },
+      {
+        "path": "src/api/Plugin.ts",
+        "role": "kernel",
+        "lines": 12,
+        "functions": 0,
+        "complexity": 0,
+        "responsibility": "A plugin is the default export of a plugin package: a class whose constructor takes no arguments."
+      },
+      {
+        "path": "src/api/PluginContext.ts",
+        "role": "kernel",
+        "lines": 19,
+        "functions": 0,
+        "complexity": 0,
+        "responsibility": "The context that a plugin gets in `activate`."
+      },
+      {
+        "path": "src/api/index.ts",
+        "role": "kernel",
+        "lines": 6,
+        "functions": 0,
+        "complexity": 0,
+        "responsibility": "This file is the only import surface for plugins."
+      },
+      {
+        "path": "src/builtin/BuiltinCommandProvider.ts",
+        "role": "kernel",
+        "lines": 23,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": "A command provider for one built-in verb."
+      },
+      {
+        "path": "src/builtin/BuiltinCommands.ts",
+        "role": "kernel",
+        "lines": 173,
+        "functions": 22,
+        "complexity": 45,
+        "responsibility": "The 19 commands of Phase 1, in the order that `help` lists them."
+      },
+      {
+        "path": "src/builtin/BuiltinShapes.ts",
+        "role": "kernel",
+        "lines": 22,
+        "functions": 2,
+        "complexity": 3,
+        "responsibility": "The six shape types of Phase 1."
+      },
+      {
+        "path": "src/cli/CliProgram.ts",
+        "role": "kernel",
+        "lines": 107,
+        "functions": 17,
+        "complexity": 28,
+        "responsibility": "CliProgram is the client in the Command pattern."
+      },
+      {
+        "path": "src/cli/Repl.ts",
+        "role": "kernel",
+        "lines": 67,
+        "functions": 10,
+        "complexity": 21,
+        "responsibility": "Repl is the read-eval-print loop."
+      },
+      {
+        "path": "src/command/AddtoCommand.ts",
+        "role": "kernel",
+        "lines": 29,
+        "functions": 5,
+        "complexity": 7,
+        "responsibility": "AddtoCommand moves a shape to the end of a container."
+      },
+      {
+        "path": "src/command/BackCommand.ts",
+        "role": "kernel",
+        "lines": 23,
+        "functions": 4,
+        "complexity": 5,
+        "responsibility": "BackCommand paints a shape below its siblings."
+      },
+      {
+        "path": "src/command/CanvasCommand.ts",
+        "role": "kernel",
+        "lines": 13,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": "The `canvas` command without arguments."
+      },
+      {
+        "path": "src/command/Command.ts",
+        "role": "kernel",
+        "lines": 11,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": "A command is one user request, stored as an object."
+      },
+      {
+        "path": "src/command/CommandContext.ts",
+        "role": "kernel",
+        "lines": 12,
+        "functions": 0,
+        "complexity": 0,
+        "responsibility": "The receivers that a command provider may hand to the commands that it creates."
+      },
+      {
+        "path": "src/command/CommandExecutor.ts",
+        "role": "kernel",
+        "lines": 48,
+        "functions": 9,
+        "complexity": 12,
+        "responsibility": "CommandExecutor is the invoker in the Command pattern."
+      },
+      {
+        "path": "src/command/CommandProvider.ts",
+        "role": "kernel",
+        "lines": 20,
+        "functions": 0,
+        "complexity": 0,
+        "responsibility": "Extension point 2."
+      },
+      {
+        "path": "src/command/CreateCommand.ts",
+        "role": "kernel",
+        "lines": 45,
+        "functions": 5,
+        "complexity": 8,
+        "responsibility": "CreateCommand creates a shape, optionally inside a container."
+      },
+      {
+        "path": "src/command/DecoratingLabel.ts",
+        "role": "kernel",
+        "lines": 27,
+        "functions": 2,
+        "complexity": 5,
+        "responsibility": "The decorator of the Decorator pattern, like DecoratingLabelProvider in JFace."
+      },
+      {
+        "path": "src/command/DeleteCommand.ts",
+        "role": "kernel",
+        "lines": 25,
+        "functions": 4,
+        "complexity": 6,
+        "responsibility": "DeleteCommand removes a shape and everything inside it."
+      },
+      {
+        "path": "src/command/DocumentCommand.ts",
+        "role": "kernel",
+        "lines": 11,
+        "functions": 1,
+        "complexity": 1,
+        "responsibility": "The base class of init, read, save and canvas resize."
+      },
+      {
+        "path": "src/command/EditCommand.ts",
+        "role": "kernel",
+        "lines": 10,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": "An edit command is a change to the document that the user can undo."
+      },
+      {
+        "path": "src/command/Extensions.ts",
+        "role": "kernel",
+        "lines": 15,
+        "functions": 7,
+        "complexity": 7,
+        "responsibility": "Extensions holds everything that the built-in code and the plugins have registered."
+      },
+      {
+        "path": "src/command/FrontCommand.ts",
+        "role": "kernel",
+        "lines": 23,
+        "functions": 4,
+        "complexity": 5,
+        "responsibility": "FrontCommand paints a shape above its siblings."
+      },
+      {
+        "path": "src/command/GroupCommand.ts",
+        "role": "kernel",
+        "lines": 28,
+        "functions": 4,
+        "complexity": 6,
+        "responsibility": "GroupCommand puts shapes into a new container."
+      },
+      {
+        "path": "src/command/HelpCommand.ts",
+        "role": "kernel",
+        "lines": 15,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": "The `help` command."
+      },
+      {
+        "path": "src/command/InitCommand.ts",
+        "role": "kernel",
+        "lines": 19,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": "InitCommand starts a new empty document with a canvas of the given size."
+      },
+      {
+        "path": "src/command/MoveCommand.ts",
+        "role": "kernel",
+        "lines": 31,
+        "functions": 4,
+        "complexity": 5,
+        "responsibility": "MoveCommand moves a shape by an offset."
+      },
+      {
+        "path": "src/command/PlainLabel.ts",
+        "role": "kernel",
+        "lines": 7,
+        "functions": 1,
+        "complexity": 1,
+        "responsibility": "The concrete component of the Decorator pattern."
+      },
+      {
+        "path": "src/command/ReadCommand.ts",
+        "role": "kernel",
+        "lines": 18,
+        "functions": 3,
+        "complexity": 4,
+        "responsibility": "The `read <file>` command."
+      },
+      {
+        "path": "src/command/RedoCommand.ts",
+        "role": "kernel",
+        "lines": 17,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": "RedoCommand runs the last undone edit again."
+      },
+      {
+        "path": "src/command/ResizeCommand.ts",
+        "role": "kernel",
+        "lines": 23,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": "The `canvas <w> [h]` command."
+      },
+      {
+        "path": "src/command/SaveCommand.ts",
+        "role": "kernel",
+        "lines": 18,
+        "functions": 2,
+        "complexity": 3,
+        "responsibility": "The `save [file]` command."
+      },
+      {
+        "path": "src/command/ScaleCommand.ts",
+        "role": "kernel",
+        "lines": 27,
+        "functions": 4,
+        "complexity": 5,
+        "responsibility": "ScaleCommand multiplies the position and size of a shape."
+      },
+      {
+        "path": "src/command/SetCommand.ts",
+        "role": "kernel",
+        "lines": 29,
+        "functions": 4,
+        "complexity": 7,
+        "responsibility": "The `set <id> <attr> <value>` command."
+      },
+      {
+        "path": "src/command/ShowCommand.ts",
+        "role": "kernel",
+        "lines": 19,
+        "functions": 3,
+        "complexity": 4,
+        "responsibility": "The `show <id>` command."
+      },
+      {
+        "path": "src/command/TreeCommand.ts",
+        "role": "kernel",
+        "lines": 18,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": "The `tree [id]` command."
+      },
+      {
+        "path": "src/command/TreeDecorator.ts",
+        "role": "kernel",
+        "lines": 11,
+        "functions": 0,
+        "complexity": 0,
+        "responsibility": "Extension point 3."
+      },
+      {
+        "path": "src/command/TreeLabel.ts",
+        "role": "kernel",
+        "lines": 6,
+        "functions": 0,
+        "complexity": 0,
+        "responsibility": "The component interface of the Decorator pattern for the rows of `tree`."
+      },
+      {
+        "path": "src/command/TreeRenderer.ts",
+        "role": "kernel",
+        "lines": 44,
+        "functions": 6,
+        "complexity": 11,
+        "responsibility": "TreeRenderer is the receiver of `tree`."
+      },
+      {
+        "path": "src/command/UndoCommand.ts",
+        "role": "kernel",
+        "lines": 18,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": "UndoCommand reverts the last edit."
+      },
+      {
+        "path": "src/command/UngroupCommand.ts",
+        "role": "kernel",
+        "lines": 24,
+        "functions": 4,
+        "complexity": 5,
+        "responsibility": "UngroupCommand dissolves a container into its parent."
+      },
+      {
+        "path": "src/command/Workspace.ts",
+        "role": "kernel",
+        "lines": 85,
+        "functions": 15,
+        "complexity": 26,
+        "responsibility": "待重构: The command module uses io directly."
+      },
+      {
+        "path": "src/command/WorkspaceObserver.ts",
+        "role": "kernel",
+        "lines": 12,
+        "functions": 0,
+        "complexity": 0,
+        "responsibility": "An observer of the workspace (Observer pattern, push model)."
+      },
+      {
+        "path": "src/domain/AttributeChange.ts",
+        "role": "kernel",
+        "lines": 21,
+        "functions": 3,
+        "complexity": 3,
+        "responsibility": "AttributeChange records one write of one attribute."
+      },
+      {
+        "path": "src/domain/AttributeEdit.ts",
+        "role": "kernel",
+        "lines": 33,
+        "functions": 8,
+        "complexity": 9,
+        "responsibility": "AttributeEdit collects every write of one `set` command, so that one undo restores all of them."
+      },
+      {
+        "path": "src/domain/AttributeHandler.ts",
+        "role": "kernel",
+        "lines": 20,
+        "functions": 0,
+        "complexity": 0,
+        "responsibility": "Extension point 4."
+      },
+      {
+        "path": "src/domain/AttributeMemento.ts",
+        "role": "kernel",
+        "lines": 19,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": "Holds the text value that one attribute had before `set`."
+      },
+      {
+        "path": "src/domain/BasicShapeProvider.ts",
+        "role": "kernel",
+        "lines": 14,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": "A shape provider for a shape class whose constructor takes only the id."
+      },
+      {
+        "path": "src/domain/Canvas.ts",
+        "role": "kernel",
+        "lines": 44,
+        "functions": 10,
+        "complexity": 13,
+        "responsibility": "Canvas is the `<svg>` root."
+      },
+      {
+        "path": "src/domain/Catalog.ts",
+        "role": "kernel",
+        "lines": 40,
+        "functions": 11,
+        "complexity": 16,
+        "responsibility": "Catalog holds the shape types and the attribute handlers that the document knows."
+      },
+      {
+        "path": "src/domain/Circle.ts",
+        "role": "kernel",
+        "lines": 8,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": "A circle with a center (cx, cy) and a radius r."
+      },
+      {
+        "path": "src/domain/Decimal.ts",
+        "role": "kernel",
+        "lines": 43,
+        "functions": 10,
+        "complexity": 12,
+        "responsibility": "Decimal is an immutable value object for every number that the editor handles."
+      },
+      {
+        "path": "src/domain/EditorError.ts",
+        "role": "kernel",
+        "lines": 7,
+        "functions": 1,
+        "complexity": 1,
+        "responsibility": "An EditorError reports a mistake by the user."
+      },
+      {
+        "path": "src/domain/Ellipse.ts",
+        "role": "kernel",
+        "lines": 8,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": "An ellipse with a center (cx, cy) and the radii rx and ry."
+      },
+      {
+        "path": "src/domain/GeometryMemento.ts",
+        "role": "kernel",
+        "lines": 17,
+        "functions": 2,
+        "complexity": 3,
+        "responsibility": "Holds the exact geometry of one leaf."
+      },
+      {
+        "path": "src/domain/Group.ts",
+        "role": "kernel",
+        "lines": 64,
+        "functions": 17,
+        "complexity": 23,
+        "responsibility": "Group is the Composite container."
+      },
+      {
+        "path": "src/domain/Journal.ts",
+        "role": "kernel",
+        "lines": 14,
+        "functions": 2,
+        "complexity": 3,
+        "responsibility": "A journal holds the mementos of an edit with several steps."
+      },
+      {
+        "path": "src/domain/Leaf.ts",
+        "role": "kernel",
+        "lines": 73,
+        "functions": 18,
+        "complexity": 28,
+        "responsibility": "Leaf applies the Template Method pattern."
+      },
+      {
+        "path": "src/domain/Line.ts",
+        "role": "kernel",
+        "lines": 15,
+        "functions": 4,
+        "complexity": 4,
+        "responsibility": "A line from (x1, y1) to (x2, y2)."
+      },
+      {
+        "path": "src/domain/Memento.ts",
+        "role": "kernel",
+        "lines": 7,
+        "functions": 0,
+        "complexity": 0,
+        "responsibility": "A memento holds the minimum state from before one edit."
+      },
+      {
+        "path": "src/domain/Placement.ts",
+        "role": "kernel",
+        "lines": 21,
+        "functions": 2,
+        "complexity": 6,
+        "responsibility": "Records where a shape is right now: its parent and its index."
+      },
+      {
+        "path": "src/domain/Rect.ts",
+        "role": "kernel",
+        "lines": 11,
+        "functions": 3,
+        "complexity": 3,
+        "responsibility": "A rectangle with a corner (x, y), a width and a height."
+      },
+      {
+        "path": "src/domain/Registry.ts",
+        "role": "kernel",
+        "lines": 38,
+        "functions": 8,
+        "complexity": 10,
+        "responsibility": "Registry keeps the extensions of one category by name, in the order of registration."
+      },
+      {
+        "path": "src/domain/Shape.ts",
+        "role": "kernel",
+        "lines": 164,
+        "functions": 37,
+        "complexity": 53,
+        "responsibility": "The positional parameters of `create <type> <id> ...`."
+      },
+      {
+        "path": "src/domain/ShapeProvider.ts",
+        "role": "kernel",
+        "lines": 11,
+        "functions": 0,
+        "complexity": 0,
+        "responsibility": "Extension point 1."
+      },
+      {
+        "path": "src/domain/StandardAttributes.ts",
+        "role": "kernel",
+        "lines": 17,
+        "functions": 1,
+        "complexity": 2,
+        "responsibility": "The default attribute rule."
+      },
+      {
+        "path": "src/domain/SvgDocument.ts",
+        "role": "kernel",
+        "lines": 209,
+        "functions": 32,
+        "complexity": 64,
+        "responsibility": "SvgDocument is the receiver of every edit command."
+      },
+      {
+        "path": "src/domain/Text.ts",
+        "role": "kernel",
+        "lines": 33,
+        "functions": 9,
+        "complexity": 11,
+        "responsibility": "In SVG, the content is the element's child text, so it counts as an attribute only for `set`."
+      },
+      {
+        "path": "src/io/SvgReader.ts",
+        "role": "kernel",
+        "lines": 204,
+        "functions": 27,
+        "complexity": 64,
+        "responsibility": "SvgReader turns SVG text into a document."
+      },
+      {
+        "path": "src/io/SvgWriter.ts",
+        "role": "kernel",
+        "lines": 45,
+        "functions": 6,
+        "complexity": 8,
+        "responsibility": "SvgWriter writes a document as indented SVG text."
+      },
+      {
+        "path": "test/cli/CliProgram.test.ts",
+        "role": "tests",
+        "lines": 162,
+        "functions": 22,
+        "complexity": 23,
+        "responsibility": ""
+      },
+      {
+        "path": "test/cli/Repl.test.ts",
+        "role": "tests",
+        "lines": 88,
+        "functions": 10,
+        "complexity": 12,
+        "responsibility": ""
+      },
+      {
+        "path": "test/command/CommandExecutor.test.ts",
+        "role": "tests",
+        "lines": 112,
+        "functions": 23,
+        "complexity": 26,
+        "responsibility": ""
+      },
+      {
+        "path": "test/command/DisplayCommands.test.ts",
+        "role": "tests",
+        "lines": 76,
+        "functions": 9,
+        "complexity": 9,
+        "responsibility": ""
+      },
+      {
+        "path": "test/command/DocumentCommands.test.ts",
+        "role": "tests",
+        "lines": 99,
+        "functions": 17,
+        "complexity": 17,
+        "responsibility": ""
+      },
+      {
+        "path": "test/command/EditCommands.test.ts",
+        "role": "tests",
+        "lines": 81,
+        "functions": 11,
+        "complexity": 11,
+        "responsibility": ""
+      },
+      {
+        "path": "test/command/StructureCommands.test.ts",
+        "role": "tests",
+        "lines": 65,
+        "functions": 7,
+        "complexity": 8,
+        "responsibility": ""
+      },
+      {
+        "path": "test/command/TreeDecorators.test.ts",
+        "role": "tests",
+        "lines": 50,
+        "functions": 13,
+        "complexity": 14,
+        "responsibility": ""
+      },
+      {
+        "path": "test/command/UndoRedo.property.test.ts",
+        "role": "tests",
+        "lines": 106,
+        "functions": 24,
+        "complexity": 30,
+        "responsibility": ""
+      },
+      {
+        "path": "test/command/WorkspaceObservers.test.ts",
+        "role": "tests",
+        "lines": 55,
+        "functions": 7,
+        "complexity": 7,
+        "responsibility": ""
+      },
+      {
+        "path": "test/domain/AttributeHandlers.test.ts",
+        "role": "tests",
+        "lines": 118,
+        "functions": 23,
+        "complexity": 30,
+        "responsibility": ""
+      },
+      {
+        "path": "test/domain/Catalog.test.ts",
+        "role": "tests",
+        "lines": 58,
+        "functions": 11,
+        "complexity": 11,
+        "responsibility": ""
+      },
+      {
+        "path": "test/domain/CompositeShapes.test.ts",
+        "role": "tests",
+        "lines": 97,
+        "functions": 24,
+        "complexity": 27,
+        "responsibility": ""
+      },
+      {
+        "path": "test/domain/Decimal.test.ts",
+        "role": "tests",
+        "lines": 26,
+        "functions": 4,
+        "complexity": 5,
+        "responsibility": ""
+      },
+      {
+        "path": "test/domain/Shapes.test.ts",
+        "role": "tests",
+        "lines": 244,
+        "functions": 44,
+        "complexity": 45,
+        "responsibility": ""
+      },
+      {
+        "path": "test/domain/SvgDocument.test.ts",
+        "role": "tests",
+        "lines": 284,
+        "functions": 68,
+        "complexity": 71,
+        "responsibility": ""
+      },
+      {
+        "path": "test/e2e/Assembly.test.ts",
+        "role": "tests",
+        "lines": 44,
+        "functions": 6,
+        "complexity": 6,
+        "responsibility": ""
+      },
+      {
+        "path": "test/e2e/Transcripts.test.ts",
+        "role": "tests",
+        "lines": 77,
+        "functions": 11,
+        "complexity": 14,
+        "responsibility": ""
+      },
+      {
+        "path": "test/fixtures/plugins/bad-activate/src/index.ts",
+        "role": "tests",
+        "lines": 14,
+        "functions": 4,
+        "complexity": 4,
+        "responsibility": ""
+      },
+      {
+        "path": "test/fixtures/plugins/duplicate/src/index.ts",
+        "role": "tests",
+        "lines": 8,
+        "functions": 1,
+        "complexity": 1,
+        "responsibility": ""
+      },
+      {
+        "path": "test/fixtures/plugins/mark/src/index.ts",
+        "role": "tests",
+        "lines": 9,
+        "functions": 2,
+        "complexity": 3,
+        "responsibility": ""
+      },
+      {
+        "path": "test/fixtures/plugins/mismatch/src/index.ts",
+        "role": "tests",
+        "lines": 7,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": ""
+      },
+      {
+        "path": "test/fixtures/plugins/no-default/src/index.ts",
+        "role": "tests",
+        "lines": 2,
+        "functions": 0,
+        "complexity": 0,
+        "responsibility": ""
+      },
+      {
+        "path": "test/fixtures/plugins/spike/src/index.ts",
+        "role": "tests",
+        "lines": 3,
+        "functions": 0,
+        "complexity": 0,
+        "responsibility": ""
+      },
+      {
+        "path": "test/fixtures/plugins/throws-on-load/src/index.ts",
+        "role": "tests",
+        "lines": 5,
+        "functions": 1,
+        "complexity": 1,
+        "responsibility": ""
+      },
+      {
+        "path": "test/host/PluginConfig.test.ts",
+        "role": "tests",
+        "lines": 103,
+        "functions": 9,
+        "complexity": 10,
+        "responsibility": ""
+      },
+      {
+        "path": "test/host/PluginHost.test.ts",
+        "role": "tests",
+        "lines": 174,
+        "functions": 38,
+        "complexity": 41,
+        "responsibility": ""
+      },
+      {
+        "path": "test/io/SvgReader.test.ts",
+        "role": "tests",
+        "lines": 170,
+        "functions": 23,
+        "complexity": 23,
+        "responsibility": ""
+      },
+      {
+        "path": "test/io/SvgWriter.test.ts",
+        "role": "tests",
+        "lines": 53,
+        "functions": 6,
+        "complexity": 6,
+        "responsibility": ""
+      },
+      {
+        "path": "test/lint/ModuleRules.test.ts",
+        "role": "tests",
+        "lines": 54,
+        "functions": 6,
+        "complexity": 11,
+        "responsibility": ""
+      },
+      {
+        "path": "test/spike/PluginPackages.test.ts",
+        "role": "tests",
+        "lines": 58,
+        "functions": 6,
+        "complexity": 9,
+        "responsibility": ""
+      },
+      {
+        "path": "test/support/EchoProvider.ts",
+        "role": "tests",
+        "lines": 15,
+        "functions": 4,
+        "complexity": 4,
+        "responsibility": ""
+      },
+      {
+        "path": "test/support/FixedDecorator.ts",
+        "role": "tests",
+        "lines": 14,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": ""
+      },
+      {
+        "path": "test/support/MemorySource.ts",
+        "role": "tests",
+        "lines": 35,
+        "functions": 4,
+        "complexity": 10,
+        "responsibility": ""
+      },
+      {
+        "path": "test/support/RecordingObserver.ts",
+        "role": "tests",
+        "lines": 22,
+        "functions": 5,
+        "complexity": 7,
+        "responsibility": ""
+      },
+      {
+        "path": "test/support/ScriptedHandler.ts",
+        "role": "tests",
+        "lines": 26,
+        "functions": 3,
+        "complexity": 4,
+        "responsibility": ""
+      },
+      {
+        "path": "test/support/Session.ts",
+        "role": "tests",
+        "lines": 76,
+        "functions": 13,
+        "complexity": 16,
+        "responsibility": ""
+      },
+      {
+        "path": "test/support/TranscriptRunner.ts",
+        "role": "tests",
+        "lines": 43,
+        "functions": 6,
+        "complexity": 8,
+        "responsibility": ""
+      },
+      {
+        "path": "vscode-extension/integration/Badge.itest.ts",
+        "role": "tests",
+        "lines": 32,
+        "functions": 7,
+        "complexity": 10,
+        "responsibility": ""
+      },
+      {
+        "path": "vscode-extension/integration/Outline.itest.ts",
+        "role": "tests",
+        "lines": 65,
+        "functions": 10,
+        "complexity": 21,
+        "responsibility": ""
+      },
+      {
+        "path": "vscode-extension/src/SvgBadgeProvider.ts",
+        "role": "vscode",
+        "lines": 32,
+        "functions": 4,
+        "complexity": 7,
+        "responsibility": "SvgBadgeProvider gives every SVG file in the Explorer the badge \"[]\"."
+      },
+      {
+        "path": "vscode-extension/src/SvgFileFilter.ts",
+        "role": "vscode",
+        "lines": 8,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": "SvgFileFilter decides by name alone whether a path looks like an SVG file."
+      },
+      {
+        "path": "vscode-extension/src/SvgOutline.ts",
+        "role": "vscode",
+        "lines": 64,
+        "functions": 4,
+        "complexity": 10,
+        "responsibility": "One element in the outline."
+      },
+      {
+        "path": "vscode-extension/src/SvgOutlineProvider.ts",
+        "role": "vscode",
+        "lines": 33,
+        "functions": 5,
+        "complexity": 6,
+        "responsibility": "SvgOutlineProvider is an adapter."
+      },
+      {
+        "path": "vscode-extension/src/extension.ts",
+        "role": "vscode",
+        "lines": 13,
+        "functions": 1,
+        "complexity": 1,
+        "responsibility": "VS Code calls activate() once, after startup."
+      },
+      {
+        "path": "vscode-extension/test/SvgFileFilter.test.ts",
+        "role": "tests",
+        "lines": 15,
+        "functions": 2,
+        "complexity": 2,
+        "responsibility": ""
+      },
+      {
+        "path": "vscode-extension/test/SvgOutline.test.ts",
+        "role": "tests",
+        "lines": 56,
+        "functions": 10,
+        "complexity": 21,
+        "responsibility": ""
+      }
+    ]
+  }
+}

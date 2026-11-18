@@ -17,6 +17,7 @@
     "#builtin/*": "./src/builtin/*",
     "#api/*": "./src/api/*",
     "#host/*": "./app/host/*",
+    "#scripts/*": "./scripts/*",
     "#test/*": "./test/*"
   },
   "scripts": {
@@ -48,7 +49,7 @@
     "knip": "^6.43.0",
     "lefthook": "^2.2.2",
     "oxfmt": "0.74.0",
-    "oxlint": "^1.89.0",
+    "oxlint": "1.89.0",
     "oxlint-tsgolint": "^7.0.2005",
     "typescript": "7.0.2"
   },

@@ -8,6 +8,7 @@
     "doc/pj1-phase2/**",
     "test/fixtures/**",
     "doc/*.svg",
-    "bun.lock"
+    "bun.lock",
+    "docs/metrics/**"
   ]
 }
