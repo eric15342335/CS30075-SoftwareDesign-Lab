@@ -174,6 +174,12 @@ test('text that is not usable SVG is rejected', () => {
     ),
   );
   expect(() => reader.parse('<html/>')).toThrow('no <svg> root element');
+  expect(() => reader.parse('<svg width="1" height="1"/><svg/>')).toThrow(
+    'more than one root element',
+  );
+  expect(() => reader.parse('<html/><svg width="1" height="1"/>')).toThrow(
+    'more than one root element',
+  );
   expect(() => reader.parse('<svg/>')).toThrow('<svg> has no width and height');
   expect(() => reader.parse('<svg width="100%" height="1"/>')).toThrow('invalid number: 100%');
 });

@@ -60,8 +60,11 @@ export class SvgReader {
     this.#validate(text);
     const parsed: unknown = SvgReader.#parser.parse(text);
     const nodes: readonly XmlNode[] = Array.isArray(parsed) ? parsed : [];
-    const root = nodes.find((node) => this.#tag(node) === 'svg');
-    if (root === undefined) throw new EditorError('no <svg> root element');
+    // XML allows one root element. The parser accepts more, and they would be lost silently.
+    const [root, ...others] = nodes.filter((node) => this.#tag(node) !== '#text');
+    if (others.length > 0) throw new EditorError('more than one root element');
+    if (root === undefined || this.#tag(root) !== 'svg')
+      throw new EditorError('no <svg> root element');
     const attributes = this.#attributes(root);
     const canvas = this.#canvas(attributes);
     for (const [name, value] of attributes) {
