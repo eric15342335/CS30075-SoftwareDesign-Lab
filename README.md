@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/eric15342335/CS30075-SoftwareDesign-Lab/actions/workflows/ci.yml/badge.svg)](https://github.com/eric15342335/CS30075-SoftwareDesign-Lab/actions/workflows/ci.yml)
 
-这是 CS30075 软件设计课程 Lab1 第一阶段（Phase 1）的作业。题目在 [phase_cli_1.md](doc/pj1-phase1/phase_cli_1.md) 里。架构方案、过程记录、一致性自查和质量保证手段，都写在 [doc/README.md](doc/README.md) 里。
+这是 CS30075 软件设计课程 Lab1 第一阶段（Phase 1）的作业。题目在 [phase_cli_1.md](doc/pj1-phase1/phase_cli_1.md) 里。架构方案、过程记录、一致性自查和质量保证手段，都写在 [doc/pj1-phase1/README.md](doc/pj1-phase1/README.md) 里。第二阶段（Phase 2）的题目和设计文档分别在 [doc/pj1-phase2/phase_cli_2.md](doc/pj1-phase2/phase_cli_2.md) 和 [doc/README.md](doc/README.md) 里。
 
 ## 运行
 

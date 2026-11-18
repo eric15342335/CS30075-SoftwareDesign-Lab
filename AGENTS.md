@@ -1,6 +1,6 @@
 # Agent guide
 
-This repository holds an SVG editor CLI for CS30075 Lab1 Phase 1. The spec is `doc/pj1-phase1/phase_cli_1.md`. The architecture, the process log, the self-check and the QA results are in `doc/README.md`, which is written in Chinese.
+This repository holds an SVG editor CLI for CS30075 Lab1 Phase 1. The spec is `doc/pj1-phase1/phase_cli_1.md`. The Phase 2 spec is `doc/pj1-phase2/phase_cli_2.md`. The Phase 2 design, the process log, the self-check and the QA results are in `doc/README.md`, which is written in Chinese. The Phase 1 design document is `doc/pj1-phase1/README.md`.
 
 ## Commands
 

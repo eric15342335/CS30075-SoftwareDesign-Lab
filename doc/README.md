@@ -1,459 +1,92 @@
-# SVG 编辑器 CLI 设计文档
+# SVG 编辑器 Phase 2 设计文档
 
-本文档对应题目 `doc/pj1-phase1/phase_cli_1.md`（Lab1 Phase 1）。第 1 节的架构方案是在写代码之前完成的。在实现过程中，对方案的改动都记在 1.6 修订记录里。程序的运行方式见仓库根目录的 `README.md`。
+本文档对应题目 `doc/pj1-phase2/phase_cli_2.md`（Lab1 Phase 2）。Phase 1 的设计文档已经移到 [doc/pj1-phase1/README.md](pj1-phase1/README.md)，那里的内容不再修改。
+
+关于目录名的说明：题目同时提到 `doc/README.md` 和 `docs/metrics/` 两个位置，所以仓库里两个目录都有。`doc/` 放设计文档和会话脚本，`docs/metrics/` 只放由脚本生成的度量结果。
+
+本文档的第 1 节是在写代码之前完成的方案。实现过程中对方案的改动都记在 1.6 修订记录里。
 
 ## 1 架构方案
 
-### 1.1 模块划分
+### 1.1 三类代码，三个顶层目录
+
+题目的差异判据要求"内核与既有插件的差异为 0"，度量也要求按"内核 / 装配处 / 插件"三类统计。所以本方案让三类代码各占一个顶层目录，`git diff` 和行数统计都可以直接按目录来做。
 
 ```text
-src/
-├── domain/    图形树（Composite）与文档 SvgDocument，命令的接收者
-├── command/   命令类（含 tree、show 等显示类命令）、命令执行器 CommandExecutor、工作区 Workspace
-├── io/        SVG 文本与领域对象互转，文件读写
-├── cli/       REPL、命令行解析与分发
-└── main.ts    组装入口（唯一不含类的文件）
+src/        内核。接入新插件时，这里的文件一个都不改。
+  domain/     图形类层次、SvgDocument、备忘录，以及 ShapeProvider、AttributeHandler 等扩展点接口
+  command/    命令基类、执行器、Workspace、内置命令类、TreeRenderer，以及 CommandProvider、TreeDecorator 等扩展点接口
+  io/         SvgReader（按 ShapeProvider 查找类型）、SvgWriter
+  cli/        Repl，以及把命令注册表接到 commander 上的 CliProgram
+  builtin/    六种内置图形和 Phase 1 的内置命令表，它们也通过注册机制装配
+  api/        Plugin 与 PluginContext；index.ts 是插件唯一可以导入的入口（@svgframe/api）
+app/        装配处。
+  main.ts     组合根：先装内置能力，再按方式 A 的代码清单或方式 B 的配置文件装插件
+  host/       PluginHost、StagedContext、PluginManifest、PluginConfig、PluginLoader
+plugins/    插件。每个插件是一个 bun workspace 包，package.json 里有 main、exports 和 contributes。
+  command-stats/  command-dir/  shape-box/  tree-star/
+vscode-extension/   第一部分的 VSCode 扩展，单独的包和 tsconfig，度量时单独列出
+plugins.config.json 方式 B 的配置文件
+scripts/            度量脚本和基线脚本
 ```
 
-| 模块    | 职责                                                                                                                                                                                           | 主要类                                                                                                          |
-| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| domain  | 图形的类层次，以及文档级的约束：id 唯一且区分大小写，容器关系不成环，错误信息与题目 4.2 节一致。这个模块不做 IO，也不依赖任何库。                                                              | `Shape` `Leaf` `Rect` `Circle` `Ellipse` `Line` `Text` `Group` `Canvas` `SvgDocument` `ShapeFactory`            |
-| command | 每条命令对应一个类。tree、show、help 这些显示类命令也是命令，它们返回排好版的文本。`CommandExecutor` 负责执行命令，并管理 undo/redo 两个栈和 IO 屏障。`Workspace` 保存当前文档和它的文件路径。 | `Command` `EditCommand` `DocumentCommand` `MoveCommand` `TreeCommand` 等具体命令，`CommandExecutor` `Workspace` |
-| io      | 负责 SVG 文本与领域对象之间的转换和文件读写。解析用 fast-xml-parser，格式检查用 fast-xml-validator，写出用 fast-xml-builder。读入时，它为缺失的 id 自动编号并给出警告。                        | `SvgReader` `SvgWriter`                                                                                         |
-| cli     | 用 node:readline 逐行读入输入，按 Tab 可以补全命令名和 id。读入一行之后，它切分参数，交给 commander 找到对应的命令，再打印反馈。在终端上，错误显示为红色。                                     | `Repl` `CliProgram`                                                                                             |
+依赖方向：`plugins` 只能导入 `@svgframe/api`，不能导入内核的内部路径、装配处或其他插件。`app` 可以依赖内核和 `node:*`。内核不依赖 `app` 和任何插件。这些规则由 oxlint 的 `no-restricted-imports` 检查。
 
-下图是模块之间的依赖关系。它是一张 PlantUML 包图，由下方的源码在 plantuml.com 上渲染生成：
+### 1.2 扩展点清单（草稿）
 
-![模块关系图：cli 依赖 command 和 domain，command 依赖 io 和 domain，io 依赖 domain](architecture.svg)
+最终版本会给出每个扩展点在代码中的准确位置和对应的测试名。
 
-<details>
-<summary>PlantUML 源码</summary>
+| 扩展点                         | 内核侧类型                                                        | 内核调用它的位置                                    | 本阶段的实现                      | 不装可选插件时的行为                                                                                                | 违反契约时的报错                                                                                                                                |
+| ------------------------------ | ----------------------------------------------------------------- | --------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ShapeProvider`                | `{ type; create(id): Shape }`                                     | `SvgDocument.create`、`SvgReader` 查找元素类型      | 六种内置图形、`box`               | `unknown shape type: box (is the plugin loaded?)`；读入 `<g data-kind="box">` 时按普通 `g` 处理，并保留 `data-kind` | 类型名重复时拒绝注册；读回时创建出的标签与元素标签不同，就退回按标签查找                                                                        |
+| `Command`（`CommandProvider`） | `{ name; syntax; description; create(args, ctx): Command }`       | `CliProgram.run`                                    | 19 条内置命令、`stats`、`dir`     | `error: unknown command: <name>`                                                                                    | 命令名重复时拒绝注册；抛出非 EditorError 的异常时显示 `error: internal: …`                                                                      |
+| `TreeDecorator`                | `{ name; label(shape): string \| undefined }`                     | `TreeRenderer.render` 通过 `DecoratingLabel` 链调用 | `modified-star`、`box-type-label` | 树的输出与 Phase 1 逐字节相同                                                                                       | 抛错时显示 `error: tree decorator failed: <name> (<reason>)`                                                                                    |
+| `AttributeHandler`             | `{ name; handles(shape, attr); apply(shape, attr, value, edit) }` | `SvgDocument.set`                                   | `box-attributes`                  | 内置的 `StandardAttributes` 按 Phase 1 的白名单处理，未知属性报 `unknown attribute: x`                              | 两个以上处理器命中时，在任何写入之前报 `conflicting attribute handlers …`；处理器抛错时回滚，并报 `attribute handler failed: <name> (<reason>)` |
 
-```plantuml
-@startuml
-skinparam packageStyle rectangle
-package cli {
-  [Repl]
-  [CliProgram]
-}
-package command {
-  [CommandExecutor]
-  [具体命令类]
-  [Workspace]
-}
-package io {
-  [SvgReader]
-  [SvgWriter]
-}
-package domain {
-  [SvgDocument]
-  [Shape 类层次]
-  [ShapeFactory]
-}
-cli ..> command
-cli ..> domain
-command ..> domain
-command ..> io
-io ..> domain
-@enduml
-```
+每个扩展点都有三类测试：注册、调用和缺省行为。
 
-</details>
+### 1.3 两种装配方式
 
-### 1.2 设计模式的选择
+两种方式都调用同一个 `PluginHost.install(plugin, manifest, options)`，所以经过同一条注册和校验路径。
 
-#### Command（题目要求）
+- 方式 A：`app/main.ts` 里列出插件的工厂函数 `() => import('@svgframe/plugin-x')`。只有走方式 A 时，这些工厂才会被调用。所以导入、构造和 `activate` 都在 `install` 的失败边界之内。
+- 方式 B：`--config <file>` 指定配置文件。加载器 `PluginLoader` 按字符串形式的模块名解析和导入插件，代码里没有任何具体插件的名字。
+- `--no-plugins` 只装内置能力，用来和 Phase 1 的输出做对比。
 
-| 角色            | 本项目中的类                                           | 职责                                                                      |
-| --------------- | ------------------------------------------------------ | ------------------------------------------------------------------------- |
-| Command         | `Command`（抽象类）                                    | `execute()` 返回反馈文本；`recordIn(executor)` 决定执行成功后怎样记入历史 |
-| ConcreteCommand | `CreateCommand`、`MoveCommand`、`GroupCommand` 等      | 每条命令一个类。具体命令只把请求转发给接收者，自己不做校验                |
-| Client          | `CliProgram`                                           | 把一行输入解析成命令对象，并绑定接收者                                    |
-| Invoker         | `CommandExecutor`                                      | 执行命令，维护 undo 栈、redo 栈和 IO 屏障                                 |
-| Receiver        | `SvgDocument`（编辑类命令）、`Workspace`（文档类命令） | 知道怎样完成操作，校验和错误信息也都在这里                                |
+### 1.4 ADR 草稿
 
-这种结构对应课件中的"方式 5"：入口（REPL）只持有命令对象，并委托 `CommandExecutor` 执行它，业务逻辑则留在接收者里。
+**ADR 1 属性扩展点的契约。** 内核先找到目标图形，再询问每个已注册处理器的 `handles()`。`handles()` 必须是纯函数。两个以上处理器命中时，命令在任何写入之前失败。只有一个命中时，由它执行修改。没有命中时，由内置的 `StandardAttributes` 执行，所以 `set` 只有一条代码路径。处理器只能通过 `AttributeEdit.set(target, name, value)` 写入。每次写入都会记下目标属性原来的准确值，所以一次 `set` 无论改了几个子部件，都是一个 undo 单元。处理器中途抛错时，`AttributeEdit` 按相反顺序恢复已经写入的值，命令报错，不进入历史，redo 栈也不变。
 
-三类命令在记录历史上的区别，由多态方法 `recordIn` 实现，所以执行器里没有类型判断：
+**ADR 2 box 的读回。** 文件中任何地方出现重复 id，整个读入都被拒绝。只有当 `data-kind` 指定的类型创建出的标签与元素标签相同时，读入才使用这个类型。装了 box 插件时，如果 box 缺少子部件或子部件类型不对，整个读入都被拒绝。读入失败时，原来的文档、路径、历史和 dirty 基线都保持不变。
 
-- `EditCommand`（create、delete、move、scale、set、group、ungroup、addto、front、back）：把自己压入 undo 栈，并清空 redo 栈。
-- `DocumentCommand`（init、read、save、canvas 改尺寸）：清空两个栈并设置 IO 屏障。此后执行 undo 或 redo 会报 `error: undo not allowed after io command`，直到下一条编辑命令成功执行为止。
-- 其余命令（tree、show、help、undo、redo、canvas 查询）：不记入历史。
+**ADR 3 dirty 的语义。** 按内容判定。打开或保存文档时，`modified-star` 记下每个 id 的指纹（类型、父节点 id、属性、文本），以及根节点的指纹（画布属性和全部 id 的顺序）。一行的指纹与基线不同，或者这一行是新节点，就加 `*`。祖先不跟着标记。只调整顺序时，只有根节点那一行加 `*`。undo 回到保存点以后，`*` 消失。同一行的多个标签按注册顺序用一个空格连接。
 
-命令执行失败时会抛出异常，这时 `recordIn` 不会被调用，所以失败的命令既不改变状态，也不进入历史。
+**ADR 4 加载与校验的时机。** 安装一个插件的顺序是：检查清单的格式，在暂存上下文 `StagedContext` 中调用 `activate`，检查重复注册，比较声明与实际注册，最后一次性提交。任何一步失败，暂存的注册全部丢弃，已经成功的插件保留，加载继续进行。
 
-undo 的做法是：每条命令只保存撤销自己所需的最少信息，不对整个文档做快照。课件提醒过，AI 常常给出快照方案，而快照的代价会随文档变大而增长。
+### 1.5 实施顺序
 
-| 命令                               | 保存的信息                                    | undo                                                                                        |
-| ---------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| create                             | 新图形对象及其位置（父容器、下标）            | 从父容器中摘下                                                                              |
-| delete                             | 被删除的子树及其位置                          | 插回原来的位置，子树内的 id 也一起恢复                                                      |
-| move、scale                        | 受影响子树的几何属性备忘（`GeometryMemento`） | 恢复原值。这里没有用"反向移动、乘 1/f"的做法，因为浮点运算不可逆，反复 undo/redo 会累积误差 |
-| set                                | 旧值，或"原先没有这个属性"                    | 写回旧值，或删除该属性                                                                      |
-| group、ungroup、addto、front、back | 每个被移动图形原来的位置（`Placement`）       | 按相反顺序放回                                                                              |
+1. 第一部分：VSCode 扩展（文件标记、大纲、测试、分析）。
+2. 框架：工作区与模块规则、组合根移到 `app/`、四个扩展点、插件宿主、两种装配方式、端到端对比、度量脚本。
+3. 命令插件 `stats` 和 `dir`。
+4. 图形插件 `box`，两种装配方式各演示一次。
+5. 树标签 `modified-star`。
+6. 收尾：最终文档、度量结果、tag `p2`。
 
-`group g1 r1 c1 t1` 整体是一个命令对象，所以一次 undo 就能还原全部改动。
-
-#### Composite
-
-`Shape` 是组件。`Rect` `Circle` `Ellipse` `Line` `Text` 是叶子，它们的共同父类是 `Leaf`。`Group` 是容器，`Canvas`（根元素 `<svg>`）是一种特殊的 `Group`。`move`、`scale`、`setAttribute`、删除和 `describe`（tree 中的一行摘要）对叶子和容器的处理方式相同，容器的 move/scale 还会递归到每个子孙。
-
-GoF 讨论过"透明"和"安全"两种 Composite 写法，本项目采用的是安全写法：增删子节点的方法只在 `Group` 上，`Shape` 只提供只读的 `children()`。判断一个图形是不是容器时，代码调用多态方法 `asGroup()`，不使用 `instanceof`。
-
-#### Template Method
-
-几何属性的处理逻辑在 `Leaf` 中只写一次。子类用 `geometry()` 声明自己有哪些几何属性，例如 rect 的 `x y width height`。子类还声明每个属性在 move 时随 dx 变、随 dy 变，还是保持不变。尺寸属于最后一种，而且不能为负。`Leaf` 根据这些声明实现 move、scale 和序列化，以及 `set` 的白名单。子类只覆盖 `summary()` 等真正不同的部分，例如 rect 在 tree 中把 width/height 缩写成 `w=`/`h=`。这样既不必在每个子类里重复同样的代码，也不需要按类型名写 `switch`。
-
-#### 值对象
-
-`Decimal` 是不可变的数值类型。几何属性、画布尺寸、move 的位移和 scale 的倍数，都用它来表示。它按 SVG 的数值语法解析文本，输出时最多保留 6 位小数并去掉 `-0`，所以 `0.1 + 0.2` 显示为 `0.3`。方法签名里的参数类型如果是 `Decimal`，就说明这个值已经校验过。
-
-#### 简单工厂
-
-`ShapeFactory` 把类型名映射到图形类，`create` 命令和读文件的 `read` 命令都使用它。这是题目允许的两处按名分派之一，已经标注为待重构（见 1.5）。
-
-#### 局部备忘录与迭代器
-
-接收者 `SvgDocument` 的每个编辑方法都返回一个备忘录。备忘录都实现 `Memento` 接口，这个接口只有一个 `restore()` 方法。命令只负责保管备忘录，在 undo 时调用它的 `restore()`：
-
-| 备忘录             | 保存的内容                       | 用于                               |
-| ------------------ | -------------------------------- | ---------------------------------- |
-| `GeometryMemento`  | 一个叶子的几何属性值             | move、scale（容器由 Journal 组合） |
-| `Placement`        | 一个图形当时的父容器和下标       | create、delete、addto、front、back |
-| `AttributeMemento` | 一个属性的旧值（或"原来没有"）   | set                                |
-| `Journal`          | 多个备忘录，按从新到旧的顺序恢复 | group、ungroup                     |
-
-`Journal` 中的每个 `Placement` 都是在对应的那一步执行之前记录的，它的下标反映的是当时的状态，所以按倒序恢复就能精确还原（见过程记录 2）。
-
-`Shape.walk()` 是一个生成器，它按先序遍历子树。代码配合 ES2025 的迭代器辅助方法，用它完成 id 查找、元素计数和成环检查。
-
-#### 考虑过但没有采用
-
-- Visitor：tree 输出和序列化看上去适合 Visitor，但课件给出的适用条件是"元素类型稳定、操作多变"。本题下一阶段会通过插件增加 `box` 等类型，而每加一种类型，所有 Visitor 都要修改，这和"内核新增代码为 0"的目标冲突。所以本项目让每种图形自己提供摘要和属性列表，写出器和 tree 排版只做通用处理。
-- Observer：目前只有 CLI 这一个视图。等到 GUI 阶段需要画布随文档刷新时再加。
-- Singleton：各个对象由 `main.ts` 组装后注入，所以测试时可以直接构造新的实例。
-
-### 1.3 依赖方向规则
-
-| 模块    | 允许依赖                                                                 | 理由                                                                     |
-| ------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| domain  | 无（不引入 `node:*`、Bun API 或任何库）                                  | 它最稳定、复用最多，各种输入通道和插件阶段都建立在它上面                 |
-| io      | domain、`node:fs`、fast-xml-parser、fast-xml-validator、fast-xml-builder | 文件格式和解析库的变化不影响模型                                         |
-| command | domain、io                                                               | 这是用例层。command 直接依赖 io 是有意保留的（题目允许本阶段 IO 未隔离） |
-| cli     | command、domain、commander、`node:readline` 等（`node:fs` 除外）         | 它只是输入通道之一，不直接读写文件                                       |
-
-具体规则有三条。第一，依赖只能指向更稳定的模块。第二，不允许循环依赖。第三，跨模块导入一律写成 `#domain/…`、`#command/…` 这样的路径别名，禁止使用 `../` 相对导入，这样从每一行 import 都能直接看出依赖方向。这些别名定义在 package.json 的 `imports` 字段中。
-
-这些规则由工具执行：上表的内容写成了 `.oxlintrc.json` 中按目录覆盖的 `no-restricted-imports` 规则，循环依赖则由 `import/no-cycle` 检查。编辑器、pre-commit 钩子和 CI 都运行 oxlint，所以违反规则的依赖无法提交，题目所说的"待处理项"在提交之前就会暴露出来。
-
-### 1.4 变化点假设
-
-| #   | 可能的变化                              | 为它留了什么                                                                                                                                                                                                                        | 没留什么，为什么                                                                |
-| --- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| 1   | 插件增加图形类型（题目 4.4 的 `box`）   | 每种图形的行为都在自己的类里，写出器和 tree 排版不认识具体类型。help 中 create 的参数表由各图形的 `createSignature()` 生成，新类型注册后会自动出现。读入时，未知属性会原样保留，所以 `data-kind="box"` 在本阶段读入再保存也不会丢失 | 没有做插件注册表和加载机制。本阶段只有内置类型，提前做只能凭猜测设计接口        |
-| 2   | 增加新命令                              | 每条命令一个类，help 文本由 commander 根据注册信息生成                                                                                                                                                                              | 没有做命令自动注册。集中注册更直观，这里也是题目要求标注的待重构点              |
-| 3   | 新的输入通道（agent、鼠标）             | domain 和 command 不接触终端，命令返回纯文本反馈，agent 也能直接读取                                                                                                                                                                | 没有做 Observer 等事件机制，因为还没有第二个视图                                |
-| 4   | 存储格式变化、IO 需要隔离               | 与文件和 XML 相关的代码全部在 io 中                                                                                                                                                                                                 | 没有定义 `DocumentStore` 之类的接口。目前只有一种实现，这样的接口只会多一层转发 |
-| 5   | 寻址方式扩展（题目提到的类 XPath 路径） | 所有查找都经过 `SvgDocument.find`                                                                                                                                                                                                   | 没有实现路径解析，本阶段不要求                                                  |
-
-### 1.5 待重构标注
-
-| 位置                         | 现状                                   | 计划                                                                  |
-| ---------------------------- | -------------------------------------- | --------------------------------------------------------------------- |
-| `src/cli/CliProgram.ts`      | 命令名到命令类的分发（commander 注册） | 插件化阶段改为由命令提供者注册                                        |
-| `src/domain/ShapeFactory.ts` | 类型名到图形类的分发                   | 替换为 `ShapeProvider` 注册表                                         |
-| command 直接依赖 io          | IO 未隔离                              | 出现第二种存储方式或需要替身测试时，在 command 中定义接口，由 io 实现 |
-
-代码里这几处都有 `待重构` 注释，用 `grep -rn 待重构 src` 可以找到它们。
+每一步是一次独立的提交，提交前运行 `bun run check`。
 
 ### 1.6 修订记录
 
-| 日期       | 改动                                                                                    | 原因                                                                                                                  |
-| ---------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| 2026-10-24 | 初版方案                                                                                |                                                                                                                       |
-| 2026-10-24 | 数值处理从静态工具类改为 `Decimal` 值对象                                               | oxlint 报告只有静态成员的类，见过程记录 1                                                                             |
-| 2026-10-24 | tree、show 的排版从 cli 移到 command，成为显示类命令                                    | 它们和编辑命令一样是用例，agent 等其他输入通道也要用。如果留在 cli，别的通道只能依赖 cli，或者重写一遍                |
-| 2026-10-24 | 端到端测试从"进程内回放加一个冒烟测试"改为全部用真实进程回放                            | 会话里有 save 和 read，每个会话需要自己的工作目录。子进程可以单独指定工作目录，进程内回放只能改全局的 `process.chdir` |
-| 2026-10-25 | io 改用 fast-xml-validator 检查 XML 格式、fast-xml-builder 写出；lint 开启弃用 API 检查 | fast-xml-parser 的 `XMLValidator` 和 `XMLBuilder` 已标记为弃用，见过程记录 6                                          |
+| 日期       | 改动     | 原因 |
+| ---------- | -------- | ---- |
+| 2026-11-18 | 初版方案 |      |
 
 ## 2 过程记录
 
-### 2.1 开发中发现并修正的问题
+### 2.1 方案评审
 
-本项目的方案、代码和测试都由 AI（Claude Code）编写。下面按时间顺序，列出几个与软件设计有关、比较有代表性的问题。
+方案由 AI（Claude Code，Opus 5.5）起草。起草之后进行了两轮评审，评审意见由 AI 逐条筛选，结果再交给我确认。
 
-1. 图形类实现：AI 起初把数值的解析和格式化写成了只有静态方法的 `Numbers` 类。oxlint 的 `typescript/no-extraneous-class` 规则报了错，并建议改成独立的函数，但题目禁止自由函数。只有静态方法的类，其实就是套了一层类的自由函数，所以 AI 最后把它改成了 `Decimal` 值对象，让解析、运算和输出都成为数值自己的方法。
-2. 接收者实现：方案里只写了"结构类命令保存 Placement，逆序恢复"。AI 在实现 group 时，用六个兄弟节点 a 到 f 推演了 `group g e a c` 这条命令。如果在执行前一次性记下所有成员的下标，倒序恢复后 e 和 f 的顺序会颠倒，因为新容器插入以后，其余节点的下标已经变了。所以 AI 改为在每一步执行之前才记录 `Placement`，并用测试 "the members keep document order, and the group takes the place of the first member" 覆盖了这个例子。
-3. 结构类命令实现：随机命令序列的性质测试（全部 undo、全部 redo 都能回到对应的状态）一直能通过。但是 AI 用 `fc.sample` 统计生成的序列之后发现，ungroup 和 addto 几乎没有成功执行过。起始文档里没有容器，随机序列又很少先造出嵌套的容器，所以这两条命令基本都在报错。这时测试通过，只能证明"失败的命令不改变状态"。于是 AI 改为从带两层嵌套容器的文档开始，扩大了 id 的取值范围，并把运行次数加到了 500 次。
-4. 读写实现：读入文件时，fast-xml-parser 返回的结果是 `any` 类型。AI 起初用 `as` 把结果直接断言成节点类型，oxlint 的 `no-unsafe-type-assertion` 规则因此报错。后来 AI 改为在 io 模块里做运行时检查：用 `Array.isArray` 判断数组，属性按 `typeof` 过滤后再放进 `Map`。这样，形状不对的数据就不会带着错误的类型进入领域层。
-5. 变异测试：AI 第一次运行 Stryker 时，行覆盖率已经是 100%，变异测试的得分却只有 92.01%（1102 个变异体，存活 88 个）。AI 逐个查看了存活的变异体，发现其中 22 个对应测试真正漏掉的地方。例如，没有测试解析过 `12.5`、`.25`、`1E-3` 这类数，所以数值语法的正则即使改坏了，测试也发现不了。又如，所有执行器测试都先执行 init，所以执行器刚创建时的状态从来没有被检查过。另外还有两行代码，删掉以后测试照样通过。AI 用小脚本确认它们确实多余，就把它们删掉了。补了测试、删了代码之后，得分升到了 94.27%。换用 fast-xml-validator 和 fast-xml-builder（过程记录 6）之后，AI 又运行了一次，并把"文件不存在"的测试改成比较完整的错误信息。现在还剩 69 个存活变异体，分类见 4.2 节。
-6. 弃用 API：我在编辑器里看到了 `XMLValidator` 的弃用提示，于是请 AI 扫描全部代码，替换弃用的 API。原来 AI 在实现读写功能时，选用了 fast-xml-parser 自带的 `XMLValidator` 和 `XMLBuilder`，当时没有发现它们已经被标记为弃用。TypeScript 只在编辑器里把弃用显示为提示，`tsc` 不会因此报错，lint 也没有开启相应的规则，所以所有检查一直都能通过。AI 用 oxlint 的 `typescript/no-deprecated` 规则扫描了全部源码和测试，只找到这两处，于是把它们换成了弃用说明里推荐的 fast-xml-validator 和 fast-xml-builder。这条规则现在设为 error，以后如果再用到弃用的 API，提交和 CI 都会失败。另外，依赖规则里原来按包名写的是 `fast-xml-parser`，现在改成了 `fast-xml-`，这样新加的两个包也受模块边界的约束。domain 和 command 的规则还补上了之前漏掉的 `@commander-js/`。
-
-### 2.2 我的体会
-
-下面几点是我自己的体会。
-
-- 使用现代、先进、维护良好的库和框架，以确保代码质量、可维护性和长期可靠性。
-- 测试极其重要，最好遵循测试驱动开发（TDD）的原则。Bun 内置的测试运行器（`bun test`）、Vitest、Playwright、axe-core 和 StrykerJS（用于变异测试）等工具，可以为 AI 编程智能体建立可执行的约束和护栏，从而减少回归问题，促成更可靠的实现。Knip、Oxlint 和 Oxfmt 等代码质量和维护工具也很有价值。
-- 强大的模型配合能力强的智能体编程工具非常重要，例如在 Claude Code（包括 Claude Desktop 中的 Code 标签页）里以最高推理强度使用 Claude Opus 5.5。
-- 始终鼓励模型上网搜索，查阅最新的官方文档和可靠的资料，以获取更多上下文、核实最佳实践，并找到合适的实现模式。这样做也能帮助模型发现有用的测试库和开发工具。
-
-## 3 一致性自查
-
-2026-10-25 实现完成以后，AI 对照第 1 节逐条检查了代码。每一项都写明了检查方法，读者可以在仓库根目录重新运行这些检查。
-
-### 3.1 模块与依赖方向
-
-| 模块    | 实际导入（`grep -rhoE "from '[^']+'" src/<模块>`，去重）                                   | 结论                                                                                                        |
-| ------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| domain  | `#domain`                                                                                  | 与 1.3 节一致，没有 `node:*`、Bun API 或任何库                                                              |
-| io      | `#domain`、fast-xml-builder、fast-xml-parser、fast-xml-validator、`node:fs`                | 一致                                                                                                        |
-| command | `#command`、`#domain`、`#io`                                                               | 一致                                                                                                        |
-| cli     | `#cli`、`#command`、`#domain`、`@commander-js/extra-typings`、`node:readline`、`node:util` | 一致，没有 `node:fs`。`@commander-js/extra-typings` 是 commander 官方的类型增强包，运行时用的就是 commander |
-| main.ts | `#cli`、`#command`                                                                         | 这是组装入口，不受 1.3 节的限制                                                                             |
-
-模块划分与 1.1 节一致。唯一的改动（tree、show 移到 command）已经记在 1.6 节。oxlint 的 `import/no-cycle` 检查通过，说明没有循环依赖。
-
-### 3.2 依赖规则确实会拦下违规
-
-为了确认这些规则真的会生效，AI 临时在 domain 中加了一个同时违反三条规则的文件 `src/domain/Probe.ts`：它导入 `node:fs`，导入 cli 的类，并用 `../` 跨模块导入。oxlint 报出了三个错误，并以退出码 1 结束，所以 pre-commit 钩子和 CI 都会因此失败：
-
-```text
-src/domain/Probe.ts:1:1: error eslint(no-restricted-imports): 'node:fs' import is restricted from being used by a pattern. help: domain does no IO and uses no libraries.
-src/domain/Probe.ts:3:1: error eslint(no-restricted-imports): '#cli/Repl.ts' import is restricted from being used by a pattern. help: domain must not depend on any other module.
-src/domain/Probe.ts:5:1: error eslint(no-restricted-imports): '../command/Workspace.ts' import is restricted from being used by a pattern. help: Cross-module imports must use the #domain/ #command/ #io/ #cli/ aliases.
-```
-
-检查完以后，这个文件已经删除。
-
-### 3.3 面向对象与命令模式的规则
-
-| 规则                           | 检查方法                                                                                          | 结果                                                                                                                                                               |
-| ------------------------------ | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 一个文件一个类，文件名就是类名 | oxlint 的 `max-classes-per-file`、`unicorn/filename-case`；另用脚本比对每个文件导出的类名与文件名 | src 下 48 个文件：46 个各有一个同名的类，`Memento.ts` 是同名接口，`main.ts` 是唯一没有类的文件                                                                     |
-| 没有自由函数                   | `grep -rnE "^(export )?function\|^(export )?const \w+ = \(" src`                                  | 没有匹配                                                                                                                                                           |
-| 不按图形类型分派               | `grep -rnE "instanceof\|switch *\(" src`                                                          | 没有 `switch`。`instanceof` 有 5 处，都只用来区分错误类型（`EditorError`、`CommanderError`，以及校验器抛出的 `Error`）。判断是否为容器时，用的是多态的 `asGroup()` |
-| 按名称分派只有两处             | 阅读代码，找字符串到类或命令的映射                                                                | 只有 `ShapeFactory` 的类型表和 `CliProgram` 的 commander 注册两处，都标了 `待重构`                                                                                 |
-| 封装                           | 检查各个类的字段                                                                                  | 实例状态都在 `#` 私有字段里。公开字段只有各图形类的 `readonly tag`，它是常量                                                                                       |
-| 具体命令只转发，不做校验       | `grep -rln "throw " src/command`，并逐个阅读命令类                                                | 会抛错的只有 `Workspace`（接收者）和 `CommandExecutor`（调用者）。调用者抛出的 `nothing to undo` 和 `undo not allowed after io command` 属于历史栈自己的规则       |
-| 命令不打印                     | `grep -rnE "console\.\|process\.std" src/domain src/command src/io`                               | 没有匹配，只有 `Repl` 和 `main.ts` 接触输入输出                                                                                                                    |
-| undo 不做整文档快照            | `grep -rnE "serialize\|structuredClone\|clone" src/command src/domain`，并阅读各命令的 undo       | 没有匹配，command 里只有 `Workspace` 为 save 持有 `SvgWriter`。各命令只保存 1.2 节表中的备忘录                                                                     |
-
-### 3.4 对照题目
-
-| 题目内容                         | 验证方式                                                                           |
-| -------------------------------- | ---------------------------------------------------------------------------------- |
-| 第 6 节、6.1 节版本 A 的完整会话 | 端到端测试用真实进程逐行回放，保存出的文件与期望文件逐字节比较                     |
-| 5.1、5.2 节 tree 和 show 的示例  | 命令层测试逐字符比较                                                               |
-| 0.1 节的示例 SVG                 | 读入再写出，与原文逐字节一致                                                       |
-| 4.2、4.3 节的错误信息            | 共 13 条。`cannot ungroup composite shape` 属于 `box` 插件阶段，其余 12 条都有测试 |
-| 4.4 节和 6.1 节版本 B 的 `box`   | 属于下一阶段，本阶段没有实现                                                       |
-
-### 3.5 自查中发现的不一致
-
-1.5 节写着"代码里这几处都有 `待重构` 注释"，但检查时发现只有两个分派点有这个注释，"command 直接依赖 io"这一处没有。现在 `Workspace.ts` 已经补上了注释，所以 `grep -rn 待重构 src` 能找到全部三处。
-
-## 4 质量保证手段
-
-### 4.1 手段
-
-| 层次         | 内容                                                                                                                                                                                 | 工具                         |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------- |
-| 接收者       | `SvgDocument` 与各图形类的单元测试，覆盖题目 4.2 节中本阶段适用的每条错误信息                                                                                                        | bun:test                     |
-| 命令与执行器 | 对每条编辑命令，检查执行前的 SVG 文本等于 undo 后的文本，执行后的文本等于 redo 后的文本。另外测试栈规则和 IO 屏障，并对随机命令序列做性质测试                                        | bun:test、fast-check         |
-| IO           | 检查自动补的 id 不与文件中后出现的 id 冲突，测试重复 id 的处理和读写往返，以及题目示例逐字节一致                                                                                     | bun:test                     |
-| 端到端       | 题目第 6 节和 6.1 节（版本 A）的会话原样作为测试数据，用真实进程逐行回放，保存出的文件与按题目推导出的期望文件逐字节比较。另有一个带语法错误的脚本，用来确认错误只在 stdout 打印一行 | bun:test、`Bun.spawn`        |
-| 静态检查     | 格式、lint（含依赖规则和弃用 API 检查）、TypeScript 严格模式、无用代码检查、覆盖率阈值（行与函数 90%）                                                                               | oxfmt、oxlint、tsc、knip     |
-| 变异测试     | 在源码里逐个植入小改动（变异体），对每个变异体跑一遍全部测试，看测试能否发现这个改动。变异测试检验的是测试本身：覆盖率只能说明代码被执行过，不能说明结果被检查过                     | Stryker 10（command 运行器） |
-
-pre-commit 钩子运行格式检查、lint 和类型检查，GitHub Actions 在每次推送时运行 `bun run check`。变异测试要跑大约 3 分钟，所以没有放进钩子和 CI，需要用 `bun run mutation` 手动运行。
-
-### 4.2 结果（2026-10-25）
-
-| 指标         | 结果                                                                                                                                                                                                                                                                                                                                                                        |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 测试         | 共 114 个：domain 49 个、command 35 个、io 16 个、cli 11 个、端到端 3 个。断言约 3700 次。性质测试的命令序列是随机生成的，所以每次运行的断言数略有不同                                                                                                                                                                                                                      |
-| 覆盖率       | 行覆盖率 99.98%，函数覆盖率 99.94%。函数覆盖率不到 100% 的只有 `CliProgram.ts`（97.06%）。原因是，交给 commander 的 `writeOut` 是空函数，commander 只在自己输出帮助时才调用它，而 help 命令是先取出帮助文本，再把它返回。行覆盖率不到 100% 的只有 `SvgReader.ts`，没有执行到的是把校验器的意外异常原样抛出的那一行 `throw error`。只有校验器自己出 bug 时，才会执行到这一行 |
-| 性质测试     | 运行 500 次，每次最多 30 条随机编辑命令，起始文档带两层嵌套容器。全部 undo 之后回到初始 SVG，全部 redo 之后回到最终 SVG                                                                                                                                                                                                                                                     |
-| 题目错误信息 | 本阶段适用的 12 条都有测试（见 3.4）                                                                                                                                                                                                                                                                                                                                        |
-| 变异测试     | 第一次运行有 1102 个变异体，存活 88 个，得分 92.01%。按结果补了测试、删掉两行多余的代码之后，变异体是 1099 个，存活 63 个，得分 94.27%（过程记录 5）。换用 fast-xml-validator 和 fast-xml-builder（过程记录 6）并收紧一个测试之后，变异体是 1111 个，存活 69 个，得分 93.79%，没有超时或未覆盖的变异体                                                                      |
-| 静态检查     | oxlint（类型感知，警告也算失败）、tsc 严格模式、knip 都没有发现问题                                                                                                                                                                                                                                                                                                         |
-
-最近一次运行剩下的 69 个存活变异体，AI 都逐个看过。这些改动都不会产生可以观察到的差别：
-
-| 类别                      | 数量 | 例子                                                                                                                                  |
-| ------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| 防御性的空值判断          | 21   | undo 中的 `this.#memento?.restore()`。undo 只会在 execute 之后调用，所以备忘录一定存在。同样，文档中的图形也一定有父容器              |
-| 结果相同或走不到的分支    | 15   | `?? ''` 这样的默认值（切分参数的正则每次匹配时总有一组有值）；`#warnings` 的初始值（每次解析前都会清空）；画布的 id（从来不会被查找） |
-| 用户看不到的文字          | 9    | commander 的参数说明（help 只显示参数名）、程序名、`EditorError.name`                                                                 |
-| 库已经保证的行为          | 15   | fast-xml-parser 已经去掉属性值两端的空白；解析结果中标签名总在 `':@'` 之前；属性值总是字符串                                          |
-| 只在别处有 bug 时才起作用 | 9    | 把意外的异常原样抛出、不包装成用户错误的判断                                                                                          |
-
-要杀死这些变异体，只能去测试实现细节，或者故意制造 bug，所以没有再为它们补测试。
-
-### 4.3 这些手段拦下的问题
-
-| 手段               | 拦下的问题                                                                                                     |
-| ------------------ | -------------------------------------------------------------------------------------------------------------- |
-| pre-commit 钩子    | 第 2 步提交时，tsc 报了 TS18048（`Leaf.movedPhrase` 中的值可能是 `undefined`），提交被拒绝，修正之后才提交成功 |
-| oxlint             | 只有静态方法的类（过程记录 1）；对库返回值的不安全类型断言（过程记录 4）                                       |
-| 统计生成的测试数据 | 性质测试几乎没有执行 ungroup 和 addto（过程记录 3）                                                            |
-| 变异测试           | 覆盖率 100% 时仍然漏掉的测试，以及两行多余的代码（过程记录 5）                                                 |
-| 一致性自查         | 1.5 节与代码不符（3.5）                                                                                        |
-
-## 附录 A 题目未明确之处与本实现的约定
-
-| #   | 问题                                      | 约定                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| --- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | tree 示例的列对齐方式不一致               | 摘要列对齐到"最长标签 + 2 个空格"                                                                                                                                                                                                                                                                                                                                                                                                       |
-| 2   | `group` 的新容器放在哪里，成员按什么顺序  | 新容器放在第一个成员（按文档顺序）原来的位置；成员保持文档中的相对顺序                                                                                                                                                                                                                                                                                                                                                                  |
-| 3   | 部分命令的成功反馈没有给出格式            | 实现时统一补全了这些格式，列在本附录末尾                                                                                                                                                                                                                                                                                                                                                                                                |
-| 4   | 读入文件中的不支持元素、重复 id、格式错误 | 不支持的元素连同它的子元素一起跳过：`warning: skipped <path id="p1">: unsupported element`。重复的 id 按缺失处理：`warning: assigned id rect2 to <rect> with duplicate id r1`。自动编号会跳过文件中任何位置已有的 id。属性值无法使用的元素也会跳过，例如带单位的数值：`warning: skipped <rect id="r1">: invalid number: 10px`。叶子元素里的子元素（如 `<text>` 里的 `<tspan>`）会被跳过并给出警告。XML 格式错误时报错，当前文档保持不变 |
-| 5   | tree 中显示哪些属性                       | 显示几何属性和 fill。题目示例里用 black 创建的 line，在 tree 中不显示 stroke                                                                                                                                                                                                                                                                                                                                                            |
-| 6   | init 之后无参数 `save`                    | 报 `error: no file name. use 'save <file.svg>'`。执行 `save <file>` 之后，无参数的 `save` 会写到这个新文件（与常见编辑器的"另存为"一致）。`init` 会清掉记住的文件                                                                                                                                                                                                                                                                       |
-| 7   | IO 屏障之后 undo 能否越过它               | 不能，文档类命令会清空 undo/redo 历史                                                                                                                                                                                                                                                                                                                                                                                                   |
-| 8   | ungroup、addto 的参数找不到或不是容器     | addto 的容器参数与 `in` 子句的处理相同：`no such container: x`、`not a container: x`。ungroup 的参数是操作对象本身，所以按普通 id 处理：找不到时报 `no such shape: x`，不是容器时报 `not a container: x`                                                                                                                                                                                                                                |
-| 9   | addto 把容器移进它自己或它的子孙          | 与 group 的处理相同：`cannot group a container into its own descendant: x`                                                                                                                                                                                                                                                                                                                                                              |
-| 10  | group 的 id 列表有重复                    | 去掉重复的 id 之后再处理                                                                                                                                                                                                                                                                                                                                                                                                                |
-| 11  | create 参数个数不对                       | `usage: create rect <id> <x> <y> <width> <height> [fill] [in <containerId>]`（按类型生成）                                                                                                                                                                                                                                                                                                                                              |
-| 12  | 数值和 id 的合法性                        | 数值按 SVG 数值语法解析，不符合时报 `invalid number: x`。尺寸（width、height、r、rx、ry）为负时报 `r must not be negative`。画布尺寸必须为正数。id 不能为空，也不能含空白，否则报 `invalid id: "x"`                                                                                                                                                                                                                                     |
-| 13  | 命令语法错误（未知命令、参数缺少或多余）  | 沿用 commander 的信息，去掉 `error: ` 前缀并合成一行，例如 `error: unknown command 'mvoe' (Did you mean move?)`、`error: missing required argument 'dy'`                                                                                                                                                                                                                                                                                |
-| 14  | 以 `-` 开头的参数                         | 一律当作参数，负数和文字都可以，因为本程序没有选项                                                                                                                                                                                                                                                                                                                                                                                      |
-| 15  | 双引号内能否再写双引号                    | 不能。两个双引号之间的内容原样作为一个参数，不支持转义                                                                                                                                                                                                                                                                                                                                                                                  |
-| 16  | 程序自身出错（bug）                       | 输出 `error: internal: ...`，会话继续                                                                                                                                                                                                                                                                                                                                                                                                   |
-| 17  | read 失败时的信息                         | 文件不存在或不可读时报 `cannot read file: a.svg`。文件能读到但内容用不了时，在括号里给出原因：`(line 1: Expected closing tag 'g' ...)`、`(no <svg> root element)`、`(<svg> has no width and height)`                                                                                                                                                                                                                                    |
-| 18  | 读入再保存，文件会有哪些变化              | 注释会丢弃。属性按 id、几何、fill、stroke、stroke-width、其余属性的顺序重排。数值会规范化（`0.50` 写成 `0.5`）。根元素的 viewBox 按 width、height 重新生成，width、height 缺失时取 viewBox 中的尺寸。本程序自己保存的文件，读回再保存时逐字节不变                                                                                                                                                                                       |
-| 19  | `canvas` 只给一个参数                     | 只改宽度，高度不变（`init` 只给一个参数时高度取默认的 600）                                                                                                                                                                                                                                                                                                                                                                             |
-
-### 成功反馈一览
-
-题目第 2 节只规定"编辑类命令回显结果摘要"，第 6 节的会话给出了一部分格式。"来源"一列中，"题目"指第 6 节会话里出现过的格式，"本实现"指按同样的风格补全的格式。
-
-| 命令        | 执行与 redo                                                                                  | undo                                                                                                   | 来源                                     |
-| ----------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
-| init        | `canvas 800x600 created`                                                                     | 文档类命令，不能 undo                                                                                  | 题目                                     |
-| create      | `rect#bg created`；带 `in` 时 `rect#start created in g#node1`                                | `rect#bg removed`                                                                                      | 执行：题目；undo：本实现                 |
-| delete      | `rect#box deleted`                                                                           | `rect#box restored into g#markers`                                                                     | 题目                                     |
-| move        | 叶子 `circle#c1 moved to (130,100)`；容器 `g#node2 moved by (0,100)`                         | `circle#c1 moved back to (100,100)`；`g#node2 moved back by (0,-100)`                                  | 题目                                     |
-| scale       | `circle#c1 scaled by 3`                                                                      | `circle#c1 scaled back by 1/3`                                                                         | 本实现                                   |
-| set         | `text#title updated: text="My Diagram v2"`；`rect#r1 updated: fill="red"`                    | 写回旧值：`text#title updated: text="My Diagram"`；原来没有这个属性：`rect#r1 updated: stroke removed` | 题目；原来没有属性的情况：本实现         |
-| group       | `g#markers created with 2 children`；一个成员时 `created with 1 child`                       | `g#markers ungrouped`                                                                                  | 执行：题目（单数：本实现）；undo：本实现 |
-| ungroup     | `g#inner ungrouped`                                                                          | `g#inner regrouped`                                                                                    | 本实现                                   |
-| addto       | `rect#bg moved into g#markers`                                                               | `rect#bg moved back into svg`                                                                          | 本实现                                   |
-| front、back | `rect#r1 brought to front`、`rect#r1 sent to back`                                           | `rect#r1 z-order restored`                                                                             | 本实现                                   |
-| canvas      | 不带参数：`canvas 800x600`；改尺寸：`canvas resized to 1024x768`                             | 改尺寸是文档类命令，不能 undo                                                                          | 本实现                                   |
-| save        | `saved to demo.svg (5 elements)`；一个元素时 `(1 element)`                                   | 不能 undo                                                                                              | 题目（单数：本实现）                     |
-| read        | 先逐行输出警告 `warning: ...`（格式见本附录第 4 行），最后一行 `read other.svg (7 elements)` | 不能 undo                                                                                              | 题目                                     |
-
-redo 会重新执行命令，所以反馈与执行时相同，题目第 6 节也是这样。没有可以 undo 或 redo 的操作时，分别报 `error: nothing to undo` 和 `error: nothing to redo`（本实现）。文档类命令之后，报题目规定的 `error: undo not allowed after io command`。
-
-## 附录 B 提示词原文
-
-下面按时间顺序，原样列出截至 2026-10-25 03:49 我在 Claude Code 中输入的全部文字。时间是 UTC+8。
-
-2026-10-24 21:55：
-
-```text
-read phase_cli_1.md and make a proposal base on your understanding and online research. load ponytail, i-have-adhd and humanizer agent skill.
-```
-
-2026-10-24 22:18：
-
-```text
-if the lecturer does not explicitly disallow bun, then use bun (e.g. if it does not say "use npm or node.js"). also, install code linting, formatting, qol tools, like knip, oxlint, oxfmt, etc. to ensure code quality. also make sure to use the latest modern language features, syntactic sugars, stdlib features etc. third party libs are unrestricted and explicitly allowed by the lecturer. so always do research and avoid reinventing the wheel at all. your project, code and dependencies and architecture can be state of the art, bleeding edge, cutting edge, modern. but always research online.
-```
-
-2026-10-24 23:31：
-
-```text
-Tried bun run cli, it works. Go on with step 8.
-```
-
-2026-10-25 00:12：
-
-```text
-Retry the commit now. I'm watching for the GPG passphrase dialog.
-```
-
-2026-10-25 00:40：
-
-```text
-I'm watching for the GPG passphrase dialog. Run the four step 9 commits now.
-```
-
-2026-10-25 00:41：
-
-```text
-Yes, send the PlantUML source to plantuml.com and commit doc/architecture.svg.
-```
-
-2026-10-25 00:46：
-
-````text
-What notes?
-
-Also,
-
-
-```
-
-'XMLValidator' is deprecated.ts(6385)
-fxp.d.ts(731, 4): The declaration was marked as deprecated here.
-(alias) class XMLValidator
-import XMLValidator
-@deprecated — Use fast-xml-validator instead
-
-@see — https://www.npmjs.com/package/fast-xml-validator
-
-```
-
-
-You might want to scan whole codebase and watch for deprecated methods for replacement. Replace them with modern alternatives.
-
-Make that a commit (since we would really trying to avoid "a huge commit with everything bundled together").
-
-Also, load humanizer agent skill and apply it to 1) code comments 2) test descriptions 3) README and docs that are not from the original project instructions 4) optionally AGENTS.md if appropriate; Make additional slight change to wordings too: Try to use more complete sentences, fill in missing subjectives, adjectives, nouns, pronouns, etc. when appropriate; Use proper tenses to make it easier for humans to read, understand and comprehend; Aim for ESL speaker with entry-college proficiency.
-````
-
-2026-10-25 00:53：
-
-```text
-Continue: load the humanizer skill and do the comments, test names, README and doc, and AGENTS.md passes as separate commits. Update the 4.2 mutation numbers from the latest Stryker run first.
-```
-
-2026-10-25 03:13：
-
-```text
-Try again
-```
-
-2026-10-25 03:37：
-
-````text
-I pushed already, check git remote!
-
-Also:
-
-
-```
-
-For the notes, I would write the following:
-Include all my original prompts, verbatim. You may be able to retrieve them from Claude Code's local session history files.
-Utilize modern, state-of-the-art, well-maintained libraries and frameworks to ensure code quality, maintainability, and long-term reliability.
-Tests are extremely important, ideally following the principles of test-driven development (TDD). Tools such as Bun's built-in test runner (`bun test`), Vitest, Playwright, axe-core, and StrykerJS (for mutation testing) help establish executable constraints and guardrails for AI coding agents, reducing regressions and encouraging more reliable implementations. Code quality and maintenance tools such as Knip, Oxlint, and Oxfmt are also valuable.
-A strong model combined with a capable agentic coding harness matters a lot, such as Claude Opus 5.5 with maximum reasoning effort in Claude Code (including the Code tab in Claude Desktop).
-Always encourage models to search the web and consult up-to-date official documentation and reliable sources to gather additional context, verify best practices, and identify appropriate implementation patterns. This also helps discover useful testing libraries and development tools.
-Help me to write the report. With my own words preserved as much as you can, but fixing all the grammars, make sentence more complete, replace word with correct word choice, while be cautious with large scale rephrasing.
-
-```
-````
-
-2026-10-25 03:49：
-
-```text
-For the edit note commit, soft reset it first, since I found some issues:
-
-* 2.1 与 AI 协作中的讨论和修正 is fake because I did not discuss such with you ever. Even if we did, it is too long and should be trimmed via removing Software Design-irrelevant discussion topics.
-* 2.2 Should be translated to simplified Chinese.
-* You should minimally rephrase README after all above these changes, i order to achieve one thing: make sentences easier for humans to read without changing words. You could do that by inserting filler words dynamically base on sentence existing information density, to make every sentence contains the same or very similar information density level (you could research online on what it means or latest 2026 research "why do AI ... so hard to understand?") or via other methods. But you should not do it too aggressively. Keep in mind humanizer agent skill mentioned principles too.
-```
+1. 第一轮由另外两个模型评审：gpt-6-astra（中等推理强度）和 Opus 5.5（高推理强度）。两者都指出，原方案的差异检查没有覆盖 `src/main.ts`，所以组合根被移到了 `app/`。Opus 指出，方式 A 和方式 B 的提交之间，端到端对比可能失效，所以对比测试改用一份与 `app/main.ts` 对应的装配配置。Opus 还指出 oxlint 自带 `eslint/complexity` 规则，推翻了 AI 认为"oxlint 没有圈复杂度规则"的假设。
+2. 第二轮由 gpt-6.2-astra（中等推理强度）评审一次、gpt-6.2-sol（高推理强度）评审两次，再由 Opus 5.5 筛选。被采纳的主要意见有：方式 A 改为惰性导入，让导入失败也落在回滚边界之内；`Decimal` 的字符串只保留 6 位小数，所以属性备忘录必须保存原来的准确值；观察者抛错时要单独捕获。
+3. 没有采纳的意见也记了下来。例如，有评审建议保留 Phase 1 读入时对重复 id 的自动改名，但题目要求重复 id 必须拒绝整个读入，我选择了全局拒绝。又如，有评审建议不要合并方式 A 的演示分支，但这个分支需要留在远程仓库里作为证据，所以仍然合并。
+4. 评审中有两处需要我决定：读入时出现重复 id 一律拒绝；`dir` 的输出采用题目示例中的格式（`[DIR]` 后两个空格，`[FILE]` 后一个空格），题目文字与示例的冲突记在附录 A。
