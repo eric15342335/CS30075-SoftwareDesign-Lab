@@ -91,10 +91,10 @@ describe('leaf editing', () => {
 
   test('set returns the old value', () => {
     const text = withAttributes(new Text('t'), { x: '1', text: 'a', fill: 'red' });
-    expect(text.setAttribute('x', '2')).toBe('1');
-    expect(text.setAttribute('text', 'b')).toBe('a');
-    expect(text.setAttribute('fill', undefined)).toBe('red');
-    expect(text.setAttribute('stroke', 'blue')).toBeUndefined();
+    expect(text.setAttribute('x', '2').old).toBe('1');
+    expect(text.setAttribute('text', 'b').old).toBe('a');
+    expect(text.setAttribute('fill', undefined).old).toBe('red');
+    expect(text.setAttribute('stroke', 'blue').old).toBeUndefined();
     expect(text.describe()).toBe('(2,0) "b"');
   });
 

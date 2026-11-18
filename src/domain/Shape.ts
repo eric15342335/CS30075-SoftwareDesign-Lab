@@ -1,3 +1,5 @@
+import { AttributeChange } from '#domain/AttributeChange.ts';
+import { AttributeMemento } from '#domain/AttributeMemento.ts';
 import type { Catalog } from '#domain/Catalog.ts';
 import type { Decimal } from '#domain/Decimal.ts';
 import { EditorError } from '#domain/EditorError.ts';
@@ -129,13 +131,14 @@ export abstract class Shape {
   }
 
   /**
-   * Changes an editable attribute for `set` and returns the old value. The value undefined
-   * removes the attribute.
+   * Changes an editable attribute for `set` and returns the change, which can restore the exact
+   * old value. The value undefined removes the attribute. An invalid value throws before anything
+   * changes.
    */
-  setAttribute(name: string, value: string | undefined): string | undefined {
+  setAttribute(name: string, value: string | undefined): AttributeChange {
     const change = this.assign(name, value);
     if (change === null) throw new EditorError(`unknown attribute: ${name}`);
-    return change.old;
+    return change;
   }
 
   /**
@@ -166,12 +169,12 @@ export abstract class Shape {
    * Writes an attribute that this shape edits and returns the old value. The result null means
    * that this shape cannot edit an attribute with that name.
    */
-  protected assign(name: string, value: string | undefined): { old: string | undefined } | null {
+  protected assign(name: string, value: string | undefined): AttributeChange | null {
     if (!Shape.#styleNames.includes(name)) return null;
     const old = this.#style.get(name);
     if (value === undefined) this.#style.delete(name);
     else this.#style.set(name, value);
-    return { old };
+    return new AttributeChange(old, new AttributeMemento(this, name, old));
   }
 
   /** Returns the style and kept extras as name=value words, which form the last line of `show`. */

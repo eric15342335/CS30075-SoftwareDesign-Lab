@@ -173,11 +173,11 @@ describe('move and scale', () => {
 describe('set', () => {
   test('set changes one attribute and remembers the old value', () => {
     const doc = session();
-    let old: string | undefined;
+    let undone: string[] = [];
     expectUndoable(doc, () => {
-      const memento = doc.set('title', 'text', 'My Diagram v2');
-      old = memento.old;
-      return memento;
+      const edit = doc.set('title', 'text', 'My Diagram v2');
+      undone = edit.undoFeedback();
+      return edit;
     }, [
       'svg (800x600)',
       '  rect#bg x=0 y=0 w=800 h=600 fill=#ffffff',
@@ -186,7 +186,7 @@ describe('set', () => {
       '    circle#c1 cx=100 cy=100 r=20 fill=red',
       '    rect#box x=200 y=80 w=60 h=60 fill=#3366ff',
     ]);
-    expect(old).toBe('My Diagram');
+    expect(undone).toEqual(['text#title updated: text="My Diagram"']);
   });
 
   test('set works on containers and rejects unknown attributes', () => {

@@ -1,7 +1,10 @@
 import type { Memento } from '#domain/Memento.ts';
 import type { Shape } from '#domain/Shape.ts';
 
-/** Holds the value that one attribute had before `set`. The value undefined means it was absent. */
+/**
+ * Holds the text value that one attribute had before `set`. The value undefined means that it was
+ * absent. A style value or a text content is text already, so this restores it exactly.
+ */
 export class AttributeMemento implements Memento {
   readonly #shape: Shape;
   readonly #name: string;
@@ -11,10 +14,6 @@ export class AttributeMemento implements Memento {
     this.#shape = shape;
     this.#name = name;
     this.#old = old;
-  }
-
-  get old(): string | undefined {
-    return this.#old;
   }
 
   restore(): void {

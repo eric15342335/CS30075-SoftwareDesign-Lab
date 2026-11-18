@@ -1,3 +1,4 @@
+import { AttributeChange } from '#domain/AttributeChange.ts';
 import { Decimal } from '#domain/Decimal.ts';
 import { EditorError } from '#domain/EditorError.ts';
 import { GeometryMemento } from '#domain/GeometryMemento.ts';
@@ -53,7 +54,7 @@ export abstract class Leaf extends Shape {
     return [...super.ownAttributes(), ...this.#formatted()];
   }
 
-  protected override assign(name: string, value: string | undefined) {
+  protected override assign(name: string, value: string | undefined): AttributeChange | null {
     const old = this.#geometry.get(name);
     if (old === undefined) return super.assign(name, value);
     // In SVG, a missing geometry attribute means 0.
@@ -61,8 +62,10 @@ export abstract class Leaf extends Shape {
     if (number.isNegative() && this.geometry()[name] === 'size') {
       throw new EditorError(`${name} must not be negative`);
     }
+    // The memento keeps the exact old numbers, so undo does not lose digits that the text hides.
+    const memento = this.saveGeometry();
     this.#geometry.set(name, number);
-    return { old: old.toString() };
+    return new AttributeChange(old.toString(), memento);
   }
 
   protected value(key: string): string {

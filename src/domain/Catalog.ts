@@ -1,17 +1,28 @@
+import type { AttributeHandler } from '#domain/AttributeHandler.ts';
 import { EditorError } from '#domain/EditorError.ts';
 import { Registry } from '#domain/Registry.ts';
 import type { Shape } from '#domain/Shape.ts';
 import type { ShapeProvider } from '#domain/ShapeProvider.ts';
 
 /**
- * Catalog holds the shape types that the document knows. The kernel looks types up here by name,
- * so it has no list of shape classes of its own.
+ * Catalog holds the shape types and the attribute handlers that the document knows. The kernel
+ * looks them up here, so it has no list of shape classes or attribute rules of its own.
  */
 export class Catalog {
   readonly #shapes = new Registry<ShapeProvider>('shapes', (provider) => provider.type);
+  readonly #handlers = new Registry<AttributeHandler>('attributes', (handler) => handler.name);
 
   addShape(provider: ShapeProvider): void {
     this.#shapes.add(provider);
+  }
+
+  addHandler(handler: AttributeHandler): void {
+    this.#handlers.add(handler);
+  }
+
+  /** Returns the registered handlers that say they are responsible, in registration order. */
+  handlersFor(shape: Shape, attr: string): AttributeHandler[] {
+    return this.#handlers.values().filter((handler) => handler.handles(shape, attr));
   }
 
   createShape(type: string, id: string): Shape {

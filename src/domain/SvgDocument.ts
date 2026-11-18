@@ -1,4 +1,4 @@
-import { AttributeMemento } from '#domain/AttributeMemento.ts';
+import { AttributeEdit } from '#domain/AttributeEdit.ts';
 import type { Canvas } from '#domain/Canvas.ts';
 import type { Catalog } from '#domain/Catalog.ts';
 import type { Decimal } from '#domain/Decimal.ts';
@@ -8,6 +8,7 @@ import { Journal } from '#domain/Journal.ts';
 import type { Memento } from '#domain/Memento.ts';
 import { Placement } from '#domain/Placement.ts';
 import type { Shape } from '#domain/Shape.ts';
+import { StandardAttributes } from '#domain/StandardAttributes.ts';
 
 /**
  * SvgDocument is the receiver of every edit command. It validates each request, raises the error
@@ -16,6 +17,7 @@ import type { Shape } from '#domain/Shape.ts';
  */
 export class SvgDocument {
   static readonly #idPattern = /^\S+$/;
+  static readonly #standard = new StandardAttributes();
   readonly #canvas: Canvas;
   readonly #catalog: Catalog;
 
@@ -81,9 +83,34 @@ export class SvgDocument {
     return memento;
   }
 
-  set(id: string, name: string, value: string): AttributeMemento {
+  /**
+   * Routes `set` through the attribute handlers (ADR 1). Two responsible handlers are a conflict,
+   * and the command fails before anything changes. With none, the standard Phase 1 rules apply.
+   * When a handler throws, every write that it made is restored and no fallback runs.
+   */
+  set(id: string, name: string, value: string): AttributeEdit {
     const shape = this.find(id);
-    return new AttributeMemento(shape, name, shape.setAttribute(name, value));
+    const handlers = this.#catalog.handlersFor(shape, name);
+    if (handlers.length > 1) {
+      const names = handlers.map((handler) => handler.name).join(', ');
+      throw new EditorError(
+        `conflicting attribute handlers for ${name} on ${shape.label()}: ${names}`,
+      );
+    }
+    const edit = new AttributeEdit();
+    const [handler] = handlers;
+    if (handler === undefined) {
+      SvgDocument.#standard.apply(shape, name, value, edit);
+      return edit;
+    }
+    try {
+      handler.apply(shape, name, value, edit);
+    } catch (error) {
+      edit.restore();
+      const reason = error instanceof Error ? error.message : String(error);
+      throw new EditorError(`attribute handler failed: ${handler.name} (${reason})`);
+    }
+    return edit;
   }
 
   /**

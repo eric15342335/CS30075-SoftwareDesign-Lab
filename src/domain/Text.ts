@@ -1,3 +1,5 @@
+import { AttributeChange } from '#domain/AttributeChange.ts';
+import { AttributeMemento } from '#domain/AttributeMemento.ts';
 import { Leaf } from '#domain/Leaf.ts';
 import type { CreateSignature } from '#domain/Shape.ts';
 
@@ -30,10 +32,10 @@ export class Text extends Leaf {
     return `(${this.value('x')},${this.value('y')}) "${this.#content}"`;
   }
 
-  protected override assign(name: string, value: string | undefined) {
+  protected override assign(name: string, value: string | undefined): AttributeChange | null {
     if (name !== 'text') return super.assign(name, value);
     const old = this.#content;
     this.#content = value ?? '';
-    return { old };
+    return new AttributeChange(old, new AttributeMemento(this, name, old));
   }
 }

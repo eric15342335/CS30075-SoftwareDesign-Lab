@@ -1,13 +1,17 @@
 import { EditCommand } from '#command/EditCommand.ts';
 import type { Workspace } from '#command/Workspace.ts';
-import type { AttributeMemento } from '#domain/AttributeMemento.ts';
+import type { AttributeEdit } from '#domain/AttributeEdit.ts';
 
+/**
+ * The `set <id> <attr> <value>` command. It forwards the request to the document, which picks the
+ * attribute handler. Redo runs execute() again, so the handler sees the current document.
+ */
 export class SetCommand extends EditCommand {
   readonly #workspace: Workspace;
   readonly #id: string;
   readonly #name: string;
   readonly #value: string;
-  #memento: AttributeMemento | null = null;
+  #edit: AttributeEdit | null = null;
 
   constructor(workspace: Workspace, id: string, name: string, value: string) {
     super();
@@ -18,19 +22,12 @@ export class SetCommand extends EditCommand {
   }
 
   override execute(): string[] {
-    const document = this.#workspace.document();
-    this.#memento = document.set(this.#id, this.#name, this.#value);
-    return [this.#feedback(this.#value)];
+    this.#edit = this.#workspace.document().set(this.#id, this.#name, this.#value);
+    return this.#edit.feedback();
   }
 
   override undo(): string[] {
-    this.#memento?.restore();
-    return [this.#feedback(this.#memento?.old)];
-  }
-
-  #feedback(value: string | undefined): string {
-    const label = this.#workspace.document().find(this.#id).label();
-    const change = value === undefined ? `${this.#name} removed` : `${this.#name}="${value}"`;
-    return `${label} updated: ${change}`;
+    this.#edit?.restore();
+    return this.#edit?.undoFeedback() ?? [];
   }
 }
