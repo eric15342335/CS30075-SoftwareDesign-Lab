@@ -151,6 +151,7 @@ export class SvgDocument {
     const container = this.find(id).asGroup();
     if (container === null) throw new EditorError(`not a container: ${id}`);
     if (!container.dissolvable()) throw new EditorError(`cannot ungroup composite shape: ${id}`);
+    this.#detachable(container);
     if (container.parent === this.#canvas) {
       throw new EditorError(`cannot ungroup top-level container: ${id}`);
     }

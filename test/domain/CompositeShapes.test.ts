@@ -12,7 +12,7 @@ import { Session } from '#test/support/Session.ts';
 
 /**
  * A test-only composite shape on the tag g. It owns two parts, <id>-a (a rect) and <id>-b (a
- * circle), the same way as the box plugin owns its rect and text.
+ * group), the same way as the box plugin owns its rect and text.
  */
 class Pair extends Group {
   override get type(): string {
@@ -21,12 +21,12 @@ class Pair extends Group {
 
   override configure(_args: readonly string[], catalog: Catalog): void {
     this.insert(catalog.createShape('rect', `${this.id}-a`));
-    this.insert(catalog.createShape('circle', `${this.id}-b`));
+    this.insert(catalog.createShape('g', `${this.id}-b`));
   }
 
   override loaded(): void {
     const types = this.children().map((child) => [child.id, child.type].join(':'));
-    if (types.join(' ') !== `${this.id}-a:rect ${this.id}-b:circle`) {
+    if (types.join(' ') !== `${this.id}-a:rect ${this.id}-b:g`) {
       throw new EditorError(`pair ${this.id} has wrong parts`);
     }
   }
@@ -52,7 +52,7 @@ test('create builds the parts and names them in the feedback', () => {
   const s = session();
   s.create('g', 'outer');
   expect(s.run(new CreateCommand(s.workspace, 'pair', 'p', [], 'outer'))).toEqual([
-    'pair#p created in g#outer (g#p + rect#p-a + circle#p-b)',
+    'pair#p created in g#outer (g#p + rect#p-a + g#p-b)',
   ]);
   expect(s.undo()).toEqual(['pair#p removed']);
   expect(s.document().ids()).toEqual(['outer']);
@@ -92,14 +92,23 @@ test('ungroup refuses a composite shape before it checks the top level', () => {
   expect(() => s.document().ungroup('p')).toThrow('cannot ungroup composite shape: p');
 });
 
+test('ungroup refuses a group that is a part, because the parts would leave the composite', () => {
+  const s = session();
+  s.create('pair', 'p');
+  expect(() => s.document().ungroup('p-b')).toThrow(
+    'cannot remove a part of a composite shape: p-b',
+  );
+  expect(s.document().find('p-b').parent?.id).toBe('p');
+});
+
 test('read checks the parts after the children are in place', () => {
   const catalog = Session.catalog();
   catalog.shapes.add(new BasicShapeProvider('pair', Pair));
   const good =
-    '<svg width="9" height="9"><g id="p" data-kind="pair"><rect id="p-a"/><circle id="p-b"/></g></svg>';
+    '<svg width="9" height="9"><g id="p" data-kind="pair"><rect id="p-a"/><g id="p-b"/></g></svg>';
   expect(new SvgReader(catalog).parse(good).find('p').type).toBe('pair');
   const skipped =
-    '<svg width="9" height="9"><g id="p" data-kind="pair"><rect id="p-a" x="1px"/><circle id="p-b"/></g></svg>';
+    '<svg width="9" height="9"><g id="p" data-kind="pair"><rect id="p-a" x="1px"/><g id="p-b"/></g></svg>';
   expect(() => new SvgReader(catalog).parse(skipped)).toThrow('pair p has wrong parts');
 });
 
