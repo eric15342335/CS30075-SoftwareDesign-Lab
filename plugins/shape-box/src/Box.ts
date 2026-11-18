@@ -38,11 +38,18 @@ export class Box extends Group {
     this.insert(text);
   }
 
-  /** A box that was read must have exactly its two parts, in order. Otherwise the read fails. */
+  /**
+   * A box that was read must hold each of its two parts once, with the right tag. The parts may
+   * be in any order, because `front` and `back` reorder them, and other children may sit beside
+   * them, because a box can hold shapes. Otherwise the read fails.
+   */
   override loaded(): void {
-    const parts = this.children().map((child) => child.elementLabel());
+    const labels = this.children().map((child) => child.elementLabel());
     const expected = [`rect#${this.#part('rect')}`, `text#${this.#part('label')}`];
-    if (parts.join(' ') !== expected.join(' ')) {
+    const complete = expected.every(
+      (part) => labels.filter((label) => label === part).length === 1,
+    );
+    if (!complete) {
       throw new EditorError(`box ${this.id} needs exactly the parts ${expected.join(' and ')}`);
     }
   }

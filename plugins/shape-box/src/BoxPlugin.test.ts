@@ -158,6 +158,48 @@ test('read rejects a box without its parts and keeps the document', () => {
   expect(cli.run('tree')).toEqual(['svg (800x600)', '└── rect#keep  x=0 y=0 w=1 h=1']);
 });
 
+test('a nested box and reordered parts survive save and read', () => {
+  const file = join(folder, 'nested.svg');
+  const cli = after(
+    'init',
+    'create box n1 0 0 80 40 "a"',
+    'create box n2 10 10 8 8 "b" in n1',
+    'front n1-rect',
+    `save ${file}`,
+  );
+  const before = cli.run('tree');
+  const other = after(`read ${file}`);
+  expect(other.run('tree')).toEqual(before);
+  expect(other.run('set n1 label c')).toEqual(['box#n1 label updated: "c"']);
+});
+
+test('read rejects a box whose part is missing, even when an id looks like both parts', () => {
+  const file = join(folder, 'tricky.svg');
+  fs.writeFileSync(
+    file,
+    '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="60">' +
+      '<g id="n1" data-kind="box"><rect id="n1-rect text#n1-label" x="0" y="0" width="1" height="1"/></g></svg>',
+  );
+  expect(() => after('init').run(`read ${file}`)).toThrow('box n1 needs exactly the parts');
+});
+
+test('set label and set fill show the new value, undo the old one and redo the new one', () => {
+  const cli = after('init', 'create box n2 0 0 8 4 "old"');
+  const row = (index: number): string => cli.run('tree n2')[index] ?? '';
+  cli.run('set n2 label "new"');
+  expect(row(2)).toContain('"new"');
+  cli.run('undo');
+  expect(row(2)).toContain('"old"');
+  cli.run('redo');
+  expect(row(2)).toContain('"new"');
+  cli.run('set n2 fill red');
+  expect(row(1)).toContain('fill=red');
+  cli.run('undo');
+  expect(row(1)).toContain('fill=#4a90d9');
+  cli.run('redo');
+  expect(row(1)).toContain('fill=red');
+});
+
 test('the type label marks only boxes', () => {
   const results = run('init', 'create g plain', 'create box b 0 0 8 4 "a"', 'tree');
   expect(results[3]).toContain('├── g#plain');
