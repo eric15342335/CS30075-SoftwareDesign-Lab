@@ -90,6 +90,15 @@ test('a listed file without a doc comment is an error, and an older tree needs n
   expect(new TreeMetrics(root, new RoleMap('HEAD'), false).measure()[0]?.responsibility).toBe('');
 });
 
+test('a doc comment on an exported type gives the responsibility too', () => {
+  const root = tree('type', {
+    'src/Kind.ts': "/** The kinds. */\nexport type Kind = 'a' | 'b';\n",
+  });
+  expect(new TreeMetrics(root, new RoleMap('HEAD'), true).measure()[0]?.responsibility).toBe(
+    'The kinds.',
+  );
+});
+
 /** Returns a measured file with ten lines and one unit. */
 function file(path: string, role: FileMetric['role'], complexity: number): FileMetric {
   return { path, role, lines: 10, functions: 1, complexity, responsibility: 'Does | things.' };

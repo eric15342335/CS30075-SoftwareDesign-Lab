@@ -21,7 +21,7 @@ export class TreeMetrics {
   static readonly #config = join(import.meta.dir, 'complexity.oxlintrc.json');
   /** A doc comment right before an exported class or interface. It never crosses a comment end. */
   static readonly #docComment =
-    /\/\*\*((?:(?!\*\/)[\s\S])*)\*\/\s*export\s+(?:default\s+)?(?:abstract\s+)?(?:class|interface)\s/;
+    /\/\*\*((?:(?!\*\/)[\s\S])*)\*\/\s*export\s+(?:default\s+)?(?:abstract\s+)?(?:class|interface|type)\s/;
   readonly #root: string;
   readonly #roles: RoleMap;
   /** Tells whether the report lists the files of this tree, so they need a responsibility. */
@@ -104,7 +104,7 @@ export class TreeMetrics {
   }
 
   /**
-   * Takes the first sentence of the doc comment on the exported class or interface. A file
+   * Takes the first sentence of the doc comment on the exported class, interface or type. A file
    * without one, such as an entry point, may use its first block of line comments instead. A
    * file with neither is an error: give it a doc comment.
    */
