@@ -7,7 +7,7 @@ import type { DirectoryListing } from './DirectoryListing.ts';
 export class DirProvider implements CommandProvider {
   readonly name = 'dir';
   readonly syntax = '';
-  readonly description = 'list the files and folders in the working directory';
+  readonly description = 'list the working directory';
   readonly #listing: DirectoryListing;
 
   constructor(listing: DirectoryListing) {
