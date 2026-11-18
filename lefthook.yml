@@ -3,7 +3,7 @@ pre-commit:
   jobs:
     - name: format
       glob: '*.{ts,json,jsonc,md,yml,yaml}'
-      run: bunx oxfmt --check {staged_files}
+      run: bunx oxfmt --check --no-error-on-unmatched-pattern {staged_files}
     - name: lint
       glob: '*.ts'
       run: bunx oxlint --type-aware --deny-warnings {staged_files}
