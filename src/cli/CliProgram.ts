@@ -83,6 +83,7 @@ export class CliProgram {
     const context: CommandContext = {
       workspace: this.#workspace,
       executor: this.#executor,
+      decorators: () => this.#extensions.decorators.values(),
       help: () => this.#help(),
     };
     for (const provider of this.#extensions.commands.values()) {

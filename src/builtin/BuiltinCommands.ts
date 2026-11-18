@@ -18,6 +18,7 @@ import { ScaleCommand } from '#command/ScaleCommand.ts';
 import { SetCommand } from '#command/SetCommand.ts';
 import { ShowCommand } from '#command/ShowCommand.ts';
 import { TreeCommand } from '#command/TreeCommand.ts';
+import { TreeRenderer } from '#command/TreeRenderer.ts';
 import { UndoCommand } from '#command/UndoCommand.ts';
 import { UngroupCommand } from '#command/UngroupCommand.ts';
 import { Decimal } from '#domain/Decimal.ts';
@@ -136,7 +137,8 @@ export class BuiltinCommands {
       'tree',
       '[id]',
       'structure tree of the document or one shape',
-      ([id], { workspace }) => new TreeCommand(workspace, id),
+      ([id], context) =>
+        new TreeCommand(context.workspace, new TreeRenderer(context.decorators()), id),
     ),
     new BuiltinCommandProvider(
       'show',

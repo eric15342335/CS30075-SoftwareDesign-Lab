@@ -16,6 +16,6 @@ export class InitCommand extends DocumentCommand {
 
   override execute(): string[] {
     const document = this.#workspace.init(this.#width, this.#height);
-    return [`canvas ${document.canvas.size()} created`];
+    return [`canvas ${document.canvas.size()} created`, ...this.#workspace.observerErrors()];
   }
 }

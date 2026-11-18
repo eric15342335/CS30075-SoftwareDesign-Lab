@@ -15,6 +15,7 @@ export class SaveCommand extends DocumentCommand {
   override execute(): string[] {
     const path = this.#workspace.save(this.#path);
     const count = this.#workspace.document().count();
-    return [`saved to ${path} (${count} ${count === 1 ? 'element' : 'elements'})`];
+    const saved = `saved to ${path} (${count} ${count === 1 ? 'element' : 'elements'})`;
+    return [saved, ...this.#workspace.observerErrors()];
   }
 }

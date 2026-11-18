@@ -15,6 +15,7 @@ export class ReadCommand extends DocumentCommand {
   override execute(): string[] {
     const warnings = this.#workspace.read(this.#path).map((warning) => `warning: ${warning}`);
     const count = this.#workspace.document().count();
-    return [...warnings, `read ${this.#path} (${count} ${count === 1 ? 'element' : 'elements'})`];
+    const read = `read ${this.#path} (${count} ${count === 1 ? 'element' : 'elements'})`;
+    return [...warnings, read, ...this.#workspace.observerErrors()];
   }
 }

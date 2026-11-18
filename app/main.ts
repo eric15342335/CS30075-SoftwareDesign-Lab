@@ -12,7 +12,7 @@ const extensions = new Extensions();
 new BuiltinShapes().register(extensions.catalog);
 new BuiltinCommands().register(extensions.commands);
 const program = new CliProgram(
-  new Workspace(extensions.catalog),
+  new Workspace(extensions.catalog, extensions.observers()),
   new CommandExecutor(),
   extensions,
 );
