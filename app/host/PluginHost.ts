@@ -70,7 +70,12 @@ export class PluginHost {
   static #activate(Type: unknown, context: StagedContext, name: string): void {
     try {
       if (!PluginHost.#isClass(Type)) throw new TypeError('the default export is not a class');
-      new Type().activate(context);
+      const result: unknown = new Type().activate(context);
+      if (result instanceof Promise) {
+        // The host cannot wait for an async activate inside its rollback, so it refuses one.
+        result.catch(() => {});
+        throw new TypeError('activate must be synchronous');
+      }
     } catch (error) {
       throw new EditorError(`plugin failed to activate: ${name} (${PluginHost.#reason(error)})`);
     }

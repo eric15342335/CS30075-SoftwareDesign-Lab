@@ -186,3 +186,41 @@ test('the context gives the options and closes after the install, also after a f
     expect(() => context.addShape(dot)).toThrow('the plugin context is closed');
   }
 });
+
+test.each(['move extra', '', '-x'])(
+  'a command name such as %j, which the CLI cannot read as one word, makes activate fail',
+  async (name) => {
+    const extensions = Session.extensions();
+    const error = await new PluginHost(extensions).install(
+      source('c', { commands: [name] }, (context) => context.addCommand(new EchoProvider(name))),
+    );
+    expect(error).toBe(`plugin failed to activate: c (invalid command name: "${name}")`);
+  },
+);
+
+test('an async activate is refused, and what it registered before or after the await stays out', async () => {
+  const extensions = Session.extensions();
+  const before = registered(extensions);
+  const error = await new PluginHost(extensions).install(
+    source('slow', { decorators: ['early', 'late'] }, async (context) => {
+      context.addDecorator(new FixedDecorator('early', () => '1'));
+      await Promise.resolve();
+      context.addDecorator(new FixedDecorator('late', () => '2'));
+    }),
+  );
+  expect(error).toBe('plugin failed to activate: slow (activate must be synchronous)');
+  await Promise.resolve();
+  expect(registered(extensions)).toEqual(before);
+});
+
+test('the manifest check compares names, not joined text', async () => {
+  const error = await new PluginHost(Session.extensions()).install(
+    source('m', { decorators: ['a,decorators/b'] }, (context) => {
+      context.addDecorator(new FixedDecorator('a', () => 'a'));
+      context.addDecorator(new FixedDecorator('b', () => 'b'));
+    }),
+  );
+  expect(error).toBe(
+    'plugin manifest mismatch: m (declared: decorators/a,decorators/b, registered: decorators/a, decorators/b)',
+  );
+});

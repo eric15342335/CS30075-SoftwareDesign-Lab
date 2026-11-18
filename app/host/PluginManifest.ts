@@ -46,7 +46,10 @@ export class PluginManifest {
   /** Throws when the plugin registered other extensions than the manifest declares. */
   verify(registered: string[]): void {
     const sorted = registered.toSorted();
-    if (sorted.join() === this.#declared.join()) return;
+    const same =
+      sorted.length === this.#declared.length &&
+      sorted.every((key, index) => key === this.#declared[index]);
+    if (same) return;
     const declared = PluginManifest.#list(this.#declared);
     throw new EditorError(
       `plugin manifest mismatch: ${this.name} (declared: ${declared}, registered: ${PluginManifest.#list(sorted)})`,

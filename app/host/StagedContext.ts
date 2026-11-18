@@ -14,6 +14,7 @@ import { StagedBatch } from '#host/StagedBatch.ts';
  * commit or `close`, the context refuses every registration.
  */
 export class StagedContext implements PluginContext {
+  static readonly #word = /^[^\s-]\S*$/;
   readonly options: Readonly<Record<string, unknown>>;
   readonly #shapes: StagedBatch<ShapeProvider>;
   readonly #commands: StagedBatch<CommandProvider>;
@@ -36,6 +37,10 @@ export class StagedContext implements PluginContext {
   }
 
   addCommand(provider: CommandProvider): void {
+    // The CLI reads the first word of a line as the command, so a name must be one such word.
+    if (!StagedContext.#word.test(provider.name)) {
+      throw new EditorError(`invalid command name: "${provider.name}"`);
+    }
     this.#stage(this.#commands, provider);
   }
 
