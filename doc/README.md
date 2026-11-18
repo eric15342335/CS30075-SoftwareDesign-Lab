@@ -176,13 +176,24 @@ scripts/            度量脚本和基线脚本
 
 ### 1.7 重构前后的模块依赖图
 
-下面两张图用 PlantUML 写成。箭头表示"导入"。重构后的规则由 oxlint 的 `no-restricted-imports` 检查，`test/lint/ModuleRules.test.ts` 为每条规则放了一个违规的探针文件，证明规则确实生效。
+箭头表示"导入"。重构后的规则由 oxlint 的 `no-restricted-imports` 检查。`test/lint/ModuleRules.test.ts` 为每个模块写一个探针文件，同时导入允许和禁止的模块，检查 oxlint 只报告禁止的那些。
+
+两张图用 PlantUML 写成，源码折叠在图下。图片用官方 Docker 镜像在本地离线生成：
+
+```sh
+docker run --rm --network none -v "<目录>:/data" -v "C:/Windows/Fonts/msyh.ttc:/usr/share/fonts/truetype/msyh/msyh.ttc:ro" plantuml/plantuml -tpng -charset UTF-8 "-SdefaultFontName=Microsoft YaHei" -Sdpi=150 /data/phase1-modules.puml /data/phase2-modules.puml
+```
 
 重构前（tag `final`，Phase 1）：
+
+![Phase 1 的模块依赖](images/phase1-modules.png)
+
+<details><summary>PlantUML 源码</summary>
 
 ```plantuml
 @startuml phase1-modules
 skinparam componentStyle rectangle
+skinparam linetype ortho
 package "src" {
   [main.ts] as main
   [cli] as cli
@@ -204,59 +215,64 @@ end note
 @enduml
 ```
 
+</details>
+
 重构后（tag `p2`）：
+
+![Phase 2 的模块依赖](images/phase2-modules.png)
+
+<details><summary>PlantUML 源码</summary>
 
 ```plantuml
 @startuml phase2-modules
 skinparam componentStyle rectangle
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 50
 package "app（装配处）" {
   [main.ts] as main
   [host] as host
 }
-package "src（内核）" {
-  [cli] as cli
-  [command] as command
-  [io] as io
-  [domain] as domain
-  [builtin] as builtin
-  [api] as api
-}
-package "plugins（插件）" {
+package "plugins（插件）" as plugins {
   [command-stats] as stats
   [command-dir] as dir
   [shape-box] as box
   [tree-star] as star
 }
+package "src（内核）" {
+  [builtin] as builtin
+  [cli] as cli
+  [api] as api
+  [command] as command
+  [io] as io
+  [domain] as domain
+}
 main --> host
+main ..> plugins : 方式 A：import()
 main --> cli
 main --> builtin
 main --> command
-main ..> stats : 方式 A：import()
-main ..> dir
-main ..> box
-main ..> star
 host --> api
 host --> command
 host --> domain
+plugins --> api
 cli --> command
 cli --> domain
-command --> io
-command --> domain
-io --> domain
 builtin --> command
 builtin --> domain
 api --> command
 api --> domain
-stats --> api
-dir --> api
-box --> api
-star --> api
-note bottom of host
+command --> io
+command --> domain
+io --> domain
+note right of host
   方式 B：PluginLoader 按配置文件里的
   字符串解析模块，没有具体插件的名字
 end note
 @enduml
 ```
+
+</details>
 
 主要变化：
 
