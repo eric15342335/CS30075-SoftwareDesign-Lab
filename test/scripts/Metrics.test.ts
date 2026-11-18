@@ -29,7 +29,7 @@ test('the role map sorts files by directory, and a reviewed override wins for it
   expect(roles.role('plugins/stats/src/index.ts')).toBe('plugins');
   expect(roles.role('plugins/stats/test/Stats.test.ts')).toBe('tests');
   expect(roles.role('vscode-extension/src/SvgOutline.ts')).toBe('vscode');
-  expect(roles.role('vscode-extension/integration/Badge.itest.ts')).toBe('tests');
+  expect(roles.role('vscode-extension/integration/Badge.itest.ts')).toBe('vscode');
   expect(roles.role('scripts/metrics.ts')).toBe('scripts');
   expect(new RoleMap('final').role('src/main.ts')).toBe('assembly');
   expect(() => roles.role('setup.ts')).toThrow('unclassified file: setup.ts');

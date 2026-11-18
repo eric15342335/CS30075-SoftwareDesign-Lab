@@ -7,11 +7,12 @@ import type { Role } from '#scripts/metrics/Role.ts';
  */
 export class RoleMap {
   static readonly #rules: [RegExp, Role][] = [
+    // The spec counts the VS Code extension apart from the CLI, its tests included.
+    [/^vscode-extension\//, 'vscode'],
     [/(?:^|\/)(?:test|integration)\/|\.i?test\.ts$/, 'tests'],
     [/^src\//, 'kernel'],
     [/^app\//, 'assembly'],
     [/^plugins\/[^/]+\/src\//, 'plugins'],
-    [/^vscode-extension\/src\//, 'vscode'],
     [/^scripts\//, 'scripts'],
   ];
   /** Files whose category differs from what the directory says, for each git ref. */
