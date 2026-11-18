@@ -1,0 +1,28 @@
+{
+  "name": "svg-badge-outline",
+  "displayName": "SVG Badge and Outline",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CS30075 Lab1 Phase 2, part 1: a [] badge on .svg files and an outline of the SVG element tree",
+  "categories": [
+    "Other"
+  ],
+  "license": "UNLICENSED",
+  "publisher": "cs30075",
+  "main": "./dist/extension.js",
+  "imports": {
+    "#ext/*": "./src/*"
+  },
+  "scripts": {
+    "build": "bun build src/extension.ts --target node --format cjs --external vscode --outfile dist/extension.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "~1.100.0"
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "engines": {
+    "vscode": "^1.100.0"
+  }
+}

@@ -6,3 +6,8 @@ reports/
 
 # files written by manual CLI sessions in the repo root
 /*.svg
+
+# build output and the VS Code download of the extension tests
+vscode-extension/dist/
+vscode-extension/out/
+vscode-extension/.vscode-test/
