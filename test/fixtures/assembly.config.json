@@ -1,3 +1,7 @@
 {
-  "plugins": [{ "module": "@svgframe/plugin-stats" }, { "module": "@svgframe/plugin-dir" }]
+  "plugins": [
+    { "module": "@svgframe/plugin-stats" },
+    { "module": "@svgframe/plugin-dir" },
+    { "module": "@svgframe/plugin-shape-box" }
+  ]
 }
