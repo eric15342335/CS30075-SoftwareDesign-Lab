@@ -6,13 +6,14 @@ import { join } from 'node:path';
 import { EditorError } from '#domain/EditorError.ts';
 import { SvgReader } from '#io/SvgReader.ts';
 import { SvgWriter } from '#io/SvgWriter.ts';
+import { Session } from '#test/support/Session.ts';
 
 const fixtures = join(import.meta.dir, '..', 'fixtures');
 const dir = mkdtempSync(join(tmpdir(), 'svg-reader-'));
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
 test('reading the spec file other.svg assigns rect1 with the spec warning', () => {
-  const reader = new SvgReader();
+  const reader = new SvgReader(Session.catalog());
   const document = reader.read(join(fixtures, 'other.svg'));
   expect(reader.warnings()).toEqual(['assigned id rect1 to unnamed <rect>']);
   expect(document.ids()).toEqual(['rect1', 't1', 'c1', 'g1', 'r2', 'c2', 'e1']);
@@ -24,14 +25,14 @@ test.each(['sample.svg', 'demo.svg', 'flowchart.svg'])(
   '%s, which uses the editor format, reads back and writes out byte for byte',
   (name) => {
     const text = readFileSync(join(fixtures, name), 'utf8');
-    const reader = new SvgReader();
+    const reader = new SvgReader(Session.catalog());
     expect(new SvgWriter().serialize(reader.parse(text))).toBe(text);
     expect(reader.warnings()).toEqual([]);
   },
 );
 
 test('the nested sample from the spec keeps transform and the other attributes, and the comments are dropped', () => {
-  const reader = new SvgReader();
+  const reader = new SvgReader(Session.catalog());
   const document = reader.read(join(fixtures, 'nested.svg'));
   expect(reader.warnings()).toEqual([
     'assigned id rect1 to unnamed <rect>',
@@ -56,7 +57,7 @@ test('the nested sample from the spec keeps transform and the other attributes, 
 });
 
 test('a missing or duplicate id becomes the tag plus a number, and never an id that appears later', () => {
-  const reader = new SvgReader();
+  const reader = new SvgReader(Session.catalog());
   const document = reader.parse(
     [
       '<svg width="10" height="10">',
@@ -76,7 +77,7 @@ test('a missing or duplicate id becomes the tag plus a number, and never an id t
 });
 
 test('unnamed elements of one type get numbers in order, and a reused reader starts counting again', () => {
-  const reader = new SvgReader();
+  const reader = new SvgReader(Session.catalog());
   const text =
     '<svg width="10" height="10"><g><rect width="1" height="1"/><rect width="1" height="1"/></g></svg>';
   const warnings = [
@@ -91,7 +92,7 @@ test('unnamed elements of one type get numbers in order, and a reused reader sta
 });
 
 test('the canvas size comes from width and height, or else from the size part of viewBox', () => {
-  const reader = new SvgReader();
+  const reader = new SvgReader(Session.catalog());
   expect(reader.parse('<svg viewBox=" 0,0  30,20 "/>').canvas.size()).toBe('30x20');
   expect(reader.parse('<svg width="50" viewBox="0 0 30 20"/>').canvas.size()).toBe('50x20');
   expect(() => reader.parse('<svg width="50"/>')).toThrow('<svg> has no width and height');
@@ -99,7 +100,7 @@ test('the canvas size comes from width and height, or else from the size part of
 });
 
 test('the reader skips the elements that it cannot use, with one warning for each', () => {
-  const reader = new SvgReader();
+  const reader = new SvgReader(Session.catalog());
   const document = reader.parse(
     [
       '<svg viewBox="0 0 300 200">',
@@ -126,7 +127,7 @@ test('the reader skips the elements that it cannot use, with one warning for eac
 });
 
 test('the root keeps unknown attributes, and a byte order mark and text with only digits are accepted', () => {
-  const reader = new SvgReader();
+  const reader = new SvgReader(Session.catalog());
   const bom = String.fromCodePoint(0xfeff);
   const document = reader.parse(
     `${bom}<svg version="1.1" viewBox="0 0 30 20" fill="none"><text id="t">007</text></svg>`,
@@ -138,7 +139,7 @@ test('the root keeps unknown attributes, and a byte order mark and text with onl
 });
 
 test('text that is not usable SVG is rejected', () => {
-  const reader = new SvgReader();
+  const reader = new SvgReader(Session.catalog());
   expect(() => reader.parse('<svg><g></svg>')).toThrow(
     new EditorError(
       "line 1: Expected closing tag 'g' (opened in line 1, col 6) instead of closing tag 'svg'",
@@ -150,7 +151,7 @@ test('text that is not usable SVG is rejected', () => {
 });
 
 test('read names the file in its errors', () => {
-  const reader = new SvgReader();
+  const reader = new SvgReader(Session.catalog());
   const missing = join(dir, 'missing.svg');
   expect(() => reader.read(missing)).toThrow(new EditorError(`cannot read file: ${missing}`));
   const broken = join(dir, 'broken.svg');

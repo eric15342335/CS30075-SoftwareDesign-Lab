@@ -1,5 +1,6 @@
 import { AttributeMemento } from '#domain/AttributeMemento.ts';
 import type { Canvas } from '#domain/Canvas.ts';
+import type { Catalog } from '#domain/Catalog.ts';
 import type { Decimal } from '#domain/Decimal.ts';
 import { EditorError } from '#domain/EditorError.ts';
 import { Group } from '#domain/Group.ts';
@@ -7,7 +8,6 @@ import { Journal } from '#domain/Journal.ts';
 import type { Memento } from '#domain/Memento.ts';
 import { Placement } from '#domain/Placement.ts';
 import type { Shape } from '#domain/Shape.ts';
-import { ShapeFactory } from '#domain/ShapeFactory.ts';
 
 /**
  * SvgDocument is the receiver of every edit command. It validates each request, raises the error
@@ -17,10 +17,11 @@ import { ShapeFactory } from '#domain/ShapeFactory.ts';
 export class SvgDocument {
   static readonly #idPattern = /^\S+$/;
   readonly #canvas: Canvas;
-  readonly #factory = new ShapeFactory();
+  readonly #catalog: Catalog;
 
-  constructor(canvas: Canvas) {
+  constructor(canvas: Canvas, catalog: Catalog) {
     this.#canvas = canvas;
+    this.#catalog = catalog;
   }
 
   get canvas(): Canvas {
@@ -46,7 +47,7 @@ export class SvgDocument {
   }
 
   create(type: string, id: string, args: readonly string[], containerId?: string): Placement {
-    const shape = this.#factory.create(type, id);
+    const shape = this.#catalog.createShape(type, id);
     this.#claim(id);
     const parent = containerId === undefined ? this.#canvas : this.#container(containerId);
     this.#configure(shape, args);

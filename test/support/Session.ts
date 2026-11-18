@@ -1,3 +1,4 @@
+import { BuiltinShapes } from '#builtin/BuiltinShapes.ts';
 import type { Command } from '#command/Command.ts';
 import { CommandExecutor } from '#command/CommandExecutor.ts';
 import { CreateCommand } from '#command/CreateCommand.ts';
@@ -5,12 +6,20 @@ import { InitCommand } from '#command/InitCommand.ts';
 import { RedoCommand } from '#command/RedoCommand.ts';
 import { UndoCommand } from '#command/UndoCommand.ts';
 import { Workspace } from '#command/Workspace.ts';
+import { Catalog } from '#domain/Catalog.ts';
 import type { SvgDocument } from '#domain/SvgDocument.ts';
 
 /** A workspace and an executor, wired the same way as in the CLI, for the command tests. */
 export class Session {
-  readonly workspace = new Workspace();
+  readonly workspace = new Workspace(Session.catalog());
   readonly executor = new CommandExecutor();
+
+  /** Returns a new catalog with the six built-in shape types, like the one the CLI starts with. */
+  static catalog(): Catalog {
+    const catalog = new Catalog();
+    new BuiltinShapes().register(catalog);
+    return catalog;
+  }
 
   /**
    * Returns a session with the document from section 6 of the spec, just before

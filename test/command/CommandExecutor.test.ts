@@ -8,10 +8,11 @@ import { RedoCommand } from '#command/RedoCommand.ts';
 import { UndoCommand } from '#command/UndoCommand.ts';
 import { Workspace } from '#command/Workspace.ts';
 import { Decimal } from '#domain/Decimal.ts';
+import { Session } from '#test/support/Session.ts';
 
 /** Creates a workspace and an executor, wired the same way as in the CLI. */
 function editor() {
-  const workspace = new Workspace();
+  const workspace = new Workspace(Session.catalog());
   const executor = new CommandExecutor();
   const run = (command: Command): string[] => executor.execute(command);
   return {

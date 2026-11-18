@@ -1,4 +1,5 @@
 import { Canvas } from '#domain/Canvas.ts';
+import type { Catalog } from '#domain/Catalog.ts';
 import { Decimal } from '#domain/Decimal.ts';
 import { EditorError } from '#domain/EditorError.ts';
 import { SvgDocument } from '#domain/SvgDocument.ts';
@@ -13,11 +14,17 @@ import { SvgWriter } from '#io/SvgWriter.ts';
 // When a second storage format or a test double becomes necessary, define a store interface here
 // and implement it in io.
 export class Workspace {
-  readonly #reader = new SvgReader();
+  readonly #catalog: Catalog;
+  readonly #reader: SvgReader;
   readonly #writer = new SvgWriter();
   #document: SvgDocument | null = null;
   /** The file that `save` writes to when it gets no file name: the last file read or saved. */
   #path: string | null = null;
+
+  constructor(catalog: Catalog) {
+    this.#catalog = catalog;
+    this.#reader = new SvgReader(catalog);
+  }
 
   document(): SvgDocument {
     if (this.#document === null) throw new EditorError("no document. use 'init' or 'read' first");
@@ -30,7 +37,7 @@ export class Workspace {
   }
 
   init(width = new Decimal(800), height = new Decimal(600)): SvgDocument {
-    this.#document = new SvgDocument(new Canvas(width, height));
+    this.#document = new SvgDocument(new Canvas(width, height), this.#catalog);
     this.#path = null;
     return this.#document;
   }

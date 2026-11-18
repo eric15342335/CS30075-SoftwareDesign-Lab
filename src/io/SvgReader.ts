@@ -4,10 +4,10 @@ import { XMLParser } from 'fast-xml-parser';
 import { SyntaxValidator } from 'fast-xml-validator';
 
 import { Canvas } from '#domain/Canvas.ts';
+import type { Catalog } from '#domain/Catalog.ts';
 import { Decimal } from '#domain/Decimal.ts';
 import { EditorError } from '#domain/EditorError.ts';
 import type { Shape } from '#domain/Shape.ts';
-import { ShapeFactory } from '#domain/ShapeFactory.ts';
 import { SvgDocument } from '#domain/SvgDocument.ts';
 
 /**
@@ -32,12 +32,16 @@ export class SvgReader {
   });
   /** The root attributes that the canvas writes by itself. */
   static readonly #canvasOwned = new Set(['xmlns', 'width', 'height', 'viewBox']);
-  readonly #factory = new ShapeFactory();
+  readonly #catalog: Catalog;
   /** Every id in the file. With this set, an assigned id never takes an id that appears later. */
   #written = new Set<string>();
   /** The ids that the reader has given to shapes so far. */
   readonly #given = new Set<string>();
   readonly #warnings: string[] = [];
+
+  constructor(catalog: Catalog) {
+    this.#catalog = catalog;
+  }
 
   /** Reads the file at path. Throws an EditorError when the file is missing or is not usable SVG. */
   read(path: string): SvgDocument {
@@ -65,7 +69,7 @@ export class SvgReader {
     }
     this.#written = new Set(this.#ids(nodes));
     this.#fill(canvas, this.#children(root));
-    return new SvgDocument(canvas);
+    return new SvgDocument(canvas, this.#catalog);
   }
 
   /**
@@ -131,13 +135,14 @@ export class SvgReader {
   /** Turns one element into a shape, or returns null with a warning when the element is unusable. */
   #shape(tag: string, node: XmlNode): Shape | null {
     const attributes = this.#attributes(node);
-    if (!this.#factory.supports(tag)) {
+    if (!this.#catalog.reads(tag)) {
       this.#warnings.push(
         `skipped ${this.#describe(tag, attributes.get('id'))}: unsupported element`,
       );
       return null;
     }
-    const shape = this.#factory.create(tag, this.#id(tag, attributes.get('id')));
+    const id = this.#id(tag, attributes.get('id'));
+    const shape = this.#catalog.readShape(tag, attributes.get('data-kind'), id);
     try {
       for (const [name, value] of attributes) {
         if (name !== 'id') shape.loadAttribute(name, value);

@@ -203,6 +203,38 @@
       }
     },
     {
+      "files": ["src/builtin/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "regex": "^\\.\\./",
+                "message": "Imports must use the #domain/ #command/ #io/ #cli/ #builtin/ #api/ aliases, or @svgframe/api in a plugin."
+              },
+              {
+                "regex": "^#host/",
+                "message": "The kernel must not depend on the assembly code in app/."
+              },
+              {
+                "regex": "^@svgframe/",
+                "message": "The kernel must not depend on plugins or on the plugin API package name."
+              },
+              {
+                "regex": "^#(cli|io|api)/",
+                "message": "builtin may only depend on domain and command."
+              },
+              {
+                "regex": "^(node:|bun(:|$)|commander$|@commander-js/|fast-xml-)",
+                "message": "builtin uses no libraries."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
       "files": ["plugins/**/*.ts", "test/fixtures/plugins/**/*.ts"],
       "rules": {
         "no-restricted-imports": [

@@ -5,6 +5,7 @@ import { Decimal } from '#domain/Decimal.ts';
 import type { Memento } from '#domain/Memento.ts';
 import type { Shape } from '#domain/Shape.ts';
 import { SvgDocument } from '#domain/SvgDocument.ts';
+import { Session } from '#test/support/Session.ts';
 
 const n = (value: number): Decimal => new Decimal(value);
 
@@ -14,7 +15,7 @@ function outline(shape: Shape, depth = 0): string[] {
 }
 
 function empty(): SvgDocument {
-  return new SvgDocument(new Canvas(n(800), n(600)));
+  return new SvgDocument(new Canvas(n(800), n(600)), Session.catalog());
 }
 
 /** The document from section 6 of the spec, right after `group markers c1 box`. */

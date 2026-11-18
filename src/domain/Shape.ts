@@ -40,7 +40,18 @@ export abstract class Shape {
     return this.#parent;
   }
 
+  /** The type name. It equals the tag name, except for a shape type that a plugin adds on a tag. */
+  get type(): string {
+    return this.tag;
+  }
+
+  /** Returns the type and the id, such as `rect#r1` or `box#n1`. Feedback and `show` use it. */
   label(): string {
+    return `${this.type}#${this.#id}`;
+  }
+
+  /** Returns the tag name and the id, such as `g#n1`. The rows of `tree` use it. */
+  elementLabel(): string {
     return `${this.tag}#${this.#id}`;
   }
 
@@ -59,7 +70,7 @@ export abstract class Shape {
     const { required, optional } = this.createSignature();
     const params = required.map((name) => `<${name}>`);
     if (optional !== undefined) params.push(`[${optional}]`);
-    return ['create', this.tag, '<id>', ...params, '[in <containerId>]'].join(' ');
+    return ['create', this.type, '<id>', ...params, '[in <containerId>]'].join(' ');
   }
 
   /** Returns the summary that `tree` prints after the label: the geometry, then the fill if set. */

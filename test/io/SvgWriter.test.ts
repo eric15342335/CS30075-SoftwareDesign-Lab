@@ -43,7 +43,7 @@ test('markup characters are escaped and read back unchanged', () => {
   const text = new SvgWriter().serialize(session.document());
   expect(text).toContain('fill="url(&quot;#g&quot;)"');
   expect(text).toContain('>a &lt; b &amp; &quot;c&quot;</text>');
-  const reread = new SvgReader().parse(text);
+  const reread = new SvgReader(Session.catalog()).parse(text);
   expect(reread.find('title').textContent()).toBe('a < b & "c"');
   expect(new SvgWriter().serialize(reread)).toBe(text);
 });

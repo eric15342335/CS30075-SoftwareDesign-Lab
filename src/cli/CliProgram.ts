@@ -23,9 +23,9 @@ import { TreeCommand } from '#command/TreeCommand.ts';
 import { UndoCommand } from '#command/UndoCommand.ts';
 import { UngroupCommand } from '#command/UngroupCommand.ts';
 import type { Workspace } from '#command/Workspace.ts';
+import type { Catalog } from '#domain/Catalog.ts';
 import { Decimal } from '#domain/Decimal.ts';
 import { EditorError } from '#domain/EditorError.ts';
-import { ShapeFactory } from '#domain/ShapeFactory.ts';
 
 /**
  * CliProgram is the client in the Command pattern. It parses one input line into a command object
@@ -42,13 +42,15 @@ export class CliProgram {
   static readonly #number = (value: string): Decimal => Decimal.parse(value);
   readonly #workspace: Workspace;
   readonly #executor: CommandExecutor;
+  readonly #catalog: Catalog;
   readonly #program: Program;
   /** The action of the matched command stores the new command object here. */
   #pending: Command | null = null;
 
-  constructor(workspace: Workspace, executor: CommandExecutor) {
+  constructor(workspace: Workspace, executor: CommandExecutor, catalog: Catalog) {
     this.#workspace = workspace;
     this.#executor = executor;
+    this.#catalog = catalog;
     this.#program = this.#define();
   }
 
@@ -225,7 +227,7 @@ export class CliProgram {
       ...this.#program.helpInformation().trimEnd().split('\n'),
       '',
       'Shape types:',
-      ...new ShapeFactory().usages().map((usage) => `  ${usage}`),
+      ...this.#catalog.usages().map((usage) => `  ${usage}`),
       '',
       'Quote text that has spaces: "My Diagram". Lines starting with # are comments.',
       'Ctrl+C or Ctrl+D quits.',

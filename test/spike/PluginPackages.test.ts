@@ -8,6 +8,7 @@ import { Decimal } from '#domain/Decimal.ts';
 import { Group } from '#domain/Group.ts';
 import { SvgDocument } from '#domain/SvgDocument.ts';
 import { SvgWriter } from '#io/SvgWriter.ts';
+import { Session } from '#test/support/Session.ts';
 
 // These tests check the assumptions that the plugin host depends on, before the host exists. The
 // config file lives in the repository root, so module names resolve from there.
@@ -51,7 +52,10 @@ test('a plugin shape can be inserted into a kernel canvas, moved, restored and s
   if (typeof Spike !== 'function') throw new Error('The fixture must export a class.');
   const shape: unknown = Reflect.construct(Spike, ['s1']);
   if (!(shape instanceof Group)) throw new Error('The fixture must extend Group.');
-  const document = new SvgDocument(new Canvas(new Decimal(100), new Decimal(100)));
+  const document = new SvgDocument(
+    new Canvas(new Decimal(100), new Decimal(100)),
+    Session.catalog(),
+  );
   document.canvas.insert(shape);
   document.create('rect', 'r1', ['1', '2', '3', '4'], 's1');
   const memento = document.move('s1', new Decimal(10), new Decimal(10));

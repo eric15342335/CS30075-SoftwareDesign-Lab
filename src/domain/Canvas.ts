@@ -26,6 +26,10 @@ export class Canvas extends Group {
     return 'svg';
   }
 
+  override elementLabel(): string {
+    return 'svg';
+  }
+
   /** Returns the size as width x height, the way that `init` and `canvas` report it. */
   size(): string {
     return `${this.#width.toString()}x${this.#height.toString()}`;

@@ -7,10 +7,15 @@ import { CliProgram } from '#cli/CliProgram.ts';
 import { CommandExecutor } from '#command/CommandExecutor.ts';
 import { Workspace } from '#command/Workspace.ts';
 import { EditorError } from '#domain/EditorError.ts';
+import { Session } from '#test/support/Session.ts';
 
 /** Returns a new program that has already run the given setup lines. */
 function cli(...lines: string[]): CliProgram {
-  const program = new CliProgram(new Workspace(), new CommandExecutor());
+  const program = new CliProgram(
+    new Workspace(Session.catalog()),
+    new CommandExecutor(),
+    Session.catalog(),
+  );
   for (const line of lines) program.run(line);
   return program;
 }

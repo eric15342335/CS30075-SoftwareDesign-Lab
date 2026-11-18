@@ -24,7 +24,7 @@ export class TreeCommand extends Command {
     // starts 2 characters after the longest row (appendix A).
     const column = Math.max(...rows.map(([branch]) => branch.length)) + 2;
     return [
-      [root.label(), root.describe()].filter(Boolean).join(' '),
+      [root.elementLabel(), root.describe()].filter(Boolean).join(' '),
       ...rows.map(([branch, summary]) => (summary ? branch.padEnd(column) + summary : branch)),
     ];
   }
@@ -34,7 +34,7 @@ export class TreeCommand extends Command {
     const children = parent.children();
     for (const [index, child] of children.entries()) {
       const last = index === children.length - 1;
-      yield [`${indent}${last ? '└── ' : '├── '}${child.label()}`, child.describe()];
+      yield [`${indent}${last ? '└── ' : '├── '}${child.elementLabel()}`, child.describe()];
       yield* this.#rows(child, `${indent}${last ? '    ' : '│   '}`);
     }
   }

@@ -14,6 +14,7 @@
     "#command/*": "./src/command/*",
     "#io/*": "./src/io/*",
     "#cli/*": "./src/cli/*",
+    "#builtin/*": "./src/builtin/*",
     "#api/*": "./src/api/*",
     "#test/*": "./test/*"
   },
