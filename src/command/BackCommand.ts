@@ -2,6 +2,7 @@ import { EditCommand } from '#command/EditCommand.ts';
 import type { Workspace } from '#command/Workspace.ts';
 import type { Memento } from '#domain/Memento.ts';
 
+/** BackCommand paints a shape below its siblings. Undo puts it back where it was. */
 export class BackCommand extends EditCommand {
   readonly #workspace: Workspace;
   readonly #id: string;

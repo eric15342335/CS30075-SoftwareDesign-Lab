@@ -2,6 +2,7 @@ import { EditCommand } from '#command/EditCommand.ts';
 import type { Workspace } from '#command/Workspace.ts';
 import type { Memento } from '#domain/Memento.ts';
 
+/** CreateCommand creates a shape, optionally inside a container. Undo removes it again. */
 export class CreateCommand extends EditCommand {
   readonly #workspace: Workspace;
   readonly #type: string;

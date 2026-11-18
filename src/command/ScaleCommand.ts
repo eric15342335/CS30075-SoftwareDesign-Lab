@@ -3,6 +3,7 @@ import type { Workspace } from '#command/Workspace.ts';
 import type { Decimal } from '#domain/Decimal.ts';
 import type { Memento } from '#domain/Memento.ts';
 
+/** ScaleCommand multiplies the position and size of a shape. Undo restores the old geometry. */
 export class ScaleCommand extends EditCommand {
   readonly #workspace: Workspace;
   readonly #id: string;

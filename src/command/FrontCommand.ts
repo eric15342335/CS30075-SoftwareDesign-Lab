@@ -2,6 +2,7 @@ import { EditCommand } from '#command/EditCommand.ts';
 import type { Workspace } from '#command/Workspace.ts';
 import type { Memento } from '#domain/Memento.ts';
 
+/** FrontCommand paints a shape above its siblings. Undo puts it back where it was. */
 export class FrontCommand extends EditCommand {
   readonly #workspace: Workspace;
   readonly #id: string;

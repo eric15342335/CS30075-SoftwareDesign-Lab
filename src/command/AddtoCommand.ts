@@ -2,6 +2,7 @@ import { EditCommand } from '#command/EditCommand.ts';
 import type { Workspace } from '#command/Workspace.ts';
 import type { Memento } from '#domain/Memento.ts';
 
+/** AddtoCommand moves a shape to the end of a container. Undo puts it back where it was. */
 export class AddtoCommand extends EditCommand {
   readonly #workspace: Workspace;
   readonly #groupId: string;

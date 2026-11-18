@@ -2,6 +2,7 @@ import { Command } from '#command/Command.ts';
 import type { CommandExecutor } from '#command/CommandExecutor.ts';
 import type { Workspace } from '#command/Workspace.ts';
 
+/** RedoCommand runs the last undone edit again. */
 export class RedoCommand extends Command {
   readonly #workspace: Workspace;
   readonly #executor: CommandExecutor;

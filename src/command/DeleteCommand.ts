@@ -2,6 +2,7 @@ import { EditCommand } from '#command/EditCommand.ts';
 import type { Workspace } from '#command/Workspace.ts';
 import type { Memento } from '#domain/Memento.ts';
 
+/** DeleteCommand removes a shape and everything inside it. Undo puts it back where it was. */
 export class DeleteCommand extends EditCommand {
   readonly #workspace: Workspace;
   readonly #id: string;

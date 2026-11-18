@@ -1,6 +1,7 @@
 import { Leaf } from '#domain/Leaf.ts';
 import type { CreateSignature } from '#domain/Shape.ts';
 
+/** A line from (x1, y1) to (x2, y2). */
 export class Line extends Leaf {
   override readonly tag = 'line';
 

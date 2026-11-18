@@ -2,6 +2,7 @@ import { EditCommand } from '#command/EditCommand.ts';
 import type { Workspace } from '#command/Workspace.ts';
 import type { Memento } from '#domain/Memento.ts';
 
+/** UngroupCommand dissolves a container into its parent. Undo builds the container again. */
 export class UngroupCommand extends EditCommand {
   readonly #workspace: Workspace;
   readonly #id: string;

@@ -2,6 +2,7 @@ import { Command } from '#command/Command.ts';
 import type { CommandExecutor } from '#command/CommandExecutor.ts';
 import type { Workspace } from '#command/Workspace.ts';
 
+/** UndoCommand reverts the last edit. */
 export class UndoCommand extends Command {
   readonly #workspace: Workspace;
   readonly #executor: CommandExecutor;

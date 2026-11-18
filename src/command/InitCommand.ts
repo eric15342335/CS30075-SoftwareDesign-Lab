@@ -2,6 +2,7 @@ import { DocumentCommand } from '#command/DocumentCommand.ts';
 import type { Workspace } from '#command/Workspace.ts';
 import type { Decimal } from '#domain/Decimal.ts';
 
+/** InitCommand starts a new empty document with a canvas of the given size. */
 export class InitCommand extends DocumentCommand {
   readonly #workspace: Workspace;
   readonly #width: Decimal | undefined;

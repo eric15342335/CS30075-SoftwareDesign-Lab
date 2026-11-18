@@ -1,5 +1,6 @@
 import { Leaf } from '#domain/Leaf.ts';
 
+/** A rectangle with a corner (x, y), a width and a height. */
 export class Rect extends Leaf {
   override readonly tag = 'rect';
 

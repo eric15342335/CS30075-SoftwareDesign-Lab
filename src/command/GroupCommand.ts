@@ -2,6 +2,7 @@ import { EditCommand } from '#command/EditCommand.ts';
 import type { Workspace } from '#command/Workspace.ts';
 import type { Memento } from '#domain/Memento.ts';
 
+/** GroupCommand puts shapes into a new container. Undo dissolves the container again. */
 export class GroupCommand extends EditCommand {
   readonly #workspace: Workspace;
   readonly #id: string;
