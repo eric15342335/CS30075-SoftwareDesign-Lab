@@ -129,6 +129,8 @@ export class SvgReader {
       if (shape === null) continue;
       group.insert(shape);
       this.#fill(shape, this.#children(node));
+      // The children are in place now, so a composite shape can check its parts.
+      shape.loaded();
     }
   }
 

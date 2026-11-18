@@ -50,7 +50,9 @@ export class SvgDocument {
     const shape = this.#catalog.createShape(type, id);
     this.#claim(id);
     const parent = containerId === undefined ? this.#canvas : this.#container(containerId);
-    this.#configure(shape, args);
+    shape.configure(args, this.#catalog);
+    // A composite shape built parts in configure(). Their ids must be free as well.
+    for (const part of shape.walk().drop(1)) this.#claim(part.id, shape);
     const placement = new Placement(shape);
     parent.insert(shape);
     return placement;
@@ -58,6 +60,7 @@ export class SvgDocument {
 
   delete(id: string): Placement {
     const shape = this.find(id);
+    this.#detachable(shape);
     const placement = new Placement(shape);
     shape.parent?.remove(shape);
     return placement;
@@ -91,6 +94,7 @@ export class SvgDocument {
     this.#claim(id);
     const chosen = new Set(memberIds.map((memberId) => this.find(memberId)));
     for (const member of chosen) {
+      this.#detachable(member);
       if (
         member
           .walk()
@@ -119,6 +123,7 @@ export class SvgDocument {
   ungroup(id: string): Journal {
     const container = this.find(id).asGroup();
     if (container === null) throw new EditorError(`not a container: ${id}`);
+    if (!container.dissolvable()) throw new EditorError(`cannot ungroup composite shape: ${id}`);
     if (container.parent === this.#canvas) {
       throw new EditorError(`cannot ungroup top-level container: ${id}`);
     }
@@ -135,6 +140,7 @@ export class SvgDocument {
   addto(groupId: string, id: string): Placement {
     const group = this.#container(groupId);
     const shape = this.find(id);
+    this.#detachable(shape);
     if (shape.walk().some((inner) => inner === group)) {
       throw new EditorError(`cannot group a container into its own descendant: ${id}`);
     }
@@ -175,20 +181,23 @@ export class SvgDocument {
     return group;
   }
 
-  #claim(id: string): void {
+  /**
+   * Checks that an id is valid and free. The canvas may keep an id from a file, and the new shape
+   * itself is not in the document yet, so its parts are checked against it too.
+   */
+  #claim(id: string, building?: Shape): void {
     if (!SvgDocument.#idPattern.test(id)) throw new EditorError(`invalid id: "${id}"`);
-    if (this.#lookup(id) !== undefined) throw new EditorError(`id already exists: ${id}`);
+    const taken =
+      this.#lookup(id) !== undefined ||
+      this.#canvas.attributes().some(([name, value]) => name === 'id' && value === id) ||
+      [...(building?.walk() ?? [])].filter((shape) => shape.id === id).length > 1;
+    if (taken) throw new EditorError(`id already exists: ${id}`);
   }
 
-  #configure(shape: Shape, args: readonly string[]): void {
-    const { required, optional } = shape.createSignature();
-    const names = optional === undefined ? required : [...required, optional];
-    if (args.length < required.length || args.length > names.length) {
-      throw new EditorError(`usage: ${shape.createUsage()}`);
-    }
-    for (const [index, name] of names.entries()) {
-      const arg = args[index];
-      if (arg !== undefined) shape.setAttribute(name, arg);
+  /** A part of a composite shape must stay inside it, so delete, addto and group refuse it. */
+  #detachable(shape: Shape): void {
+    if (shape.parent?.holds(shape) === true) {
+      throw new EditorError(`cannot remove a part of a composite shape: ${shape.id}`);
     }
   }
 }

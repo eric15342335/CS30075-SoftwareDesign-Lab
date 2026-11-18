@@ -28,9 +28,16 @@ export class CreateCommand extends EditCommand {
   override execute(): string[] {
     const document = this.#workspace.document();
     this.#memento = document.create(this.#type, this.#id, this.#args, this.#containerId);
-    const label = document.find(this.#id).label();
-    if (this.#containerId === undefined) return [`${label} created`];
-    return [`${label} created in ${document.find(this.#containerId).label()}`];
+    const shape = document.find(this.#id);
+    const where =
+      this.#containerId === undefined ? '' : ` in ${document.find(this.#containerId).label()}`;
+    // A composite shape lists the elements that it made, such as (g#n1 + rect#n1-rect).
+    const parts = shape
+      .walk()
+      .map((part) => part.elementLabel())
+      .toArray();
+    const note = parts.length > 1 ? ` (${parts.join(' + ')})` : '';
+    return [`${shape.label()} created${where}${note}`];
   }
 
   override undo(): string[] {

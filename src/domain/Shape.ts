@@ -1,3 +1,4 @@
+import type { Catalog } from '#domain/Catalog.ts';
 import type { Decimal } from '#domain/Decimal.ts';
 import { EditorError } from '#domain/EditorError.ts';
 import type { Group } from '#domain/Group.ts';
@@ -64,6 +65,28 @@ export abstract class Shape {
   /** Returns the lines that `show` prints under the header. */
   abstract details(): string[];
   abstract createSignature(): CreateSignature;
+
+  /**
+   * Fills a new shape from the parameters of `create`. A composite shape overrides this method to
+   * build its parts, and it can ask the catalog for them by type name.
+   */
+  configure(args: readonly string[], _catalog: Catalog): void {
+    const { required, optional } = this.createSignature();
+    const names = optional === undefined ? required : [...required, optional];
+    if (args.length < required.length || args.length > names.length) {
+      throw new EditorError(`usage: ${this.createUsage()}`);
+    }
+    for (const [index, name] of names.entries()) {
+      const arg = args[index];
+      if (arg !== undefined) this.setAttribute(name, arg);
+    }
+  }
+
+  /**
+   * Runs after `read` has filled this shape and its children. A composite shape overrides it and
+   * throws an EditorError when a part is missing, which rejects the whole file.
+   */
+  loaded(): void {}
 
   /** Returns `create <type> <id> ...` with this shape's parameters, for `help` and argument errors. */
   createUsage(): string {

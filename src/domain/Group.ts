@@ -34,6 +34,19 @@ export class Group extends Shape {
     return index;
   }
 
+  /**
+   * Tells whether the child is a part that must stay inside this group. Plain groups have no
+   * parts. A composite shape overrides this method.
+   */
+  holds(_child: Shape): boolean {
+    return false;
+  }
+
+  /** Tells whether `ungroup` may dissolve this group. A composite shape refuses. */
+  dissolvable(): boolean {
+    return true;
+  }
+
   indexOf(child: Shape): number {
     return this.#children.indexOf(child);
   }

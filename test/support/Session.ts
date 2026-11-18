@@ -11,8 +11,12 @@ import type { SvgDocument } from '#domain/SvgDocument.ts';
 
 /** A workspace and an executor, wired the same way as in the CLI, for the command tests. */
 export class Session {
-  readonly workspace = new Workspace(Session.catalog());
+  readonly workspace: Workspace;
   readonly executor = new CommandExecutor();
+
+  constructor(catalog = Session.catalog()) {
+    this.workspace = new Workspace(catalog);
+  }
 
   /** Returns a new catalog with the six built-in shape types, like the one the CLI starts with. */
   static catalog(): Catalog {
