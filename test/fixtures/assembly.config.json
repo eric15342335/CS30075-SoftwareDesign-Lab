@@ -2,6 +2,7 @@
   "plugins": [
     { "module": "@svgframe/plugin-stats" },
     { "module": "@svgframe/plugin-dir" },
-    { "module": "@svgframe/plugin-shape-box" }
+    { "module": "@svgframe/plugin-shape-box" },
+    { "module": "@svgframe/plugin-tree-star" }
   ]
 }

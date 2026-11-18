@@ -33,6 +33,11 @@ const shipped: PluginSource[] = [
     manifest: () => import('@svgframe/plugin-shape-box/package.json', { with: { type: 'json' } }),
     load: () => import('@svgframe/plugin-shape-box'),
   },
+  {
+    module: '@svgframe/plugin-tree-star',
+    manifest: () => import('@svgframe/plugin-tree-star/package.json', { with: { type: 'json' } }),
+    load: () => import('@svgframe/plugin-tree-star'),
+  },
 ];
 const assembly = Assembly.from(process.argv.slice(2), shipped);
 const problems = [
