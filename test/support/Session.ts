@@ -1,12 +1,14 @@
+import { BuiltinCommands } from '#builtin/BuiltinCommands.ts';
 import { BuiltinShapes } from '#builtin/BuiltinShapes.ts';
 import type { Command } from '#command/Command.ts';
 import { CommandExecutor } from '#command/CommandExecutor.ts';
 import { CreateCommand } from '#command/CreateCommand.ts';
+import { Extensions } from '#command/Extensions.ts';
 import { InitCommand } from '#command/InitCommand.ts';
 import { RedoCommand } from '#command/RedoCommand.ts';
 import { UndoCommand } from '#command/UndoCommand.ts';
 import { Workspace } from '#command/Workspace.ts';
-import { Catalog } from '#domain/Catalog.ts';
+import type { Catalog } from '#domain/Catalog.ts';
 import type { SvgDocument } from '#domain/SvgDocument.ts';
 
 /** A workspace and an executor, wired the same way as in the CLI, for the command tests. */
@@ -18,11 +20,23 @@ export class Session {
     this.workspace = new Workspace(catalog);
   }
 
-  /** Returns a new catalog with the six built-in shape types, like the one the CLI starts with. */
+  /** Returns new registries with the built-in shapes and commands, like the CLI starts with. */
+  static extensions(): Extensions {
+    const extensions = new Extensions();
+    new BuiltinShapes().register(extensions.catalog);
+    new BuiltinCommands().register(extensions.commands);
+    return extensions;
+  }
+
+  /** Returns the constructor arguments of a CliProgram with the built-in extensions. */
+  static program(): [Workspace, CommandExecutor, Extensions] {
+    const extensions = Session.extensions();
+    return [new Workspace(extensions.catalog), new CommandExecutor(), extensions];
+  }
+
+  /** Returns a new catalog with the six built-in shape types. */
   static catalog(): Catalog {
-    const catalog = new Catalog();
-    new BuiltinShapes().register(catalog);
-    return catalog;
+    return Session.extensions().catalog;
   }
 
   /**

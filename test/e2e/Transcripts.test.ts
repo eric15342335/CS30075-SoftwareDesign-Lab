@@ -65,9 +65,6 @@ test('a syntax error prints one line on stdout and nothing on stderr', async () 
     new Response(child.stderr).text(),
   ]);
   expect(await child.exited).toBe(0);
-  expect(normalize(output)).toEqual([
-    'svg> mvoe c1 1 2',
-    "error: unknown command 'mvoe' (Did you mean move?)",
-  ]);
+  expect(normalize(output)).toEqual(['svg> mvoe c1 1 2', 'error: unknown command: mvoe']);
   expect(errors).toBe('');
 });

@@ -4,8 +4,6 @@ import { stripVTControlCharacters } from 'node:util';
 
 import { CliProgram } from '#cli/CliProgram.ts';
 import { Repl } from '#cli/Repl.ts';
-import { CommandExecutor } from '#command/CommandExecutor.ts';
-import { Workspace } from '#command/Workspace.ts';
 import { Session } from '#test/support/Session.ts';
 
 /** A program whose `boom` line hits a bug. The tests use it to see how the loop reports a bug. */
@@ -34,11 +32,7 @@ function recorder(terminal: boolean) {
 /** Feeds chunks of input to a Repl and returns everything that the Repl wrote. */
 async function replay(chunks: string[], terminal = false): Promise<string> {
   const { output, text } = recorder(terminal);
-  const program = new BuggyProgram(
-    new Workspace(Session.catalog()),
-    new CommandExecutor(),
-    Session.catalog(),
-  );
+  const program = new BuggyProgram(...Session.program());
   await new Repl(program, Readable.from(chunks), output).start();
   return text();
 }
@@ -81,11 +75,7 @@ test('on a terminal, the prompt comes back after each command, and the typed lin
   // This input comes at human speed: it ends only after the Repl has answered the first line.
   const input = new PassThrough();
   const { output, text } = recorder(true);
-  const program = new CliProgram(
-    new Workspace(Session.catalog()),
-    new CommandExecutor(),
-    Session.catalog(),
-  );
+  const program = new CliProgram(...Session.program());
   const session = new Repl(program, input, output).start();
   input.write('init\n');
   await new Promise((resolve) => setImmediate(resolve));

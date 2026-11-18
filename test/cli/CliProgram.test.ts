@@ -4,18 +4,13 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { CliProgram } from '#cli/CliProgram.ts';
-import { CommandExecutor } from '#command/CommandExecutor.ts';
-import { Workspace } from '#command/Workspace.ts';
 import { EditorError } from '#domain/EditorError.ts';
+import { EchoProvider } from '#test/support/EchoProvider.ts';
 import { Session } from '#test/support/Session.ts';
 
 /** Returns a new program that has already run the given setup lines. */
 function cli(...lines: string[]): CliProgram {
-  const program = new CliProgram(
-    new Workspace(Session.catalog()),
-    new CommandExecutor(),
-    Session.catalog(),
-  );
+  const program = new CliProgram(...Session.program());
   for (const line of lines) program.run(line);
   return program;
 }
@@ -103,13 +98,11 @@ test('a trailing "in <id>" names the container, and "in" anywhere else is a plai
 test('a syntax error becomes a one-line EditorError without the commander prefix', () => {
   const program = cli('init');
   expect(() => program.run('mvoe c1 1 2')).toThrow(EditorError);
-  expect(() => program.run('mvoe c1 1 2')).toThrow(
-    new EditorError("unknown command 'mvoe' (Did you mean move?)"),
-  );
+  expect(() => program.run('mvoe c1 1 2')).toThrow(new EditorError('unknown command: mvoe'));
   expect(() => program.run('move c1 1')).toThrow("missing required argument 'dy'");
   expect(() => program.run('delete a b')).toThrow("too many arguments for 'delete'");
   expect(() => program.run('move c1 1 x')).toThrow('invalid number: x');
-  expect(() => program.run('--help')).toThrow("unknown option '--help'");
+  expect(() => program.run('--help')).toThrow('unknown command: --help');
 });
 
 test('help lists every command and the create syntax of every shape type', () => {
@@ -155,4 +148,29 @@ test('completion offers command names first, then the ids in the document', () =
   expect(program.complete('un')).toEqual([['ungroup', 'undo'], 'un']);
   expect(program.complete('move b')).toEqual([['box', 'base'], 'b']);
   expect(cli().complete('show ')).toEqual([[], '']);
+});
+
+test('an empty quoted word is a value, so "" sets an empty text', () => {
+  const program = cli('init', 'create text t 1 2 old');
+  expect(program.run('set t text ""')).toEqual(['text#t updated: text=""']);
+});
+
+test('register: a second command provider with a taken name is refused', () => {
+  const extensions = Session.extensions();
+  expect(() => extensions.commands.add(new EchoProvider('move'))).toThrow(
+    'duplicate registration: commands/move',
+  );
+});
+
+test('invoke: a registered provider gets the raw words and appears in help', () => {
+  const [workspace, executor, extensions] = Session.program();
+  extensions.commands.add(new EchoProvider('echo'));
+  const program = new CliProgram(workspace, executor, extensions);
+  expect(program.run('echo -5 "two words" x')).toEqual(['-5|two words|x']);
+  expect(program.run('help')).toContain('  echo <first> [rest...]          repeat the words');
+  expect(program.complete('ec')).toEqual([['echo'], 'ec']);
+});
+
+test('default: a name that no provider registered is an unknown command', () => {
+  expect(() => cli().run('stats')).toThrow(new EditorError('unknown command: stats'));
 });
