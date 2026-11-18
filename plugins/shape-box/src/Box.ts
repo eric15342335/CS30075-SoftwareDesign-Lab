@@ -7,6 +7,8 @@ import type { Catalog } from '@svgframe/api';
  * place, because Box says that it holds them and cannot be dissolved.
  */
 export class Box extends Group {
+  /** The shape type that the provider registers and the tree label checks. */
+  static readonly typeName = 'box';
   readonly #fill: string;
 
   constructor(id: string, fill: string) {
@@ -15,7 +17,12 @@ export class Box extends Group {
   }
 
   override get type(): string {
-    return 'box';
+    return Box.typeName;
+  }
+
+  /** Returns the id of a part of the box with this id, for example `n1-rect`. */
+  static partId(boxId: string, part: 'rect' | 'label'): string {
+    return `${boxId}-${part}`;
   }
 
   override createSignature() {
@@ -68,10 +75,10 @@ export class Box extends Group {
   }
 
   protected override ownAttributes(): Array<[string, string]> {
-    return [...super.ownAttributes(), ['data-kind', 'box']];
+    return [...super.ownAttributes(), ['data-kind', Box.typeName]];
   }
 
   #part(name: 'rect' | 'label'): string {
-    return `${this.id}-${name}`;
+    return Box.partId(this.id, name);
   }
 }

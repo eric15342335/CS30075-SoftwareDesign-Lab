@@ -4,7 +4,7 @@ import { Box } from './Box.ts';
 
 /** Registers the shape type "box". Each new box gets the rect fill from the plugin options. */
 export class BoxProvider implements ShapeProvider {
-  readonly type = 'box';
+  readonly type = Box.typeName;
   readonly #fill: string;
 
   constructor(fill: string) {

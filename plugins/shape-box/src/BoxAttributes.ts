@@ -1,6 +1,8 @@
 import { EditorError } from '@svgframe/api';
 import type { AttributeEdit, AttributeHandler, Shape } from '@svgframe/api';
 
+import { Box } from './Box.ts';
+
 /**
  * BoxAttributes gives two attributes of a box their meaning. `fill` goes to the rect part, and
  * `label` rewrites the text part. It finds the parts by their derived ids and writes only through
@@ -10,7 +12,7 @@ export class BoxAttributes implements AttributeHandler {
   readonly name = 'box-attributes';
 
   handles(shape: Shape, attr: string): boolean {
-    return shape.type === 'box' && (attr === 'fill' || attr === 'label');
+    return shape.type === Box.typeName && (attr === 'fill' || attr === 'label');
   }
 
   apply(shape: Shape, attr: string, value: string, edit: AttributeEdit): void {
@@ -30,8 +32,8 @@ export class BoxAttributes implements AttributeHandler {
     );
   }
 
-  static #part(shape: Shape, name: string): Shape {
-    const id = `${shape.id}-${name}`;
+  static #part(shape: Shape, name: 'rect' | 'label'): Shape {
+    const id = Box.partId(shape.id, name);
     const part = shape.children().find((child) => child.id === id);
     if (part === undefined) throw new EditorError(`box ${shape.id} has no part ${id}`);
     return part;
