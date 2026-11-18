@@ -23,6 +23,11 @@ const shipped: PluginSource[] = [
     manifest: () => import('@svgframe/plugin-stats/package.json', { with: { type: 'json' } }),
     load: () => import('@svgframe/plugin-stats'),
   },
+  {
+    module: '@svgframe/plugin-dir',
+    manifest: () => import('@svgframe/plugin-dir/package.json', { with: { type: 'json' } }),
+    load: () => import('@svgframe/plugin-dir'),
+  },
 ];
 const assembly = Assembly.from(process.argv.slice(2), shipped);
 const problems = [
