@@ -25,9 +25,12 @@ export class Catalog {
     return provider.create(id);
   }
 
-  /** Tells whether `read` can turn an element with this tag name into a shape. */
-  reads(tag: string): boolean {
-    return this.shapes.get(tag) !== undefined;
+  /**
+   * Tells whether `read` can turn an element into a shape: a provider is registered for its tag,
+   * or the type in `data-kind` makes a shape with the same tag.
+   */
+  reads(tag: string, kind: string | undefined): boolean {
+    return this.shapes.get(tag) !== undefined || this.#special(tag, kind, '') !== undefined;
   }
 
   /**
@@ -35,8 +38,13 @@ export class Catalog {
    * shape has the same tag as the element. Otherwise, the tag name decides.
    */
   readShape(tag: string, kind: string | undefined, id: string): Shape {
-    const special = kind === undefined ? undefined : this.shapes.get(kind)?.create(id);
-    return special?.tag === tag ? special : this.createShape(tag, id);
+    return this.#special(tag, kind, id) ?? this.createShape(tag, id);
+  }
+
+  /** Creates the shape of the `data-kind` type when that shape has the element's tag. */
+  #special(tag: string, kind: string | undefined, id: string): Shape | undefined {
+    const shape = kind === undefined ? undefined : this.shapes.get(kind)?.create(id);
+    return shape?.tag === tag ? shape : undefined;
   }
 
   /** Returns the `create` syntax of each type, in the order of registration, for `help`. */

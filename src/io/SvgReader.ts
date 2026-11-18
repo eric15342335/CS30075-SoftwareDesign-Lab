@@ -137,7 +137,7 @@ export class SvgReader {
   /** Turns one element into a shape, or returns null with a warning when the element is unusable. */
   #shape(tag: string, node: XmlNode): Shape | null {
     const attributes = this.#attributes(node);
-    if (!this.#catalog.reads(tag)) {
+    if (!this.#catalog.reads(tag, attributes.get('data-kind'))) {
       this.#warnings.push(
         `skipped ${this.#describe(tag, attributes.get('id'))}: unsupported element`,
       );

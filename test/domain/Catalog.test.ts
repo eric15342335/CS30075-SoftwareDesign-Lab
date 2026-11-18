@@ -2,6 +2,7 @@ import { expect, test } from 'bun:test';
 
 import { BasicShapeProvider } from '#domain/BasicShapeProvider.ts';
 import { Canvas } from '#domain/Canvas.ts';
+import { Catalog } from '#domain/Catalog.ts';
 import { Decimal } from '#domain/Decimal.ts';
 import { Group } from '#domain/Group.ts';
 import { Rect } from '#domain/Rect.ts';
@@ -47,6 +48,15 @@ test('invoke: data-kind falls back to the tag when the provider makes another ta
   const text = '<svg width="10" height="10"><rect id="r1" data-kind="note"/></svg>';
   const document = new SvgReader(catalogWithNote()).parse(text);
   expect(document.find('r1').type).toBe('rect');
+});
+
+test('invoke: data-kind finds its provider even when no provider is registered for the tag', () => {
+  const catalog = new Catalog();
+  catalog.shapes.add(new BasicShapeProvider('note', Note));
+  const text = '<svg width="10" height="10"><g id="n1" data-kind="note"/><g id="g1"/></svg>';
+  const reader = new SvgReader(catalog);
+  expect(reader.parse(text).ids()).toEqual(['n1']);
+  expect(reader.warnings()).toEqual(['skipped <g id="g1">: unsupported element']);
 });
 
 test('invoke: help lists the usage of each registered type, in registration order', () => {
