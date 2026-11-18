@@ -25,22 +25,23 @@ This repository holds an SVG editor CLI for CS30075 Lab1, Phases 1 and 2. The Ph
 
 ## Module boundaries (oxlint `no-restricted-imports` enforces them)
 
-| Module          | May import                                                                    |
-| --------------- | ----------------------------------------------------------------------------- |
-| `src/domain`    | nothing: no `node:*`, no Bun, no packages                                     |
-| `src/io`        | domain, `node:fs`, fast-xml-parser, fast-xml-validator, fast-xml-builder      |
-| `src/command`   | domain, io                                                                    |
-| `src/cli`       | command, domain, commander, `node:*` except `node:fs`                         |
-| `src/builtin`   | domain, command; no libraries                                                 |
-| `src/api`       | domain, command; plugins see it as `@svgframe/api`                            |
-| `app/` (host)   | every kernel module, `node:*`                                                 |
-| `plugins/*/src` | `@svgframe/api` and `node:*`; never another plugin; never `@svgframe/testing` |
-| plugin tests    | `@svgframe/api` and `@svgframe/testing`                                       |
+| Module          | May import                                                               |
+| --------------- | ------------------------------------------------------------------------ |
+| `src/domain`    | nothing: no `node:*`, no Bun, no packages                                |
+| `src/io`        | domain, `node:fs`, fast-xml-parser, fast-xml-validator, fast-xml-builder |
+| `src/command`   | domain, io                                                               |
+| `src/cli`       | command, domain, commander, `node:*` except `node:fs`                    |
+| `src/builtin`   | domain, command; no libraries                                            |
+| `src/api`       | domain, command; plugins see it as `@svgframe/api`                       |
+| `app/` (host)   | every kernel module, `node:*`                                            |
+| `plugins/*/src` | `@svgframe/api`, `node:*` and its own files; no other package            |
+| plugin tests    | `@svgframe/api` and `@svgframe/testing`                                  |
 
-No module in `src/` may import `#host/...` or any `@svgframe/...` package. Cross-module imports use the `#domain/...`, `#command/...`, `#io/...`, `#cli/...`, `#builtin/...`, `#api/...`, `#host/...` and `#scripts/...` aliases. Imports that start with `../` are banned. `test/lint/ModuleRules.test.ts` proves each rule with a probe file.
+Each module has one allow-list in `.oxlintrc.json`, so anything the table does not list is an error. No module in `src/` may import `#host/...`, `#test/...`, `#scripts/...` or any `@svgframe/...` package. Cross-module imports use the `#domain/...`, `#command/...`, `#io/...`, `#cli/...`, `#builtin/...`, `#api/...`, `#host/...`, `#scripts/...` and `#test/...` aliases. Imports that start with `../` are banned. `test/lint/ModuleRules.test.ts` checks every allowed and forbidden import of each rule with a probe file.
 
 ## Workflow
 
 - Write the tests first (`bun:test`). Every error message in the spec and every transcript in the spec has a test.
+- Tests take repository paths from `repo` in `test/support/Paths.ts` and temp folders from `using folder = new TempFolder()`, which deletes the folder when the test ends. `CliProcess` starts the real CLI, and `TranscriptRunner` runs a transcript in one fixed folder. Plugin tests get `TempFolder` from `@svgframe/testing`.
 - Make one commit per step, with a conventional commit message (commitlint checks it).
 - When an AI suggestion turns out to be wrong or the spec is unclear, add an entry to 过程记录 or 附录 A in `doc/README.md`. Record plan changes in 1.6 修订记录.
