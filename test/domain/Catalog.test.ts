@@ -19,13 +19,13 @@ class Note extends Group {
 
 function catalogWithNote() {
   const catalog = Session.catalog();
-  catalog.addShape(new BasicShapeProvider('note', Note));
+  catalog.shapes.add(new BasicShapeProvider('note', Note));
   return catalog;
 }
 
 test('register: a second provider for a taken type name is refused', () => {
   const catalog = Session.catalog();
-  expect(() => catalog.addShape(new BasicShapeProvider('rect', Rect))).toThrow(
+  expect(() => catalog.shapes.add(new BasicShapeProvider('rect', Rect))).toThrow(
     'duplicate registration: shapes/rect',
   );
 });

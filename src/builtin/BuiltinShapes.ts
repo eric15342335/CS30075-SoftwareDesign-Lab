@@ -19,6 +19,6 @@ export class BuiltinShapes {
   ];
 
   register(catalog: Catalog): void {
-    for (const provider of BuiltinShapes.#providers) catalog.addShape(provider);
+    for (const provider of BuiltinShapes.#providers) catalog.shapes.add(provider);
   }
 }

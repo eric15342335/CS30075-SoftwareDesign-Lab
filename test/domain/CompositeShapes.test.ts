@@ -42,7 +42,7 @@ class Pair extends Group {
 
 function session(): Session {
   const catalog = Session.catalog();
-  catalog.addShape(new BasicShapeProvider('pair', Pair));
+  catalog.shapes.add(new BasicShapeProvider('pair', Pair));
   const result = new Session(catalog);
   result.run(new InitCommand(result.workspace));
   return result;
@@ -94,7 +94,7 @@ test('ungroup refuses a composite shape before it checks the top level', () => {
 
 test('read checks the parts after the children are in place', () => {
   const catalog = Session.catalog();
-  catalog.addShape(new BasicShapeProvider('pair', Pair));
+  catalog.shapes.add(new BasicShapeProvider('pair', Pair));
   const good =
     '<svg width="9" height="9"><g id="p" data-kind="pair"><rect id="p-a"/><circle id="p-b"/></g></svg>';
   expect(new SvgReader(catalog).parse(good).find('p').type).toBe('pair');

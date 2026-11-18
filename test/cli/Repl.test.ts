@@ -85,3 +85,12 @@ test('on a terminal, the prompt comes back after each command, and the typed lin
     "svg-editor 0.1 — type 'help' for commands\n\nsvg> init\r\ncanvas 800x600 created\nsvg> ",
   );
 });
+
+test('problems from the start, such as a plugin that failed, are error lines after the banner', async () => {
+  const { output, text } = recorder(false);
+  const program = new CliProgram(...Session.program());
+  await new Repl(program, Readable.from([]), output).start(['plugin not found: x']);
+  expect(stripVTControlCharacters(text())).toBe(
+    "svg-editor 0.1 — type 'help' for commands\nerror: plugin not found: x\n\n",
+  );
+});

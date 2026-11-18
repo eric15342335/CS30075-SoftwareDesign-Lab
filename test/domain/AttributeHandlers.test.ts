@@ -18,7 +18,7 @@ const allTexts = new ScriptedHandler('all-texts', 'g', 'label', (shape, value, e
 /** A session with a group g1 that holds two texts, t1 and t2. */
 function session(...handlers: ScriptedHandler[]): Session {
   const catalog = Session.catalog();
-  for (const handler of handlers) catalog.addHandler(handler);
+  for (const handler of handlers) catalog.handlers.add(handler);
   const result = new Session(catalog);
   result.run(new InitCommand(result.workspace));
   result.create('g', 'g1');
@@ -37,8 +37,8 @@ function set(result: Session, id: string, attr: string, value: string): string[]
 
 test('register: a second handler with a taken name is refused', () => {
   const catalog = Session.catalog();
-  catalog.addHandler(allTexts);
-  expect(() => catalog.addHandler(allTexts)).toThrow(
+  catalog.handlers.add(allTexts);
+  expect(() => catalog.handlers.add(allTexts)).toThrow(
     'duplicate registration: attributes/all-texts',
   );
 });

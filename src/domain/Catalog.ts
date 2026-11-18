@@ -9,24 +9,16 @@ import type { ShapeProvider } from '#domain/ShapeProvider.ts';
  * looks them up here, so it has no list of shape classes or attribute rules of its own.
  */
 export class Catalog {
-  readonly #shapes = new Registry<ShapeProvider>('shapes', (provider) => provider.type);
-  readonly #handlers = new Registry<AttributeHandler>('attributes', (handler) => handler.name);
-
-  addShape(provider: ShapeProvider): void {
-    this.#shapes.add(provider);
-  }
-
-  addHandler(handler: AttributeHandler): void {
-    this.#handlers.add(handler);
-  }
+  readonly shapes = new Registry<ShapeProvider>('shapes', (provider) => provider.type);
+  readonly handlers = new Registry<AttributeHandler>('attributes', (handler) => handler.name);
 
   /** Returns the registered handlers that say they are responsible, in registration order. */
   handlersFor(shape: Shape, attr: string): AttributeHandler[] {
-    return this.#handlers.values().filter((handler) => handler.handles(shape, attr));
+    return this.handlers.values().filter((handler) => handler.handles(shape, attr));
   }
 
   createShape(type: string, id: string): Shape {
-    const provider = this.#shapes.get(type);
+    const provider = this.shapes.get(type);
     if (provider === undefined) {
       throw new EditorError(`unknown shape type: ${type} (is the plugin loaded?)`);
     }
@@ -35,7 +27,7 @@ export class Catalog {
 
   /** Tells whether `read` can turn an element with this tag name into a shape. */
   reads(tag: string): boolean {
-    return this.#shapes.get(tag) !== undefined;
+    return this.shapes.get(tag) !== undefined;
   }
 
   /**
@@ -43,12 +35,12 @@ export class Catalog {
    * shape has the same tag as the element. Otherwise, the tag name decides.
    */
   readShape(tag: string, kind: string | undefined, id: string): Shape {
-    const special = kind === undefined ? undefined : this.#shapes.get(kind)?.create(id);
+    const special = kind === undefined ? undefined : this.shapes.get(kind)?.create(id);
     return special?.tag === tag ? special : this.createShape(tag, id);
   }
 
   /** Returns the `create` syntax of each type, in the order of registration, for `help`. */
   usages(): string[] {
-    return this.#shapes.values().map((provider) => provider.create('').createUsage());
+    return this.shapes.values().map((provider) => provider.create('').createUsage());
   }
 }

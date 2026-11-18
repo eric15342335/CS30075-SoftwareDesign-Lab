@@ -12,13 +12,5 @@ export class Extensions {
   readonly catalog = new Catalog();
   readonly commands = new Registry<CommandProvider>('commands', (provider) => provider.name);
   readonly decorators = new Registry<TreeDecorator>('decorators', (decorator) => decorator.name);
-  readonly #observers: WorkspaceObserver[] = [];
-
-  observe(observer: WorkspaceObserver): void {
-    this.#observers.push(observer);
-  }
-
-  observers(): WorkspaceObserver[] {
-    return [...this.#observers];
-  }
+  readonly observers = new Registry<WorkspaceObserver>('observers', (observer) => observer.name);
 }

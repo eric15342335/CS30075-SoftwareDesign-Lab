@@ -16,11 +16,23 @@ export class Registry<T> {
   }
 
   add(item: T): void {
-    const name = this.#name(item);
-    if (this.#items.has(name)) {
-      throw new EditorError(`duplicate registration: ${this.#category}/${name}`);
+    this.check([item]);
+    this.#items.set(this.#name(item), item);
+  }
+
+  /** Throws when one of the items has a name that is taken, or when two of them share a name. */
+  check(items: T[]): void {
+    const taken = new Set(this.#items.keys());
+    for (const name of items.map(this.#name)) {
+      if (taken.has(name))
+        throw new EditorError(`duplicate registration: ${this.#category}/${name}`);
+      taken.add(name);
     }
-    this.#items.set(name, item);
+  }
+
+  /** Returns the key "category/name" of each item, as a plugin manifest writes it. */
+  keys(items: T[]): string[] {
+    return items.map((item) => `${this.#category}/${this.#name(item)}`);
   }
 
   get(name: string): T | undefined {

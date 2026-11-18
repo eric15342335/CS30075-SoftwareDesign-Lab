@@ -25,8 +25,11 @@ export class Repl {
     this.#output = output;
   }
 
-  /** Starts the loop. The promise resolves when the input ends with EOF, Ctrl+D or Ctrl+C. */
-  async start(): Promise<void> {
+  /**
+   * Starts the loop. The promise resolves when the input ends with EOF, Ctrl+D or Ctrl+C. The
+   * problems, such as plugins that failed to load, appear as error lines after the banner.
+   */
+  async start(problems: string[] = []): Promise<void> {
     const terminal = this.#output.isTTY === true;
     const lines = createInterface({
       input: this.#input,
@@ -39,7 +42,7 @@ export class Repl {
     lines.on('close', () => {
       open = false;
     });
-    this.#print(Repl.#banner, '');
+    this.#print(Repl.#banner, ...problems.map((problem) => this.#error(problem)), '');
     if (terminal) lines.prompt();
     for await (const line of lines) {
       const quiet = Repl.#quiet.test(line);
@@ -58,8 +61,12 @@ export class Repl {
       // Spec 2 says that every error is one line that starts with "error:". A bug also gets
       // such a line, and the session goes on.
       const message = error instanceof EditorError ? error.message : `internal: ${String(error)}`;
-      return [styleText('red', `error: ${message}`, { stream: this.#output })];
+      return [this.#error(message)];
     }
+  }
+
+  #error(message: string): string {
+    return styleText('red', `error: ${message}`, { stream: this.#output });
   }
 
   #print(...lines: string[]): void {

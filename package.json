@@ -16,6 +16,7 @@
     "#cli/*": "./src/cli/*",
     "#builtin/*": "./src/builtin/*",
     "#api/*": "./src/api/*",
+    "#host/*": "./app/host/*",
     "#test/*": "./test/*"
   },
   "scripts": {

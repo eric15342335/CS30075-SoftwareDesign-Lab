@@ -68,3 +68,17 @@ test('a syntax error prints one line on stdout and nothing on stderr', async () 
   expect(normalize(output)).toEqual(['svg> mvoe c1 1 2', 'error: unknown command: mvoe']);
   expect(errors).toBe('');
 });
+
+/** Runs `help` in the real program with the flags and returns stdout. */
+async function help(...flags: string[]): Promise<string> {
+  const child = Bun.spawn([process.execPath, main, ...flags], { stdin: new Blob(['help\n']) });
+  const output = await new Response(child.stdout).text();
+  expect(await child.exited).toBe(0);
+  return output;
+}
+
+test('--no-plugins starts the editor with the built-in extensions only', async () => {
+  const [plain, builtins] = await Promise.all([help(), help('--no-plugins')]);
+  expect(builtins).toBe(plain);
+  expect(builtins).toContain('create g <id> [in <containerId>]');
+});

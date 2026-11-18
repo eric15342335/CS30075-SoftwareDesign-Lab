@@ -53,8 +53,8 @@ test('a failing observer adds an error line, the next observer still runs, and t
 test('the observers registered in the extensions hear the workspace of the CLI', () => {
   const observer = new RecordingObserver('recorder');
   const extensions = Session.extensions();
-  extensions.observe(observer);
-  const workspace = new Workspace(extensions.catalog, extensions.observers());
+  extensions.observers.add(observer);
+  const workspace = new Workspace(extensions.catalog, extensions.observers.values());
   new CliProgram(workspace, new CommandExecutor(), extensions).run('init');
   expect(observer.events).toEqual(['opened 0']);
 });
