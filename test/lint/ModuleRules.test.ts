@@ -1,14 +1,13 @@
-import { afterAll, expect, test } from 'bun:test';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { expect, test } from 'bun:test';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+
+import { repo } from '#test/support/Paths.ts';
+import { TempFolder } from '#test/support/TempFolder.ts';
 
 // Each probe file breaks, or keeps, one module rule. The test copies the real lint config into a
 // temporary folder, writes the probes at the paths that the rules match, and runs oxlint there.
 // This proves that each rule catches what it should, which an empty lint run cannot show.
-const root = join(import.meta.dir, '..', '..');
-const dir = mkdtempSync(join(tmpdir(), 'svg-lint-'));
-afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
 const probes: Record<string, [imports: string[], errors: number]> = {
   'src/domain/Probe.ts': [['#host/PluginHost.ts', '#api/index.ts', '#builtin/BuiltinShapes.ts'], 3],
@@ -24,22 +23,28 @@ const probes: Record<string, [imports: string[], errors: number]> = {
 };
 
 test('each module rule reports the imports that it forbids, and only those', async () => {
+  using dir = new TempFolder();
   const config: Record<string, unknown> = JSON.parse(
-    readFileSync(join(root, '.oxlintrc.json'), 'utf8'),
+    readFileSync(join(repo.root, '.oxlintrc.json'), 'utf8'),
   );
   // The probes have no tsconfig, so the type-aware options are left out.
   delete config['options'];
   delete config['$schema'];
-  writeFileSync(join(dir, '.oxlintrc.json'), JSON.stringify(config));
+  writeFileSync(dir.file('.oxlintrc.json'), JSON.stringify(config));
   for (const [path, [imports]] of Object.entries(probes)) {
-    mkdirSync(join(dir, dirname(path)), { recursive: true });
+    mkdirSync(dir.file(dirname(path)), { recursive: true });
     const lines = imports.map((name, index) => `import probe${index} from '${name}';`);
     const uses = imports.map((_name, index) => `probe${index}`).join(', ');
-    writeFileSync(join(dir, path), `${lines.join('\n')}\nexport default [${uses}];\n`);
+    writeFileSync(dir.file(path), `${lines.join('\n')}\nexport default [${uses}];\n`);
   }
   const child = Bun.spawn(
-    [process.execPath, join(root, 'node_modules', 'oxlint', 'bin', 'oxlint'), '--format', 'json'],
-    { cwd: dir, stdout: 'pipe' },
+    [
+      process.execPath,
+      join(repo.root, 'node_modules', 'oxlint', 'bin', 'oxlint'),
+      '--format',
+      'json',
+    ],
+    { cwd: dir.path, stdout: 'pipe' },
   );
   const report: { diagnostics: Array<{ code: string; filename: string }> } = JSON.parse(
     await new Response(child.stdout).text(),

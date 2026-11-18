@@ -1,7 +1,5 @@
-import { afterAll, expect, test } from 'bun:test';
-import { copyFileSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { expect, test } from 'bun:test';
+import { copyFileSync, readFileSync } from 'node:fs';
 
 import { CanvasCommand } from '#command/CanvasCommand.ts';
 import { InitCommand } from '#command/InitCommand.ts';
@@ -9,15 +7,14 @@ import { ReadCommand } from '#command/ReadCommand.ts';
 import { ResizeCommand } from '#command/ResizeCommand.ts';
 import { SaveCommand } from '#command/SaveCommand.ts';
 import { Decimal } from '#domain/Decimal.ts';
+import { repo } from '#test/support/Paths.ts';
 import { Session } from '#test/support/Session.ts';
-
-const fixtures = join(import.meta.dir, '..', 'fixtures');
-const dir = mkdtempSync(join(tmpdir(), 'svg-commands-'));
-afterAll(() => rmSync(dir, { recursive: true, force: true }));
+import { TempFolder } from '#test/support/TempFolder.ts';
 
 test('save and read report element counts, and save without a name reuses the file', () => {
+  using folder = new TempFolder();
   const session = Session.spec();
-  const file = join(dir, 'demo.svg');
+  const file = folder.file('demo.svg');
   expect(session.run(new SaveCommand(session.workspace, file))).toEqual([
     `saved to ${file} (4 elements)`,
   ]);
@@ -31,8 +28,9 @@ test('save and read report element counts, and save without a name reuses the fi
 });
 
 test('read lists the warnings first, and a later save writes back to the file that was read', () => {
-  const file = join(dir, 'other.svg');
-  copyFileSync(join(fixtures, 'other.svg'), file);
+  using folder = new TempFolder();
+  const file = folder.file('other.svg');
+  copyFileSync(repo.fixture('other.svg'), file);
   const session = new Session();
   expect(session.run(new ReadCommand(session.workspace, file))).toEqual([
     'warning: assigned id rect1 to unnamed <rect>',
@@ -45,10 +43,11 @@ test('read lists the warnings first, and a later save writes back to the file th
 });
 
 test('the feedback for a document with one element says "1 element"', () => {
+  using folder = new TempFolder();
   const session = new Session();
   session.run(new InitCommand(session.workspace));
   session.create('g', 'only');
-  const file = join(dir, 'one.svg');
+  const file = folder.file('one.svg');
   expect(session.run(new SaveCommand(session.workspace, file))).toEqual([
     `saved to ${file} (1 element)`,
   ]);
@@ -64,19 +63,20 @@ test('save needs a file name after init, even when an earlier document was read'
   expect(() => session.run(new SaveCommand(session.workspace))).toThrow(
     "no file name. use 'save <file.svg>'",
   );
-  session.run(new ReadCommand(session.workspace, join(fixtures, 'other.svg')));
+  session.run(new ReadCommand(session.workspace, repo.fixture('other.svg')));
   session.run(new InitCommand(session.workspace));
   expect(() => session.run(new SaveCommand(session.workspace))).toThrow('no file name');
 });
 
 test('a failed read or save changes nothing, including the history', () => {
+  using folder = new TempFolder();
   const session = Session.spec();
   const before = session.fingerprint();
-  const missing = join(dir, 'missing.svg');
+  const missing = folder.file('missing.svg');
   expect(() => session.run(new ReadCommand(session.workspace, missing))).toThrow(
     `cannot read file: ${missing}`,
   );
-  const unwritable = join(dir, 'no-such-dir', 'x.svg');
+  const unwritable = folder.file('no-such-dir', 'x.svg');
   expect(() => session.run(new SaveCommand(session.workspace, unwritable))).toThrow(
     `cannot write file: ${unwritable}`,
   );

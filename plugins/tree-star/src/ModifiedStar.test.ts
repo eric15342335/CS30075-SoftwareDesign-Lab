@@ -1,15 +1,8 @@
-import { afterAll, expect, test } from 'bun:test';
-import * as fs from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { expect, test } from 'bun:test';
 
-import { PluginHarness } from '@svgframe/testing';
+import { PluginHarness, TempFolder } from '@svgframe/testing';
 
 import ModifiedStarPlugin from './ModifiedStarPlugin.ts';
-
-const folder = fs.mkdtempSync(join(tmpdir(), 'svg-star-'));
-afterAll(() => fs.rmSync(folder, { recursive: true, force: true }));
-const file = join(folder, 'saved.svg');
 
 /** Returns a CLI with the modified-star plugin after it ran the lines. */
 function after(...lines: string[]): PluginHarness {
@@ -31,7 +24,9 @@ test('a new document has no stars, and a new shape gets one at once with the can
 });
 
 test('save clears the stars, an edit marks only its row, and undo of that edit clears it', () => {
-  const cli = after('init', 'create rect r 0 0 1 1', 'create g g1', `save ${file}`);
+  using folder = new TempFolder();
+  const file = folder.file('saved.svg');
+  const cli = after('init', 'create rect r 0 0 1 1', 'create g g1', `save "${file}"`);
   expect(starred(cli)).toEqual([]);
   cli.run('move r 1 1');
   expect(starred(cli)).toEqual(['├── rect#r  x=1 y=1 w=1 h=1 *']);
@@ -40,15 +35,19 @@ test('save clears the stars, an edit marks only its row, and undo of that edit c
 });
 
 test('read starts clean, and an edit inside a group marks the shape but not its parents', () => {
-  const cli = after('init', 'create g g1', 'create rect r 0 0 1 1 in g1', `save ${file}`);
-  cli.run(`read ${file}`);
+  using folder = new TempFolder();
+  const file = folder.file('saved.svg');
+  const cli = after('init', 'create g g1', 'create rect r 0 0 1 1 in g1', `save "${file}"`);
+  cli.run(`read "${file}"`);
   expect(starred(cli)).toEqual([]);
   cli.run('set r fill red');
   expect(starred(cli)).toEqual(['    └── rect#r  x=0 y=0 w=1 h=1 fill=red *']);
 });
 
 test('canvas resize and delete mark only the canvas row', () => {
-  const cli = after('init', 'create rect r 0 0 1 1', 'create rect s 0 0 1 1', `save ${file}`);
+  using folder = new TempFolder();
+  const file = folder.file('saved.svg');
+  const cli = after('init', 'create rect r 0 0 1 1', 'create rect s 0 0 1 1', `save "${file}"`);
   cli.run('canvas 900');
   expect(starred(cli)).toEqual(['svg (900x600) *']);
   cli.run('canvas 800');
@@ -58,7 +57,9 @@ test('canvas resize and delete mark only the canvas row', () => {
 });
 
 test('a reorder marks the canvas row, and moving into a group marks the moved shape', () => {
-  const cli = after('init', 'create rect r 0 0 1 1', 'create g g1', `save ${file}`);
+  using folder = new TempFolder();
+  const file = folder.file('saved.svg');
+  const cli = after('init', 'create rect r 0 0 1 1', 'create g g1', `save "${file}"`);
   cli.run('front r');
   expect(starred(cli)).toEqual(['svg (800x600) *']);
   cli.run('undo');
@@ -67,7 +68,9 @@ test('a reorder marks the canvas row, and moving into a group marks the moved sh
 });
 
 test('a set to the same value leaves no star, and redo brings the star back', () => {
-  const cli = after('init', 'create rect r 0 0 1 1 red', `save ${file}`, 'set r fill red');
+  using folder = new TempFolder();
+  const file = folder.file('saved.svg');
+  const cli = after('init', 'create rect r 0 0 1 1 red', `save "${file}"`, 'set r fill red');
   expect(starred(cli)).toEqual([]);
   cli.run('set r fill blue');
   cli.run('undo');
@@ -77,26 +80,33 @@ test('a set to the same value leaves no star, and redo brings the star back', ()
 });
 
 test('a failed save and a failed read keep the stars', () => {
+  using folder = new TempFolder();
   const cli = after('init', 'create rect r 0 0 1 1');
-  expect(() => cli.run(`save ${join(folder, 'missing', 'x.svg')}`)).toThrow();
-  expect(() => cli.run(`read ${join(folder, 'missing.svg')}`)).toThrow();
+  expect(() => cli.run(`save "${folder.file('missing', 'x.svg')}"`)).toThrow();
+  expect(() => cli.run(`read "${folder.file('missing.svg')}"`)).toThrow();
   expect(starred(cli)).toHaveLength(2);
 });
 
 test('two plugin instances keep their own saved state', () => {
-  const first = after('init', 'create rect r 0 0 1 1', `save ${file}`);
+  using folder = new TempFolder();
+  const file = folder.file('saved.svg');
+  const first = after('init', 'create rect r 0 0 1 1', `save "${file}"`);
   const second = after('init', 'create rect r 0 0 1 1');
   expect(starred(first)).toEqual([]);
   expect(starred(second)).toHaveLength(2);
 });
 
 test('a move into the group just before marks the canvas row, although the order stays', () => {
-  const cli = after('init', 'create g g1', 'create rect r 0 0 1 1', `save ${file}`, 'addto g1 r');
+  using folder = new TempFolder();
+  const file = folder.file('saved.svg');
+  const cli = after('init', 'create g g1', 'create rect r 0 0 1 1', `save "${file}"`, 'addto g1 r');
   expect(starred(cli)).toEqual(['svg (800x600) *', '    └── rect#r  x=0 y=0 w=1 h=1 *']);
 });
 
 test('tree of one shape marks a changed root row and leaves an unchanged one alone', () => {
-  const cli = after('init', 'create g g1', `save ${file}`, 'create rect r 0 0 1 1 in g1');
+  using folder = new TempFolder();
+  const file = folder.file('saved.svg');
+  const cli = after('init', 'create g g1', `save "${file}"`, 'create rect r 0 0 1 1 in g1');
   expect(cli.run('tree g1')).toEqual(['g#g1', '└── rect#r  x=0 y=0 w=1 h=1 *']);
   cli.run('set g1 fill red');
   expect(cli.run('tree g1')[0]).toBe('g#g1 fill=red *');

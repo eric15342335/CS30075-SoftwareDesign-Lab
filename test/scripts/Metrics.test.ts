@@ -1,24 +1,20 @@
-import { afterAll, expect, test } from 'bun:test';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { expect, test } from 'bun:test';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { dirname } from 'node:path';
 
 import type { FileMetric } from '#scripts/metrics/FileMetric.ts';
 import { MetricsReport } from '#scripts/metrics/MetricsReport.ts';
 import { RoleMap } from '#scripts/metrics/RoleMap.ts';
 import { TreeMetrics } from '#scripts/metrics/TreeMetrics.ts';
+import { TempFolder } from '#test/support/TempFolder.ts';
 
-const scratch = mkdtempSync(join(tmpdir(), 'svg-metrics-test-'));
-afterAll(() => rmSync(scratch, { recursive: true, force: true }));
-
-/** Writes a small tree of files into a new folder and returns the folder. */
-function tree(name: string, files: Record<string, string>): string {
-  const root = join(scratch, name);
+/** Writes a small tree of files into the folder and returns the folder path. */
+function tree(folder: TempFolder, files: Record<string, string>): string {
   for (const [path, text] of Object.entries(files)) {
-    mkdirSync(dirname(join(root, path)), { recursive: true });
-    writeFileSync(join(root, path), text);
+    mkdirSync(dirname(folder.file(path)), { recursive: true });
+    writeFileSync(folder.file(path), text);
   }
-  return root;
+  return folder.path;
 }
 
 test('the role map sorts files by directory, and a reviewed override wins for its ref', () => {
@@ -38,7 +34,8 @@ test('the role map sorts files by directory, and a reviewed override wins for it
 });
 
 test('a tree is measured file by file, with lines, units, complexity and responsibility', () => {
-  const root = tree('good', {
+  using folder = new TempFolder();
+  const root = tree(folder, {
     'src/Thing.ts':
       '/**\n * Thing does one job. It does it well.\n */\nexport class Thing {\n  f(x: number): number {\n    return x > 0 ? 1 : 2;\n  }\n}\n',
     'app/main.ts':
@@ -85,7 +82,8 @@ test('a tree is measured file by file, with lines, units, complexity and respons
 });
 
 test('a listed file without a doc comment is an error, and an older tree needs none', () => {
-  const root = tree('bare', { 'src/Bare.ts': 'export class Bare {}\n' });
+  using folder = new TempFolder();
+  const root = tree(folder, { 'src/Bare.ts': 'export class Bare {}\n' });
   expect(() => new TreeMetrics(root, new RoleMap('HEAD'), true).measure()).toThrow(
     'no responsibility for src/Bare.ts',
   );
@@ -93,7 +91,8 @@ test('a listed file without a doc comment is an error, and an older tree needs n
 });
 
 test('a doc comment on an exported type gives the responsibility too', () => {
-  const root = tree('type', {
+  using folder = new TempFolder();
+  const root = tree(folder, {
     'src/Kind.ts': "/** The kinds. */\nexport type Kind = 'a' | 'b';\n",
   });
   expect(new TreeMetrics(root, new RoleMap('HEAD'), true).measure()[0]?.responsibility).toBe(

@@ -1,18 +1,14 @@
-import { afterAll, expect, test } from 'bun:test';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { expect, test } from 'bun:test';
+import { readFileSync } from 'node:fs';
 
 import { InitCommand } from '#command/InitCommand.ts';
 import { SetCommand } from '#command/SetCommand.ts';
 import { Decimal } from '#domain/Decimal.ts';
 import { SvgReader } from '#io/SvgReader.ts';
 import { SvgWriter } from '#io/SvgWriter.ts';
+import { repo } from '#test/support/Paths.ts';
 import { Session } from '#test/support/Session.ts';
-
-const fixtures = join(import.meta.dir, '..', 'fixtures');
-const dir = mkdtempSync(join(tmpdir(), 'svg-writer-'));
-afterAll(() => rmSync(dir, { recursive: true, force: true }));
+import { TempFolder } from '#test/support/TempFolder.ts';
 
 test('the writer reproduces the sample from spec section 0.1 byte for byte', () => {
   const session = new Session();
@@ -22,7 +18,7 @@ test('the writer reproduces the sample from spec section 0.1 byte for byte', () 
   session.create('line', 'edge', ['150', '100', '250', '100', 'black'], 'flow');
   session.create('rect', 'end', ['250', '70', '120', '60', '#f5a623'], 'flow');
   expect(new SvgWriter().serialize(session.document())).toBe(
-    readFileSync(join(fixtures, 'sample.svg'), 'utf8'),
+    readFileSync(repo.fixture('sample.svg'), 'utf8'),
   );
 });
 
@@ -49,11 +45,12 @@ test('markup characters are escaped and read back unchanged', () => {
 });
 
 test('write puts the text in the file, or reports that it cannot', () => {
+  using folder = new TempFolder();
   const document = Session.spec().document();
   const writer = new SvgWriter();
-  const file = join(dir, 'out.svg');
+  const file = folder.file('out.svg');
   writer.write(file, document);
   expect(readFileSync(file, 'utf8')).toBe(writer.serialize(document));
-  const unwritable = join(dir, 'no-such-dir', 'out.svg');
+  const unwritable = folder.file('no-such-dir', 'out.svg');
   expect(() => writer.write(unwritable, document)).toThrow(`cannot write file: ${unwritable}`);
 });

@@ -1,14 +1,9 @@
-import { afterAll, expect, test } from 'bun:test';
+import { expect, test } from 'bun:test';
 import * as fs from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 
-import { PluginHarness } from '@svgframe/testing';
+import { PluginHarness, TempFolder } from '@svgframe/testing';
 
 import BoxPlugin from './BoxPlugin.ts';
-
-const folder = fs.mkdtempSync(join(tmpdir(), 'svg-box-'));
-afterAll(() => fs.rmSync(folder, { recursive: true, force: true }));
 
 /** Returns a CLI with the box plugin. */
 function harness(options: Readonly<Record<string, unknown>> = {}): PluginHarness {
@@ -129,12 +124,14 @@ test('the parts of a box cannot be deleted or moved out', () => {
 });
 
 test('a box survives save and read with data-kind and the (box) label', () => {
-  const file = join(folder, 'box.svg');
+  using folder = new TempFolder();
+  const file = folder.file('box.svg');
   const cli = harness();
-  for (const line of ['init', 'create box n1 120 100 160 60 "开始"', `save ${file}`]) cli.run(line);
+  for (const line of ['init', 'create box n1 120 100 160 60 "开始"', `save "${file}"`])
+    cli.run(line);
   expect(fs.readFileSync(file, 'utf8')).toContain('data-kind="box"');
   const other = harness();
-  other.run(`read ${file}`);
+  other.run(`read "${file}"`);
   expect(other.run('tree')).toEqual([
     'svg (800x600)',
     '└── g#n1 (box)',
@@ -145,42 +142,45 @@ test('a box survives save and read with data-kind and the (box) label', () => {
 });
 
 test('read rejects a box without its parts and keeps the document', () => {
-  const file = join(folder, 'broken.svg');
+  using folder = new TempFolder();
+  const file = folder.file('broken.svg');
   fs.writeFileSync(
     file,
     '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="60">' +
       '<g id="n1" data-kind="box"><rect id="n1-rect" x="0" y="0" width="1" height="1"/></g></svg>',
   );
   const cli = after('init', 'create rect keep 0 0 1 1');
-  expect(() => cli.run(`read ${file}`)).toThrow(
+  expect(() => cli.run(`read "${file}"`)).toThrow(
     'box n1 needs exactly the parts rect#n1-rect and text#n1-label',
   );
   expect(cli.run('tree')).toEqual(['svg (800x600)', '└── rect#keep  x=0 y=0 w=1 h=1']);
 });
 
 test('a nested box and reordered parts survive save and read', () => {
-  const file = join(folder, 'nested.svg');
+  using folder = new TempFolder();
+  const file = folder.file('nested.svg');
   const cli = after(
     'init',
     'create box n1 0 0 80 40 "a"',
     'create box n2 10 10 8 8 "b" in n1',
     'front n1-rect',
-    `save ${file}`,
+    `save "${file}"`,
   );
   const before = cli.run('tree');
-  const other = after(`read ${file}`);
+  const other = after(`read "${file}"`);
   expect(other.run('tree')).toEqual(before);
   expect(other.run('set n1 label c')).toEqual(['box#n1 label updated: "c"']);
 });
 
 test('read rejects a box whose part is missing, even when an id looks like both parts', () => {
-  const file = join(folder, 'tricky.svg');
+  using folder = new TempFolder();
+  const file = folder.file('tricky.svg');
   fs.writeFileSync(
     file,
     '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="60">' +
       '<g id="n1" data-kind="box"><rect id="n1-rect text#n1-label" x="0" y="0" width="1" height="1"/></g></svg>',
   );
-  expect(() => after('init').run(`read ${file}`)).toThrow('box n1 needs exactly the parts');
+  expect(() => after('init').run(`read "${file}"`)).toThrow('box n1 needs exactly the parts');
 });
 
 test('set label and set fill show the new value, undo the old one and redo the new one', () => {

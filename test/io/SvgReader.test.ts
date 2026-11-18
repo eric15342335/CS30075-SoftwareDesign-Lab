@@ -1,22 +1,18 @@
-import { afterAll, expect, test } from 'bun:test';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { expect, test } from 'bun:test';
+import { readFileSync, writeFileSync } from 'node:fs';
 
 import { InitCommand } from '#command/InitCommand.ts';
 import { ReadCommand } from '#command/ReadCommand.ts';
 import { EditorError } from '#domain/EditorError.ts';
 import { SvgReader } from '#io/SvgReader.ts';
 import { SvgWriter } from '#io/SvgWriter.ts';
+import { repo } from '#test/support/Paths.ts';
 import { Session } from '#test/support/Session.ts';
-
-const fixtures = join(import.meta.dir, '..', 'fixtures');
-const dir = mkdtempSync(join(tmpdir(), 'svg-reader-'));
-afterAll(() => rmSync(dir, { recursive: true, force: true }));
+import { TempFolder } from '#test/support/TempFolder.ts';
 
 test('reading the spec file other.svg assigns rect1 with the spec warning', () => {
   const reader = new SvgReader(Session.catalog());
-  const document = reader.read(join(fixtures, 'other.svg'));
+  const document = reader.read(repo.fixture('other.svg'));
   expect(reader.warnings()).toEqual(['assigned id rect1 to unnamed <rect>']);
   expect(document.ids()).toEqual(['rect1', 't1', 'c1', 'g1', 'r2', 'c2', 'e1']);
   expect(document.canvas.size()).toBe('400x300');
@@ -26,7 +22,7 @@ test('reading the spec file other.svg assigns rect1 with the spec warning', () =
 test.each(['sample.svg', 'demo.svg', 'flowchart.svg'])(
   '%s, which uses the editor format, reads back and writes out byte for byte',
   (name) => {
-    const text = readFileSync(join(fixtures, name), 'utf8');
+    const text = readFileSync(repo.fixture(name), 'utf8');
     const reader = new SvgReader(Session.catalog());
     expect(new SvgWriter().serialize(reader.parse(text))).toBe(text);
     expect(reader.warnings()).toEqual([]);
@@ -35,7 +31,7 @@ test.each(['sample.svg', 'demo.svg', 'flowchart.svg'])(
 
 test('the nested sample from the spec keeps transform and the other attributes, and the comments are dropped', () => {
   const reader = new SvgReader(Session.catalog());
-  const document = reader.read(join(fixtures, 'nested.svg'));
+  const document = reader.read(repo.fixture('nested.svg'));
   expect(reader.warnings()).toEqual([
     'assigned id rect1 to unnamed <rect>',
     'assigned id text1 to unnamed <text>',
@@ -88,8 +84,9 @@ test.each([
 });
 
 test('a failed read because of a duplicate id keeps the open document and its path', () => {
+  using folder = new TempFolder();
   const session = new Session();
-  const path = join(dir, 'dup.svg');
+  const path = folder.file('dup.svg');
   writeFileSync(path, '<svg width="10" height="10"><rect id="a"/><rect id="a"/></svg>');
   session.run(new InitCommand(session.workspace));
   session.create('rect', 'kept', ['1', '2', '3', '4']);
@@ -175,10 +172,11 @@ test('text that is not usable SVG is rejected', () => {
 });
 
 test('read names the file in its errors', () => {
+  using folder = new TempFolder();
   const reader = new SvgReader(Session.catalog());
-  const missing = join(dir, 'missing.svg');
+  const missing = folder.file('missing.svg');
   expect(() => reader.read(missing)).toThrow(new EditorError(`cannot read file: ${missing}`));
-  const broken = join(dir, 'broken.svg');
+  const broken = folder.file('broken.svg');
   writeFileSync(broken, '<svg><g></svg>');
   expect(() => reader.read(broken)).toThrow(`cannot read file: ${broken} (line 1: Expected`);
 });

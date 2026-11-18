@@ -1,12 +1,10 @@
 import { expect, test } from 'bun:test';
-import { mkdtempSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 
 import { CliProgram } from '#cli/CliProgram.ts';
 import { EditorError } from '#domain/EditorError.ts';
 import { EchoProvider } from '#test/support/EchoProvider.ts';
 import { Session } from '#test/support/Session.ts';
+import { TempFolder } from '#test/support/TempFolder.ts';
 
 /** Returns a new program that has already run the given setup lines. */
 function cli(...lines: string[]): CliProgram {
@@ -54,17 +52,13 @@ test('every verb reaches its command', () => {
 });
 
 test('canvas, save and read reach their commands, and a quoted path may contain spaces', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'svg-cli-'));
-  const file = join(dir, 'my drawing.svg');
-  try {
-    const program = cli('init', 'create rect r1 0 0 10 10');
-    expect(program.run('canvas')).toEqual(['canvas 800x600']);
-    expect(program.run('canvas 400 300')).toEqual(['canvas resized to 400x300']);
-    expect(program.run(`save "${file}"`)).toEqual([`saved to ${file} (1 element)`]);
-    expect(cli().run(`read "${file}"`)).toEqual([`read ${file} (1 element)`]);
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
-  }
+  using folder = new TempFolder();
+  const file = folder.file('my drawing.svg');
+  const program = cli('init', 'create rect r1 0 0 10 10');
+  expect(program.run('canvas')).toEqual(['canvas 800x600']);
+  expect(program.run('canvas 400 300')).toEqual(['canvas resized to 400x300']);
+  expect(program.run(`save "${file}"`)).toEqual([`saved to ${file} (1 element)`]);
+  expect(cli().run(`read "${file}"`)).toEqual([`read ${file} (1 element)`]);
 });
 
 test('quoted words keep their spaces, and a blank line does nothing', () => {
