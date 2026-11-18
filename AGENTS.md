@@ -16,7 +16,7 @@ This repository holds an SVG editor CLI for CS30075 Lab1 Phase 1. The spec is `d
 - Name-based dispatch exists in exactly two places, and both are marked `// 待重构`. `src/cli/CliProgram.ts` maps a command name to a command, and `src/domain/ShapeFactory.ts` maps a type name to a class.
 - Containers and leaves support the same operations (Composite pattern).
 - Follow the Command pattern. A concrete command only forwards the request to its receiver (`SvgDocument` or `Workspace`). Validation and the spec's error messages live in the receiver. Undo stores the minimum prior state (`GeometryMemento`, `Placement`, or the old values). Never take a snapshot of the whole document.
-- Commands are synchronous and never print. They return feedback lines, and only `src/cli/Repl.ts` and `src/main.ts` touch stdin and stdout.
+- Commands are synchronous and never print. They return feedback lines, and only `src/cli/Repl.ts` and `app/main.ts` touch stdin and stdout.
 - Do not use deprecated APIs. Oxlint's `typescript/no-deprecated` rule fails the check when code uses one. Use the replacement that the deprecation notice names.
 
 ## Module boundaries (oxlint `no-restricted-imports` enforces them)

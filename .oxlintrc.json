@@ -40,7 +40,7 @@
   "overrides": [
     {
       "files": ["src/**/*.ts", "app/**/*.ts", "plugins/*/src/**/*.ts"],
-      "excludeFiles": ["src/api/index.ts", "app/main.ts", "src/main.ts"],
+      "excludeFiles": ["src/api/index.ts", "app/main.ts"],
       "rules": {
         "unicorn/filename-case": [
           "error",

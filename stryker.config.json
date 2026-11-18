@@ -7,7 +7,7 @@
     "src/**/*.ts",
     "app/**/*.ts",
     "plugins/*/src/**/*.ts",
-    "!src/main.ts",
+
     "!app/main.ts",
     "!**/*.test.ts"
   ],

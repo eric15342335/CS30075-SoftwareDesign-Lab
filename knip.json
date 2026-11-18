@@ -3,7 +3,7 @@
   "workspaces": {
     ".": {
       "entry": ["test/**/*.test.ts"],
-      "project": ["src/**/*.ts", "test/**/*.ts"],
+      "project": ["src/**/*.ts", "app/**/*.ts", "test/**/*.ts"],
       // Stryker's "command" test runner ships inside @stryker-mutator/core; this package name does not exist on npm.
       "ignoreDependencies": ["@stryker-mutator/command-runner"]
     },

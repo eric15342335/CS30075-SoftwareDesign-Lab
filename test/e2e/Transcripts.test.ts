@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { stripVTControlCharacters } from 'node:util';
 
 const fixtures = join(import.meta.dir, '..', 'fixtures');
-const main = join(import.meta.dir, '..', '..', 'src', 'main.ts');
+const main = join(import.meta.dir, '..', '..', 'app', 'main.ts');
 const dirs: string[] = [];
 afterAll(() => {
   for (const dir of dirs) rmSync(dir, { recursive: true, force: true });

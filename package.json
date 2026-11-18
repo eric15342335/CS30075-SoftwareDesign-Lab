@@ -18,7 +18,7 @@
     "#test/*": "./test/*"
   },
   "scripts": {
-    "cli": "bun src/main.ts",
+    "cli": "bun app/main.ts",
     "test": "bun test",
     "coverage": "bun test --coverage",
     "typecheck": "tsc && tsc -p vscode-extension",
