@@ -17,7 +17,13 @@ new BuiltinCommands().register(extensions.commands);
 
 // Mode A, code assembly: the plugins that this build ships. Each entry imports its package only
 // when the host installs it, so a broken plugin cannot stop the editor from starting.
-const shipped: PluginSource[] = [];
+const shipped: PluginSource[] = [
+  {
+    module: '@svgframe/plugin-stats',
+    manifest: () => import('@svgframe/plugin-stats/package.json', { with: { type: 'json' } }),
+    load: () => import('@svgframe/plugin-stats'),
+  },
+];
 const assembly = Assembly.from(process.argv.slice(2), shipped);
 const problems = [
   ...assembly.problems,

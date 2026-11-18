@@ -78,7 +78,8 @@ async function help(...flags: string[]): Promise<string> {
 }
 
 test('--no-plugins starts the editor with the built-in extensions only', async () => {
-  const [plain, builtins] = await Promise.all([help(), help('--no-plugins')]);
-  expect(builtins).toBe(plain);
+  const [plugins, builtins] = await Promise.all([help(), help('--no-plugins')]);
+  expect(plugins).toContain('  stats ');
+  expect(builtins).not.toContain('  stats ');
   expect(builtins).toContain('create g <id> [in <containerId>]');
 });

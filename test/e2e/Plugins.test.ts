@@ -17,7 +17,10 @@ async function run(flags: string[], lines: string[]): Promise<string> {
   return output;
 }
 
-test('the shipped plugins.config.json loads stats', async () => {
-  const output = await run(['--config', shipped], ['init', 'create rect r 0 0 1 1', 'stats']);
-  expect(output).toContain('svg> stats\nrect: 1  (total 1, containers 0)\n');
-});
+test.each([[[]], [['--config', shipped]]])(
+  'the code assembly and plugins.config.json (%j) both load stats',
+  async (flags) => {
+    const output = await run(flags, ['init', 'create rect r 0 0 1 1', 'stats']);
+    expect(output).toContain('svg> stats\nrect: 1  (total 1, containers 0)\n');
+  },
+);
