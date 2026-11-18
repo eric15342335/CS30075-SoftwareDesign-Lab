@@ -11,6 +11,8 @@ const transcripts = join(root, 'doc', 'transcript');
 const empty = join(root, 'test', 'fixtures', 'configs', 'empty.config.json');
 // This file mirrors the plugin list in app/main.ts. A commit that changes one changes both.
 const assembly = join(root, 'test', 'fixtures', 'assembly.config.json');
+// The config file that the repository ships for mode B.
+const shipped = join(root, 'plugins.config.json');
 const scratch = mkdtempSync(join(tmpdir(), 'svg-assembly-'));
 afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 // One fixed working folder, outside the repository, that every run empties and refills.
@@ -50,11 +52,24 @@ test.each(['cli-1', 'cli-2'])(
 );
 
 // cli-3 needs the stats and dir plugins. Its expected output was recorded once from the code
-// assembly and checked by hand. Between a mode B commit and the matching mode A commit, the
-// shipped plugins.config.json may list one plugin more, so the final test compares it instead.
-test.each([[[]], [['--config', assembly]]])(
+// assembly and checked by hand.
+test.each([[[]], [['--config', assembly]], [['--config', shipped]]])(
   'cli-3 (stats, dir and help) prints and saves the recorded bytes with %j',
   async (flags) => {
     expect(await runner.run(main, flags, input('cli-3'))).toEqual(baseline('cli-3'));
   },
 );
+
+// Version B of spec 6.1 uses box, and its tree rows get the labels of every shipped plugin. The
+// code assembly and the shipped plugins.config.json must print and save the same bytes.
+test('version B of spec 6.1 prints and saves the same bytes in mode A and with plugins.config.json', async () => {
+  const session = readFileSync(join(root, 'test', 'fixtures', 'flowchart-box.txt'), 'utf8')
+    .split(/\r?\n/)
+    .filter((line) => /^(?:svg> |#)/.test(line))
+    .map((line) => line.replace(/^svg> /, ''))
+    .join('\n');
+  const codeAssembly = await runner.run(main, [], session);
+  expect(codeAssembly.stdout).toContain('    ├── g#n1 (box) *\n');
+  expect(Object.keys(codeAssembly.files)).toEqual(['flowchart-box.svg']);
+  expect(await runner.run(main, ['--config', shipped], session)).toEqual(codeAssembly);
+});
