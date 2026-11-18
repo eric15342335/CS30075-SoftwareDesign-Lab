@@ -21,7 +21,7 @@ function input(name: string): string {
   return readFileSync(join(transcripts, `${name}.txt`), 'utf8');
 }
 
-/** Reads what the tag `final` printed and saved for a transcript (see scripts/baseline.ts). */
+/** Reads the recorded output of a transcript. For cli-1 and cli-2, it comes from the tag final. */
 function baseline(name: string): { stdout: string; files: Record<string, string> } {
   const folder = join(transcripts, 'expected', name);
   const files = Object.fromEntries(
@@ -46,5 +46,16 @@ test.each(['cli-1', 'cli-2'])(
   async (name) => {
     const codeAssembly = await runner.run(main, [], input(name));
     expect(await runner.run(main, ['--config', assembly], input(name))).toEqual(codeAssembly);
+  },
+);
+
+// cli-3 needs the stats and dir plugins. Its expected output was recorded once from the code
+// assembly and checked by hand. The shipped config must give the same bytes.
+const shipped = join(root, 'plugins.config.json');
+
+test.each([[[]], [['--config', shipped]], [['--config', assembly]]])(
+  'cli-3 (stats, dir and help) prints and saves the recorded bytes with %j',
+  async (flags) => {
+    expect(await runner.run(main, flags, input('cli-3'))).toEqual(baseline('cli-3'));
   },
 );

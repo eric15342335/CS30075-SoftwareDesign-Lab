@@ -1,0 +1,25 @@
+# The new commands appear in help, and dir works before init.
+help
+dir
+
+# stats counts leaves by type and containers apart.
+init
+create g outer
+create rect r1 0 0 10 10 in outer
+create circle c1 5 5 2 red
+create rect r2 20 0 10 10
+stats
+
+# dir and stats change nothing, so undo still reaches the last edit.
+dir
+undo
+stats
+
+# After save, dir shows the new file, and undo stops at the io barrier.
+save cli-3.svg
+dir
+undo
+
+# After read, the counts follow the new document.
+read other.svg
+stats

@@ -1,0 +1,79 @@
+svg-editor 0.1 — type 'help' for commands
+
+# The new commands appear in help, and dir works before init.
+svg> help
+Usage: <command> [arguments]
+
+Commands:
+  init [w] [h]                    new empty canvas, 800x600 by default
+  read <file>                     open an .svg file as the document
+  save [file]                     save to a file (default: last read or saved)
+  canvas [w] [h]                  show the canvas size, or change it
+  create <type> <id> [params...]  new shape, see shape types below
+  delete <id>                     delete a shape and everything inside it
+  move <id> <dx> <dy>             move by an offset
+  scale <id> <factor>             multiply position and size by factor > 0
+  set <id> <attr> <value>         set a style or geometry attribute, or text
+  group <gid> <ids...>            put shapes into a new container
+  ungroup <gid>                   dissolve a container into its parent
+  addto <gid> <id>                move a shape to the end of a container
+  front <id>                      paint above its siblings
+  back <id>                       paint below its siblings
+  tree [id]                       structure tree of the document or one shape
+  show <id>                       all attributes of one shape
+  help                            show this list
+  undo                            undo the last edit
+  redo                            redo the last undone edit
+  stats                           count the shapes by type
+  dir                             list the working directory
+
+Shape types:
+  create rect <id> <x> <y> <width> <height> [fill] [in <containerId>]
+  create circle <id> <cx> <cy> <r> [fill] [in <containerId>]
+  create ellipse <id> <cx> <cy> <rx> <ry> [fill] [in <containerId>]
+  create line <id> <x1> <y1> <x2> <y2> [stroke] [in <containerId>]
+  create text <id> <x> <y> <text> [in <containerId>]
+  create g <id> [in <containerId>]
+
+Quote text that has spaces: "My Diagram". Lines starting with # are comments.
+Ctrl+C or Ctrl+D quits.
+svg> dir
+[FILE] other.svg
+
+# stats counts leaves by type and containers apart.
+svg> init
+canvas 800x600 created
+svg> create g outer
+g#outer created
+svg> create rect r1 0 0 10 10 in outer
+rect#r1 created in g#outer
+svg> create circle c1 5 5 2 red
+circle#c1 created
+svg> create rect r2 20 0 10 10
+rect#r2 created
+svg> stats
+rect: 2  circle: 1  (total 3, containers 1)
+
+# dir and stats change nothing, so undo still reaches the last edit.
+svg> dir
+[FILE] other.svg
+svg> undo
+rect#r2 removed
+svg> stats
+rect: 1  circle: 1  (total 2, containers 1)
+
+# After save, dir shows the new file, and undo stops at the io barrier.
+svg> save cli-3.svg
+saved to cli-3.svg (3 elements)
+svg> dir
+[FILE] cli-3.svg
+[FILE] other.svg
+svg> undo
+error: undo not allowed after io command
+
+# After read, the counts follow the new document.
+svg> read other.svg
+warning: assigned id rect1 to unnamed <rect>
+read other.svg (7 elements)
+svg> stats
+rect: 2  text: 1  circle: 2  ellipse: 1  (total 6, containers 1)
