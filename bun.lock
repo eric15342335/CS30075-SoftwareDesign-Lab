@@ -25,6 +25,10 @@
         "typescript": "7.0.2",
       },
     },
+    "plugins/command-dir": {
+      "name": "@svgframe/plugin-dir",
+      "version": "0.1.0",
+    },
     "plugins/command-stats": {
       "name": "@svgframe/plugin-stats",
       "version": "0.1.0",
@@ -446,6 +450,8 @@
     "@svgframe/fixture-spike": ["@svgframe/fixture-spike@workspace:test/fixtures/plugins/spike"],
 
     "@svgframe/fixture-throws-on-load": ["@svgframe/fixture-throws-on-load@workspace:test/fixtures/plugins/throws-on-load"],
+
+    "@svgframe/plugin-dir": ["@svgframe/plugin-dir@workspace:plugins/command-dir"],
 
     "@svgframe/plugin-stats": ["@svgframe/plugin-stats@workspace:plugins/command-stats"],
 

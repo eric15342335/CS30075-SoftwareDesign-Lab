@@ -1,0 +1,16 @@
+{
+  "name": "@svgframe/plugin-dir",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/DirPlugin.ts",
+  "exports": {
+    ".": "./src/DirPlugin.ts",
+    "./package.json": "./package.json"
+  },
+  "contributes": {
+    "commands": [
+      "dir"
+    ]
+  }
+}
