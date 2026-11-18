@@ -2,7 +2,8 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {
-      "entry": ["test/**/*.test.ts", "scripts/*.ts"],
+      // The plugin API and the plugin test helpers are public surfaces, so their exports count as used.
+      "entry": ["test/**/*.test.ts", "scripts/*.ts", "src/api/index.ts", "test/support/Testing.ts"],
       "project": ["src/**/*.ts", "app/**/*.ts", "test/**/*.ts", "scripts/**/*.ts"],
       // Stryker's "command" test runner ships inside @stryker-mutator/core; this package name does not exist on npm.
       "ignoreDependencies": ["@stryker-mutator/command-runner"]
