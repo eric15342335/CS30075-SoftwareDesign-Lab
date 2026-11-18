@@ -26,7 +26,7 @@ test('stats counts leaves by type in first-seen order, depth first, and counts c
   expect(results.at(-1)).toEqual(['text: 2  rect: 3  circle: 1  (total 6, containers 2)']);
 });
 
-test('stats follows the current order after front and back', () => {
+test('stats follows the current order after back', () => {
   const results = run('init', 'create rect r 0 0 1 1', 'create circle c 1 1 1', 'back c', 'stats');
   expect(results.at(-1)).toEqual(['circle: 1  rect: 1  (total 2, containers 0)']);
 });

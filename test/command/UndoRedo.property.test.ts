@@ -86,6 +86,9 @@ function start(): Session {
 }
 
 test('in random edit sequences, failures change nothing, undo walks back through every state, and redo walks forward again', () => {
+  // If every generated edit failed, the undo and redo walks would check nothing. About one
+  // generated edit in seven succeeds, so a normal run has about a thousand.
+  let succeeded = 0;
   fc.assert(
     fc.property(fc.array(edit, { maxLength: 30 }), (edits) => {
       const session = start();
@@ -94,6 +97,7 @@ test('in random edit sequences, failures change nothing, undo walks back through
         try {
           session.run(makeEdit(session.workspace));
           states.push(session.fingerprint());
+          succeeded += 1;
         } catch (error) {
           if (!(error instanceof EditorError)) throw error;
           expect(session.fingerprint()).toEqual(states.at(-1) ?? []);
@@ -110,4 +114,5 @@ test('in random edit sequences, failures change nothing, undo walks back through
     }),
     { numRuns: 500 },
   );
+  expect(succeeded).toBeGreaterThan(250);
 });

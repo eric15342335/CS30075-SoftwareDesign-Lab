@@ -44,12 +44,16 @@ test('hidden items are listed like any other item', () => {
   expect(listing.lines()).toEqual(['[DIR]  .git', '[FILE] .env', '[FILE] b']);
 });
 
-test('the order is the same whatever order the directory gives', () => {
-  const entries = [dir('b'), file('c'), dir('a'), file('d'), file('C')];
-  const forward = new DirectoryListing(new FakeDirectory(entries)).lines();
-  const backward = new DirectoryListing(new FakeDirectory(entries.toReversed())).lines();
-  expect(backward).toEqual(forward);
-});
+test.each([false, true])(
+  'the order does not depend on the order the directory gives (reversed: %p)',
+  (reversed) => {
+    const entries = [dir('b'), file('c'), dir('a'), file('d'), file('C')];
+    const listing = new DirectoryListing(
+      new FakeDirectory(reversed ? entries.toReversed() : entries),
+    );
+    expect(listing.lines()).toEqual(['[DIR]  a', '[DIR]  b', '[FILE] C', '[FILE] c', '[FILE] d']);
+  },
+);
 
 test('an empty directory prints one line that says so', () => {
   expect(new DirectoryListing(new FakeDirectory([])).lines()).toEqual(['(empty directory)']);

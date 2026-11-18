@@ -16,16 +16,18 @@ const broken: Directory = {
   },
 };
 
+/** A plugin that registers dir with the broken directory. */
+const failing = {
+  activate: (context: PluginContext) =>
+    context.addCommand(new DirProvider(new DirectoryListing(broken))),
+};
+
 test('dir works before init, because it needs no document', () => {
   const harness = new PluginHarness([new DirPlugin()]);
   expect(harness.run('dir')).toContain('[FILE] package.json');
 });
 
-test('dir, when it works and when it fails, leaves the document and the history alone', () => {
-  const failing = {
-    activate: (context: PluginContext) =>
-      context.addCommand(new DirProvider(new DirectoryListing(broken))),
-  };
+test('a dir that fails leaves the document and the history alone', () => {
   const harness = new PluginHarness([failing]);
   harness.run('init');
   harness.run('create rect r 0 0 1 1');
@@ -45,25 +47,21 @@ test('a dir that works is no io command, so undo still reaches the edit before i
   expect(harness.run('undo')).toEqual(['rect#r removed']);
 });
 
-test.each([
-  ['works', new DirPlugin()],
-  [
-    'fails',
-    {
-      activate: (context: PluginContext) =>
-        context.addCommand(new DirProvider(new DirectoryListing(broken))),
-    },
-  ],
-])('a dir that %s between undo and redo keeps the pending redo', (_case, plugin) => {
-  const harness = new PluginHarness([plugin]);
+test('a dir that works between undo and redo keeps the pending redo', () => {
+  const harness = new PluginHarness([new DirPlugin()]);
   harness.run('init');
   harness.run('create rect r 0 0 1 1');
   harness.run('undo');
-  try {
-    harness.run('dir');
-  } catch {
-    // The failing directory throws here, and the history must stay as it is all the same.
-  }
+  expect(harness.run('dir')).toContain('[FILE] package.json');
+  expect(harness.run('redo')).toEqual(['rect#r created']);
+});
+
+test('a dir that fails between undo and redo keeps the pending redo', () => {
+  const harness = new PluginHarness([failing]);
+  harness.run('init');
+  harness.run('create rect r 0 0 1 1');
+  harness.run('undo');
+  expect(() => harness.run('dir')).toThrow('cannot read directory: /nowhere');
   expect(harness.run('redo')).toEqual(['rect#r created']);
 });
 

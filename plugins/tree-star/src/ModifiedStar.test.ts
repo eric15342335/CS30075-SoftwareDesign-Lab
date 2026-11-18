@@ -37,9 +37,11 @@ test('save clears the stars, an edit marks only its row, and undo of that edit c
 test('read starts clean, and an edit inside a group marks the shape but not its parents', () => {
   using folder = new TempFolder();
   const file = folder.file('saved.svg');
-  const cli = after('init', 'create g g1', 'create rect r 0 0 1 1 in g1', `save "${file}"`);
+  after('init', 'create g g1', 'create rect r 0 0 1 1 in g1', `save "${file}"`);
+  // This CLI has its own edits and has never saved, so only the read can clear its stars.
+  const cli = after('init', 'create circle c 1 1 1');
   cli.run(`read "${file}"`);
-  expect(starred(cli)).toEqual([]);
+  expect(cli.run('tree')).toEqual(['svg (800x600)', '└── g#g1', '    └── rect#r  x=0 y=0 w=1 h=1']);
   cli.run('set r fill red');
   expect(starred(cli)).toEqual(['    └── rect#r  x=0 y=0 w=1 h=1 fill=red *']);
 });
@@ -82,9 +84,13 @@ test('a set to the same value leaves no star, and redo brings the star back', ()
 test('a failed save and a failed read keep the stars', () => {
   using folder = new TempFolder();
   const cli = after('init', 'create rect r 0 0 1 1');
-  expect(() => cli.run(`save "${folder.file('missing', 'x.svg')}"`)).toThrow();
-  expect(() => cli.run(`read "${folder.file('missing.svg')}"`)).toThrow();
-  expect(starred(cli)).toHaveLength(2);
+  const stars = ['svg (800x600) *', '└── rect#r  x=0 y=0 w=1 h=1 *'];
+  const unwritable = folder.file('missing', 'x.svg');
+  expect(() => cli.run(`save "${unwritable}"`)).toThrow(`cannot write file: ${unwritable}`);
+  expect(starred(cli)).toEqual(stars);
+  const missing = folder.file('missing.svg');
+  expect(() => cli.run(`read "${missing}"`)).toThrow(`cannot read file: ${missing}`);
+  expect(starred(cli)).toEqual(stars);
 });
 
 test('two plugin instances keep their own saved state', () => {

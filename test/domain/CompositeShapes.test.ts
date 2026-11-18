@@ -81,8 +81,17 @@ test('front, back and moving the whole composite shape still work', () => {
   const s = session();
   s.create('pair', 'p');
   s.create('g', 'g1');
-  expect(() => s.document().front('p-a')).not.toThrow();
-  expect(() => s.document().addto('g1', 'p')).not.toThrow();
+  const parts = (): string[] =>
+    s
+      .document()
+      .find('p')
+      .children()
+      .map((child) => child.id);
+  s.document().front('p-a');
+  expect(parts()).toEqual(['p-b', 'p-a']);
+  s.document().back('p-a');
+  expect(parts()).toEqual(['p-a', 'p-b']);
+  s.document().addto('g1', 'p');
   expect(s.document().find('p').parent?.id).toBe('g1');
 });
 

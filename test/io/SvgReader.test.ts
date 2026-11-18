@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 
 import { InitCommand } from '#command/InitCommand.ts';
 import { ReadCommand } from '#command/ReadCommand.ts';
+import { SaveCommand } from '#command/SaveCommand.ts';
 import { EditorError } from '#domain/EditorError.ts';
 import { SvgReader } from '#io/SvgReader.ts';
 import { SvgWriter } from '#io/SvgWriter.ts';
@@ -86,15 +87,21 @@ test.each([
 test('a failed read because of a duplicate id keeps the open document and its path', () => {
   using folder = new TempFolder();
   const session = new Session();
+  const good = folder.file('good.svg');
   const path = folder.file('dup.svg');
   writeFileSync(path, '<svg width="10" height="10"><rect id="a"/><rect id="a"/></svg>');
   session.run(new InitCommand(session.workspace));
+  session.run(new SaveCommand(session.workspace, good));
   session.create('rect', 'kept', ['1', '2', '3', '4']);
   expect(() => session.run(new ReadCommand(session.workspace, path))).toThrow(
     `cannot read file: ${path} (duplicate id: a)`,
   );
   expect(session.document().ids()).toEqual(['kept']);
   expect(session.undo()).toEqual(['rect#kept removed']);
+  // A save without a name still writes to the file of the document, not to the failed one.
+  expect(session.run(new SaveCommand(session.workspace))).toEqual([
+    `saved to ${good} (0 elements)`,
+  ]);
 });
 
 test('unnamed elements of one type get numbers in order, and a reused reader starts counting again', () => {
