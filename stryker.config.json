@@ -16,5 +16,7 @@
   "htmlReporter": { "fileName": "reports/mutation/index.html" },
   "jsonReporter": { "fileName": "reports/mutation/mutation.json" },
   "concurrency": 8,
-  "tempDirName": ".stryker-tmp"
+  "tempDirName": ".stryker-tmp",
+  "symlinkNodeModules": false,
+  "buildCommand": "bun scripts/stryker-sandbox.ts"
 }
