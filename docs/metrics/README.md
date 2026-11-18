@@ -1,6 +1,6 @@
 # 度量：final → HEAD
 
-本文件由 `bun scripts/metrics.ts --from final --to HEAD` 生成，请勿手改。final = `3084d36`，HEAD = `01aa37b`。行数只数非空行。圈复杂度由 oxlint 的 `eslint/complexity` 规则逐个单元给出（单元是函数、方法、访问器、构造器、箭头函数和类字段初始化器），再按文件和类别求和。
+本文件由 `bun scripts/metrics.ts --from final --to HEAD` 生成，请勿手改。final = `3084d36`，HEAD = `cbf8909`。行数只数非空行。圈复杂度由 oxlint 的 `eslint/complexity` 规则逐个单元给出（单元是函数、方法、访问器、构造器、箭头函数和类字段初始化器），再按文件和类别求和。
 
 ## 按类别汇总
 
@@ -8,10 +8,10 @@
 | --- | --- | --- | --- | --- |
 | 内核 | 47 → 69 (+22) | 1821 → 2432 (+611) | 316 → 382 (+66) | 475 → 597 (+122) |
 | 装配处 | 1 → 9 (+8) | 8 → 426 (+418) | 0 → 63 (+63) | 0 → 122 (+122) |
-| 插件 | 0 → 18 (+18) | 0 → 369 (+369) | 0 → 61 (+61) | 0 → 89 (+89) |
-| VSCode 扩展 | 0 → 5 (+5) | 0 → 150 (+150) | 0 → 16 (+16) | 0 → 26 (+26) |
-| 脚本 | 0 → 8 (+8) | 0 → 384 (+384) | 0 → 47 (+47) | 0 → 88 (+88) |
-| 测试 | 15 → 53 (+38) | 1634 → 3648 (+2014) | 276 → 619 (+343) | 299 → 722 (+423) |
+| 插件 | 0 → 18 (+18) | 0 → 377 (+377) | 0 → 63 (+63) | 0 → 92 (+92) |
+| VSCode 扩展 | 0 → 9 (+9) | 0 → 318 (+318) | 0 → 45 (+45) | 0 → 80 (+80) |
+| 脚本 | 0 → 8 (+8) | 0 → 390 (+390) | 0 → 49 (+49) | 0 → 90 (+90) |
+| 测试 | 15 → 49 (+34) | 1634 → 3548 (+1914) | 276 → 598 (+322) | 299 → 678 (+379) |
 
 ## 圈复杂度增量（只列有变化的文件）
 
@@ -26,7 +26,7 @@
 | `app/host/StagedContext.ts` | 装配处 | 0 | 19 | +19 |
 | `app/main.ts` | 装配处 | 0 | 8 | +8 |
 | `plugins/command-dir/src/DirCommand.ts` | 插件 | 0 | 2 | +2 |
-| `plugins/command-dir/src/DirPlugin.test.ts` | 测试 | 0 | 9 | +9 |
+| `plugins/command-dir/src/DirPlugin.test.ts` | 测试 | 0 | 12 | +12 |
 | `plugins/command-dir/src/DirPlugin.ts` | 插件 | 0 | 2 | +2 |
 | `plugins/command-dir/src/DirProvider.ts` | 插件 | 0 | 5 | +5 |
 | `plugins/command-dir/src/DirectoryListing.test.ts` | 测试 | 0 | 12 | +12 |
@@ -38,19 +38,19 @@
 | `plugins/command-stats/src/StatsPlugin.test.ts` | 测试 | 0 | 8 | +8 |
 | `plugins/command-stats/src/StatsPlugin.ts` | 插件 | 0 | 1 | +1 |
 | `plugins/command-stats/src/StatsProvider.ts` | 插件 | 0 | 4 | +4 |
-| `plugins/shape-box/src/Box.ts` | 插件 | 0 | 20 | +20 |
+| `plugins/shape-box/src/Box.ts` | 插件 | 0 | 22 | +22 |
 | `plugins/shape-box/src/BoxAttributes.ts` | 插件 | 0 | 10 | +10 |
-| `plugins/shape-box/src/BoxPlugin.test.ts` | 测试 | 0 | 34 | +34 |
+| `plugins/shape-box/src/BoxPlugin.test.ts` | 测试 | 0 | 40 | +40 |
 | `plugins/shape-box/src/BoxPlugin.ts` | 插件 | 0 | 2 | +2 |
 | `plugins/shape-box/src/BoxProvider.ts` | 插件 | 0 | 3 | +3 |
 | `plugins/shape-box/src/BoxTypeLabel.ts` | 插件 | 0 | 3 | +3 |
-| `plugins/tree-star/src/ModifiedStar.test.ts` | 测试 | 0 | 16 | +16 |
-| `plugins/tree-star/src/ModifiedStar.ts` | 插件 | 0 | 13 | +13 |
+| `plugins/tree-star/src/ModifiedStar.test.ts` | 测试 | 0 | 17 | +17 |
+| `plugins/tree-star/src/ModifiedStar.ts` | 插件 | 0 | 14 | +14 |
 | `plugins/tree-star/src/ModifiedStarPlugin.ts` | 插件 | 0 | 1 | +1 |
 | `scripts/baseline.ts` | 脚本 | 0 | 2 | +2 |
 | `scripts/metrics.ts` | 脚本 | 0 | 6 | +6 |
 | `scripts/metrics/MetricsReport.ts` | 脚本 | 0 | 33 | +33 |
-| `scripts/metrics/RoleMap.ts` | 脚本 | 0 | 9 | +9 |
+| `scripts/metrics/RoleMap.ts` | 脚本 | 0 | 11 | +11 |
 | `scripts/metrics/TreeMetrics.ts` | 脚本 | 0 | 38 | +38 |
 | `src/builtin/BuiltinCommandProvider.ts` | 内核 | 0 | 2 | +2 |
 | `src/builtin/BuiltinCommands.ts` | 内核 | 0 | 45 | +45 |
@@ -108,15 +108,15 @@
 | `test/support/ScriptedHandler.ts` | 测试 | 0 | 4 | +4 |
 | `test/support/Session.ts` | 测试 | 12 | 16 | +4 |
 | `test/support/TranscriptRunner.ts` | 测试 | 0 | 8 | +8 |
-| `vscode-extension/integration/Badge.itest.ts` | 测试 | 0 | 10 | +10 |
-| `vscode-extension/integration/Outline.itest.ts` | 测试 | 0 | 21 | +21 |
+| `vscode-extension/integration/Badge.itest.ts` | VSCode 扩展 | 0 | 10 | +10 |
+| `vscode-extension/integration/Outline.itest.ts` | VSCode 扩展 | 0 | 21 | +21 |
 | `vscode-extension/src/SvgBadgeProvider.ts` | VSCode 扩展 | 0 | 7 | +7 |
 | `vscode-extension/src/SvgFileFilter.ts` | VSCode 扩展 | 0 | 2 | +2 |
 | `vscode-extension/src/SvgOutline.ts` | VSCode 扩展 | 0 | 10 | +10 |
 | `vscode-extension/src/SvgOutlineProvider.ts` | VSCode 扩展 | 0 | 6 | +6 |
 | `vscode-extension/src/extension.ts` | VSCode 扩展 | 0 | 1 | +1 |
-| `vscode-extension/test/SvgFileFilter.test.ts` | 测试 | 0 | 2 | +2 |
-| `vscode-extension/test/SvgOutline.test.ts` | 测试 | 0 | 21 | +21 |
+| `vscode-extension/test/SvgFileFilter.test.ts` | VSCode 扩展 | 0 | 2 | +2 |
+| `vscode-extension/test/SvgOutline.test.ts` | VSCode 扩展 | 0 | 21 | +21 |
 
 ## 文件清单与职责（HEAD）
 
@@ -142,19 +142,19 @@
 | `plugins/command-stats/src/StatsCommand.ts` | 插件 | 16 | 2 | StatsCommand forwards `stats` to its receiver. |
 | `plugins/command-stats/src/StatsPlugin.ts` | 插件 | 8 | 1 | The stats plugin adds the `stats` command, which counts the shapes of the document by type. |
 | `plugins/command-stats/src/StatsProvider.ts` | 插件 | 12 | 4 | Registers the `stats` command. |
-| `plugins/shape-box/src/Box.ts` | 插件 | 59 | 20 | Box is a titled rectangle: a container on the tag g that owns two parts, the rect <id>-rect and the text <id>-label. |
+| `plugins/shape-box/src/Box.ts` | 插件 | 66 | 22 | Box is a titled rectangle: a container on the tag g that owns two parts, the rect <id>-rect and the text <id>-label. |
 | `plugins/shape-box/src/BoxAttributes.ts` | 插件 | 35 | 10 | BoxAttributes gives two attributes of a box their meaning. |
 | `plugins/shape-box/src/BoxPlugin.ts` | 插件 | 16 | 2 | The box plugin adds the shape type box, the attribute handler for its fill and label, and the "(box)" tree label. |
 | `plugins/shape-box/src/BoxProvider.ts` | 插件 | 13 | 3 | Registers the shape type "box". |
 | `plugins/shape-box/src/BoxTypeLabel.ts` | 插件 | 8 | 3 | BoxTypeLabel adds "(box)" to the tree row of a box, whose element is a plain g. |
-| `plugins/tree-star/src/ModifiedStar.ts` | 插件 | 49 | 13 | ModifiedStar adds "*" to a row of `tree` when the shape changed since the document was last opened or saved (ADR 3). |
+| `plugins/tree-star/src/ModifiedStar.ts` | 插件 | 50 | 14 | ModifiedStar adds "*" to a row of `tree` when the shape changed since the document was last opened or saved (ADR 3). |
 | `plugins/tree-star/src/ModifiedStarPlugin.ts` | 插件 | 13 | 1 | The modified-star plugin marks the rows of `tree` that differ from the last opened or saved document. |
 | `scripts/baseline.ts` | 脚本 | 49 | 2 | Records the output of the tag `final` (Phase 1) for the transcripts in doc/transcript/. |
 | `scripts/metrics.ts` | 脚本 | 47 | 6 | Writes docs/metrics/ from the git history: the file list with responsibilities, the lines split into kernel, assembly and plugins, and the change in cyclomatic complexity between two refs. |
 | `scripts/metrics/FileMetric.ts` | 脚本 | 17 | 0 | What the metrics know about one file of one tree. |
 | `scripts/metrics/MetricsReport.ts` | 脚本 | 108 | 33 | The measured files of one git ref. |
 | `scripts/metrics/Role.ts` | 脚本 | 2 | 0 | The categories that the metrics count apart. |
-| `scripts/metrics/RoleMap.ts` | 脚本 | 31 | 9 | RoleMap puts each TypeScript file of a tree into one category by its directory. |
+| `scripts/metrics/RoleMap.ts` | 脚本 | 37 | 11 | RoleMap puts each TypeScript file of a tree into one category by its directory. |
 | `scripts/metrics/TreeMetrics.ts` | 脚本 | 113 | 38 | TreeMetrics measures every TypeScript file in one checked-out tree: its category, its lines, its function units with their cyclomatic complexity (from oxlint) and its responsibility. |
 | `scripts/stryker-sandbox.ts` | 脚本 | 17 | 0 | Stryker runs this script inside its sandbox, .stryker-tmp/sandbox-<id>/, before the dry run. |
 | `src/api/Plugin.ts` | 内核 | 12 | 0 | A plugin is the default export of a plugin package: a class whose constructor takes no arguments. |
@@ -226,22 +226,26 @@
 | `src/domain/Text.ts` | 内核 | 33 | 11 | In SVG, the content is the element's child text, so it counts as an attribute only for `set`. |
 | `src/io/SvgReader.ts` | 内核 | 204 | 64 | SvgReader turns SVG text into a document. |
 | `src/io/SvgWriter.ts` | 内核 | 45 | 8 | SvgWriter writes a document as indented SVG text. |
+| `vscode-extension/integration/Badge.itest.ts` | VSCode 扩展 | 32 | 10 |  |
+| `vscode-extension/integration/Outline.itest.ts` | VSCode 扩展 | 65 | 21 |  |
 | `vscode-extension/src/SvgBadgeProvider.ts` | VSCode 扩展 | 32 | 7 | SvgBadgeProvider gives every SVG file in the Explorer the badge "[]". |
 | `vscode-extension/src/SvgFileFilter.ts` | VSCode 扩展 | 8 | 2 | SvgFileFilter decides by name alone whether a path looks like an SVG file. |
 | `vscode-extension/src/SvgOutline.ts` | VSCode 扩展 | 64 | 10 | One element in the outline. |
 | `vscode-extension/src/SvgOutlineProvider.ts` | VSCode 扩展 | 33 | 6 | SvgOutlineProvider is an adapter. |
 | `vscode-extension/src/extension.ts` | VSCode 扩展 | 13 | 1 | VS Code calls activate() once, after startup. |
+| `vscode-extension/test/SvgFileFilter.test.ts` | VSCode 扩展 | 15 | 2 |  |
+| `vscode-extension/test/SvgOutline.test.ts` | VSCode 扩展 | 56 | 21 |  |
 
 ## 测试文件（HEAD）
 
 | 文件 | 非空行 |
 | --- | --- |
-| `plugins/command-dir/src/DirPlugin.test.ts` | 46 |
+| `plugins/command-dir/src/DirPlugin.test.ts` | 67 |
 | `plugins/command-dir/src/DirectoryListing.test.ts` | 51 |
 | `plugins/command-dir/src/NodeDirectory.test.ts` | 39 |
 | `plugins/command-stats/src/StatsPlugin.test.ts` | 44 |
-| `plugins/shape-box/src/BoxPlugin.test.ts` | 145 |
-| `plugins/tree-star/src/ModifiedStar.test.ts` | 82 |
+| `plugins/shape-box/src/BoxPlugin.test.ts` | 184 |
+| `plugins/tree-star/src/ModifiedStar.test.ts` | 88 |
 | `test/cli/CliProgram.test.ts` | 162 |
 | `test/cli/Repl.test.ts` | 88 |
 | `test/command/CommandExecutor.test.ts` | 112 |
@@ -274,7 +278,7 @@
 | `test/io/SvgReader.test.ts` | 170 |
 | `test/io/SvgWriter.test.ts` | 53 |
 | `test/lint/ModuleRules.test.ts` | 54 |
-| `test/scripts/Metrics.test.ts` | 140 |
+| `test/scripts/Metrics.test.ts` | 142 |
 | `test/spike/PluginPackages.test.ts` | 58 |
 | `test/support/EchoProvider.ts` | 15 |
 | `test/support/FixedDecorator.ts` | 14 |
@@ -285,7 +289,3 @@
 | `test/support/Session.ts` | 76 |
 | `test/support/Testing.ts` | 4 |
 | `test/support/TranscriptRunner.ts` | 43 |
-| `vscode-extension/integration/Badge.itest.ts` | 32 |
-| `vscode-extension/integration/Outline.itest.ts` | 65 |
-| `vscode-extension/test/SvgFileFilter.test.ts` | 15 |
-| `vscode-extension/test/SvgOutline.test.ts` | 56 |

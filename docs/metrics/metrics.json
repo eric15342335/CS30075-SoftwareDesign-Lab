@@ -511,7 +511,7 @@
   },
   "to": {
     "ref": "HEAD",
-    "commit": "01aa37b",
+    "commit": "cbf8909",
     "files": [
       {
         "path": "app/host/Assembly.ts",
@@ -596,9 +596,9 @@
       {
         "path": "plugins/command-dir/src/DirPlugin.test.ts",
         "role": "tests",
-        "lines": 46,
-        "functions": 9,
-        "complexity": 9,
+        "lines": 67,
+        "functions": 11,
+        "complexity": 12,
         "responsibility": ""
       },
       {
@@ -708,9 +708,9 @@
       {
         "path": "plugins/shape-box/src/Box.ts",
         "role": "plugins",
-        "lines": 59,
-        "functions": 11,
-        "complexity": 20,
+        "lines": 66,
+        "functions": 13,
+        "complexity": 22,
         "responsibility": "Box is a titled rectangle: a container on the tag g that owns two parts, the rect <id>-rect and the text <id>-label."
       },
       {
@@ -724,9 +724,9 @@
       {
         "path": "plugins/shape-box/src/BoxPlugin.test.ts",
         "role": "tests",
-        "lines": 145,
-        "functions": 28,
-        "complexity": 34,
+        "lines": 184,
+        "functions": 33,
+        "complexity": 40,
         "responsibility": ""
       },
       {
@@ -756,17 +756,17 @@
       {
         "path": "plugins/tree-star/src/ModifiedStar.test.ts",
         "role": "tests",
-        "lines": 82,
-        "functions": 15,
-        "complexity": 16,
+        "lines": 88,
+        "functions": 16,
+        "complexity": 17,
         "responsibility": ""
       },
       {
         "path": "plugins/tree-star/src/ModifiedStar.ts",
         "role": "plugins",
-        "lines": 49,
+        "lines": 50,
         "functions": 10,
-        "complexity": 13,
+        "complexity": 14,
         "responsibility": "ModifiedStar adds \"*\" to a row of `tree` when the shape changed since the document was last opened or saved (ADR 3)."
       },
       {
@@ -820,9 +820,9 @@
       {
         "path": "scripts/metrics/RoleMap.ts",
         "role": "scripts",
-        "lines": 31,
-        "functions": 5,
-        "complexity": 9,
+        "lines": 37,
+        "functions": 7,
+        "complexity": 11,
         "responsibility": "RoleMap puts each TypeScript file of a tree into one category by its directory."
       },
       {
@@ -1652,7 +1652,7 @@
       {
         "path": "test/scripts/Metrics.test.ts",
         "role": "tests",
-        "lines": 140,
+        "lines": 142,
         "functions": 10,
         "complexity": 13,
         "responsibility": ""
@@ -1739,7 +1739,7 @@
       },
       {
         "path": "vscode-extension/integration/Badge.itest.ts",
-        "role": "tests",
+        "role": "vscode",
         "lines": 32,
         "functions": 7,
         "complexity": 10,
@@ -1747,7 +1747,7 @@
       },
       {
         "path": "vscode-extension/integration/Outline.itest.ts",
-        "role": "tests",
+        "role": "vscode",
         "lines": 65,
         "functions": 10,
         "complexity": 21,
@@ -1795,7 +1795,7 @@
       },
       {
         "path": "vscode-extension/test/SvgFileFilter.test.ts",
-        "role": "tests",
+        "role": "vscode",
         "lines": 15,
         "functions": 2,
         "complexity": 2,
@@ -1803,7 +1803,7 @@
       },
       {
         "path": "vscode-extension/test/SvgOutline.test.ts",
-        "role": "tests",
+        "role": "vscode",
         "lines": 56,
         "functions": 10,
         "complexity": 21,
