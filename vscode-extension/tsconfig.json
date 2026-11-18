@@ -1,7 +1,7 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "types": ["bun"]
+    "types": ["bun", "mocha"]
   },
-  "include": ["src", "test"]
+  "include": ["src", "test", "integration"]
 }

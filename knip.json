@@ -8,8 +8,10 @@
       "ignoreDependencies": ["@stryker-mutator/command-runner"]
     },
     "vscode-extension": {
-      "entry": ["src/extension.ts", "test/**/*.test.ts"],
-      "project": ["src/**/*.ts", "test/**/*.ts"]
+      "entry": ["src/extension.ts", "test/**/*.test.ts", "integration/**/*.itest.ts"],
+      "project": ["src/**/*.ts", "test/**/*.ts", "integration/**/*.ts"],
+      // @vscode/test-cli loads @vscode/test-electron at run time to download and start VS Code.
+      "ignoreDependencies": ["@vscode/test-electron"]
     }
   }
 }
