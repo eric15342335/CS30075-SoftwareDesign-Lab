@@ -45,6 +45,28 @@ test('a dir that works is no io command, so undo still reaches the edit before i
   expect(harness.run('undo')).toEqual(['rect#r removed']);
 });
 
+test.each([
+  ['works', new DirPlugin()],
+  [
+    'fails',
+    {
+      activate: (context: PluginContext) =>
+        context.addCommand(new DirProvider(new DirectoryListing(broken))),
+    },
+  ],
+])('a dir that %s between undo and redo keeps the pending redo', (_case, plugin) => {
+  const harness = new PluginHarness([plugin]);
+  harness.run('init');
+  harness.run('create rect r 0 0 1 1');
+  harness.run('undo');
+  try {
+    harness.run('dir');
+  } catch {
+    // The failing directory throws here, and the history must stay as it is all the same.
+  }
+  expect(harness.run('redo')).toEqual(['rect#r created']);
+});
+
 test('help lists dir when the plugin is loaded, and without it dir is an unknown command', () => {
   expect(new PluginHarness([new DirPlugin()]).run('help').join('\n')).toContain('  dir ');
   const harness = new PluginHarness([]);
