@@ -1,34 +1,42 @@
 # Agent guide
 
-This repository holds an SVG editor CLI for CS30075 Lab1 Phase 1. The spec is `doc/pj1-phase1/phase_cli_1.md`. The Phase 2 spec is `doc/pj1-phase2/phase_cli_2.md`. The Phase 2 design, the process log, the self-check and the QA results are in `doc/README.md`, which is written in Chinese. The Phase 1 design document is `doc/pj1-phase1/README.md`.
+This repository holds an SVG editor CLI for CS30075 Lab1, Phases 1 and 2. The Phase 1 spec is `doc/pj1-phase1/phase_cli_1.md`. The Phase 2 spec is `doc/pj1-phase2/phase_cli_2.md`. The Phase 2 design, the process log, the self-check and the QA results are in `doc/README.md`, which is written in Chinese. The Phase 1 design document is `doc/pj1-phase1/README.md`.
 
 ## Commands
 
-- `bun install` installs the dependencies.
-- `bun run cli` starts the REPL.
+- `bun install` installs the dependencies. Run it again after you add a package in `plugins/` or `test/fixtures/plugins/`, so that its workspace link exists.
+- `bun run cli` starts the REPL with the plugins that `app/main.ts` lists (mode A). `bun run cli --config plugins.config.json` loads the plugins of a config file instead (mode B). `bun run cli --no-plugins` loads only the built-in extensions.
 - `bun test` runs the tests.
 - `bun run check` runs everything that CI runs: the format check, lint with the architecture rules, the type check, knip, and the tests with coverage thresholds.
 - `bun run fmt` formats the code, and `bunx oxlint --fix` applies lint fixes.
+- `bun scripts/metrics.ts [--from final] [--to HEAD]` writes `docs/metrics/` from committed trees. Never edit those files by hand.
+- `bun scripts/baseline.ts` records the output of the tag `final` for `doc/transcript/cli-1.txt` and `cli-2.txt` into `doc/transcript/expected/`.
 
 ## Rules the code must follow (they are graded)
 
 - Use OOP: a class hierarchy with polymorphism, encapsulated `#private` fields, and one class per file, where the file name equals the class name. Do not write anemic data classes or free functions, and do not dispatch on the shape type with `switch` or `instanceof`.
-- Name-based dispatch exists in exactly two places, and both are marked `// 待重构`. `src/cli/CliProgram.ts` maps a command name to a command, and `src/domain/ShapeFactory.ts` maps a type name to a class.
+- The kernel (`src/`) has no list of concrete shapes, commands or plugins. Shape types, commands, tree decorators, attribute handlers and workspace observers are registered in `Registry` objects (`Catalog` and `Extensions`) and looked up by name. `src/builtin/` registers the Phase 1 shapes and commands.
+- A plugin is a workspace package in `plugins/`. Its default export is a `Plugin` class, and its `package.json` lists every registration under `contributes`. Adding a plugin must not change `src/`. Mode A lists it in `app/main.ts` and in `test/fixtures/assembly.config.json`; mode B lists it in `plugins.config.json`.
 - Containers and leaves support the same operations (Composite pattern).
-- Follow the Command pattern. A concrete command only forwards the request to its receiver (`SvgDocument` or `Workspace`). Validation and the spec's error messages live in the receiver. Undo stores the minimum prior state (`GeometryMemento`, `Placement`, or the old values). Never take a snapshot of the whole document.
+- Follow the Command pattern. A concrete command only forwards the request to its receiver (`SvgDocument`, `Workspace`, `TreeRenderer` or a plugin's receiver). Validation and the spec's error messages live in the receiver. Undo stores the minimum prior state (`GeometryMemento`, `Placement`, `AttributeEdit`, or the old values). Never take a snapshot of the whole document.
 - Commands are synchronous and never print. They return feedback lines, and only `src/cli/Repl.ts` and `app/main.ts` touch stdin and stdout.
 - Do not use deprecated APIs. Oxlint's `typescript/no-deprecated` rule fails the check when code uses one. Use the replacement that the deprecation notice names.
 
 ## Module boundaries (oxlint `no-restricted-imports` enforces them)
 
-| Module  | May import                                                               |
-| ------- | ------------------------------------------------------------------------ |
-| domain  | nothing: no `node:*`, no Bun, no packages                                |
-| io      | domain, `node:fs`, fast-xml-parser, fast-xml-validator, fast-xml-builder |
-| command | domain, io                                                               |
-| cli     | command, domain, commander, `node:*` except `node:fs`                    |
+| Module          | May import                                                               |
+| --------------- | ------------------------------------------------------------------------ |
+| `src/domain`    | nothing: no `node:*`, no Bun, no packages                                |
+| `src/io`        | domain, `node:fs`, fast-xml-parser, fast-xml-validator, fast-xml-builder |
+| `src/command`   | domain, io                                                               |
+| `src/cli`       | command, domain, commander, `node:*` except `node:fs`                    |
+| `src/builtin`   | domain, command; no libraries                                            |
+| `src/api`       | domain, command; plugins see it as `@svgframe/api`                       |
+| `app/` (host)   | every kernel module, `node:*`                                            |
+| `plugins/*/src` | `@svgframe/api` only; never another plugin; never `@svgframe/testing`    |
+| plugin tests    | `@svgframe/api` and `@svgframe/testing`                                  |
 
-Cross-module imports use the `#domain/...`, `#command/...`, `#io/...` and `#cli/...` aliases. Imports that start with `../` are banned.
+No module in `src/` may import `#host/...` or any `@svgframe/...` package. Cross-module imports use the `#domain/...`, `#command/...`, `#io/...`, `#cli/...`, `#builtin/...`, `#api/...`, `#host/...` and `#scripts/...` aliases. Imports that start with `../` are banned. `test/lint/ModuleRules.test.ts` proves each rule with a probe file.
 
 ## Workflow
 
