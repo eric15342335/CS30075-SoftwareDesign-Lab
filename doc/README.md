@@ -126,14 +126,14 @@ scripts/            度量脚本和基线脚本
 **ADR 2 box 的读回与子部件的保护。**
 
 - 背景：装了插件的编辑器读入 `<g data-kind="box">` 时，文件里的子部件可能缺失或类型不对。题目允许"拒绝整个读入"或"警告并降级"。
-- 决定：拒绝整个读入。`Box.loaded()` 在子节点读完以后检查，子节点必须正好是 `rect#<id>-rect` 和 `text#<id>-label`，否则报 `cannot read file: <路径> (box <id> needs exactly the parts …)`。文件里任何地方出现重复 id，也拒绝整个读入。读入失败时，原来的文档、路径、历史和 dirty 基线都不变。没装插件的编辑器把它读成普通 `g`，保存时保留 `data-kind`。
+- 决定：拒绝整个读入。`Box.loaded()` 在子节点读完以后检查，`rect#<id>-rect` 和 `text#<id>-label` 必须各出现一次，标签名也要对。两个部件的先后不限（`front` 和 `back` 可以调整它们），旁边也可以有别的子节点（box 本身是容器，可以再放图形或别的 box）。否则报 `cannot read file: <路径> (box <id> needs exactly the parts …)`。文件里任何地方出现重复 id，也拒绝整个读入。读入失败时，原来的文档、路径、历史和 dirty 基线都不变。没装插件的编辑器把它读成普通 `g`，保存时保留 `data-kind`。
 - 子部件的保护：`Box.holds(child)` 对两个子部件返回 true，`Box.dissolvable()` 返回 false。内核的 `SvgDocument` 因此拒绝 `delete`、`addto` 和 `group` 移走子部件（`cannot remove a part of a composite shape: <id>`），拒绝 `ungroup` 一个 box（`cannot ungroup composite shape: <id>`）。`move`、`scale` 和 `set` 只改属性，不破坏结构，所以允许。
 - 放弃的方案：降级为普通分组。降级以后，用户以为自己在编辑 box，`set n1 label` 却会报未知属性，这比直接报错更难理解。
 
 **ADR 3 dirty 的语义与祖先传播。**
 
-- 决定：按内容判定。`init`、`read` 或 `save` 成功时，`modified-star` 为每个 id 记下指纹（类型、父节点 id、属性、文本），再为根节点记下画布属性和全部 id 的顺序。树的一行与记下的指纹不同，或者是新节点，就加 `*`。指纹只用来比较，不是 undo 的快照。
-- 祖先不跟着标记：改了一个矩形，只有矩形那一行有 `*`。删除、调整顺序和移入别的容器会改变 id 的顺序，所以根节点那一行（`svg (800x600)`）也有 `*`。移入容器的图形本身也有 `*`，因为它的父节点变了。新建的节点立即有 `*`。
+- 决定：按内容判定。`init`、`read` 或 `save` 成功时，`modified-star` 为每个 id 记下指纹（类型、父节点 id、属性、文本），再为根节点记下画布属性，以及按文档顺序排列的每个 id 和它的父节点 id。树的一行与记下的指纹不同，或者是新节点，就加 `*`。指纹只用来比较，不是 undo 的快照。
+- 祖先不跟着标记：改了一个矩形，只有矩形那一行有 `*`。删除、调整顺序和移入别的容器都会改变根节点的指纹，所以根节点那一行（`svg (800x600)`）也有 `*`。即使移动以后文档顺序没变（例如把紧跟在 `g1` 后面的图形移进 `g1`），父节点 id 也变了。移入容器的图形本身也有 `*`，因为它的父节点变了。新建的节点立即有 `*`。
 - undo 回到保存时的内容以后，`*` 消失，因为比较的是内容，不是"保存后有没有执行过命令"。注意：Phase 1 的规则不允许 undo 越过 `save`（`undo not allowed after io command`），所以只能在保存之后的编辑之间回到保存点。
 - 多个标签：同一行的标签按注册顺序用一个空格连接，写在对齐列之后，行尾没有空格。例如 `g#n1 (box) *`。对齐列只按没有标签的行计算，所以加标签不会移动其他列。
 - 放弃的方案：用"保存后执行过的命令数"判断。这样 undo 回到保存点时还会显示 `*`，而且无法知道是哪一行变了。
@@ -291,6 +291,12 @@ end note
 6. AI 写 `modified-star` 的测试时，假设 undo 可以越过 `save` 回到保存之前，测试因 `undo not allowed after io command` 失败。这是 Phase 1 的 IO 屏障，测试改成在保存之后的编辑之间回到保存点，ADR 3 也写明了这一点。AI 还以为 `canvas` 可以撤销，实际上它不进入历史，测试改用 `canvas 800` 恢复尺寸。
 7. 方式 A 接入 `modified-star` 以后，第 6 节和第 6.1 节版本 A 的原文对照失败，因为 `tree` 多了 `*`。AI 把这两项对照改为 `--no-plugins` 运行，这也是题目对基础兼容性的要求。
 8. AI 运行 Stryker 变异测试时，沙箱里有 6 个测试失败，都是"同一个类出现了两份"的错误。原因是 Stryker 不把 `tsconfig.json` 复制进沙箱，Bun 就找到了上两级真实项目的配置，`@svgframe/api` 指向了真实的 `src/`；插件的 workspace 链接也指向真实目录。AI 第一次只在沙箱里单独安装依赖，没有解决；第二次加上复制 `tsconfig.json` 才解决（`scripts/stryker-sandbox.ts`）。
+9. 第 3 至 6 阶段完成后，AI 请 Codex（gpt-6.2-sol，最高推理强度，只读）评审 `8262d32..49756d7` 的改动。它报告了 11 条意见，AI 逐条复现、筛选：
+   - 采纳并修正 7 条：嵌套了别的 box、或者用 `front` 调整过部件顺序的 box，保存以后读不回来；一个 id 写成 `n1-rect text#n1-label` 的矩形能冒充两个部件；把紧跟在 `g1` 后面的图形移进 `g1` 时，文档顺序不变，`modified-star` 漏标了根节点；`set … label` 的测试只在 undo 之后检查文字，改不了文字的处理器也能通过；`dir` 的历史测试没有覆盖"undo 之后、redo 之前"执行 `dir` 的情况；`tree <id>` 的测试没有期望根行出现 `*`；度量把 VSCode 扩展的测试算进了 CLI 的测试，现在单独列出。每条修正都有对应的测试或回归测试。
+   - 不采纳 4 条：
+     - "`p2` tag 和最后的提交不在远程仓库"：推送和打 tag 要等我确认，这是计划中的最后一步。
+     - "box 的标题读回后丢掉首尾空格"：这是 Phase 1 读入器对所有 `<text>` 的处理，与 box 无关，改它会改变 Phase 1 的读回行为。
+     - `dir` 的空格和配置出错时的提示：附录 A 第 2 条和第 6 条已说明。
 
 ## 3 第一部分：VSCode 扩展
 
@@ -485,9 +491,9 @@ $ rg -n "import|require|switch" app/host
 
 ## 6 质量保证
 
-- 测试：`bun run check` 依次运行格式检查、oxlint（含模块边界规则）、类型检查（CLI 和 VSCode 扩展各一次）、knip 和带覆盖率阈值的测试。在 tag `p2` 之前的最后一次运行中，35 个测试文件共 272 个测试全部通过。
+- 测试：`bun run check` 依次运行格式检查、oxlint（含模块边界规则）、类型检查（CLI 和 VSCode 扩展各一次）、knip 和带覆盖率阈值的测试。在 tag `p2` 之前的最后一次运行中，35 个测试文件共 278 个测试全部通过。
 - 覆盖率：行覆盖率 99.97%，函数覆盖率 99.93%（`bunfig.toml` 设了阈值，低于阈值时 `check` 失败）。测试用的夹具插件不计入。
-- 变异测试：`bun run mutation` 用 Stryker 对 `src/`、`app/host/` 和 `plugins/*/src/` 生成变异体，每个变异体运行一次 `bun test`。共 1851 个变异体，杀死 1699 个，变异分数 91.79%。按目录：内核 `src/` 92.36%，`app/host/` 90.73%，插件合计 89.96%（`stats` 100%、`modified-star` 96.43%、`dir` 88.64%、`box` 86.92%）。152 个存活的变异体中，条件表达式 43 个，字符串字面量 41 个，可选链 21 个，其余 47 个分散在各类变异中；没有逐个分析，这是留下的改进空间。报告在 `reports/mutation/index.html`，不提交到仓库。
+- 变异测试：`bun run mutation` 用 Stryker 对 `src/`、`app/host/` 和 `plugins/*/src/` 生成变异体，每个变异体运行一次 `bun test`。下面的数字来自 Codex 第二次评审之前的代码（提交 `0f992a1`）。共 1851 个变异体，杀死 1699 个，变异分数 91.79%。按目录：内核 `src/` 92.36%，`app/host/` 90.73%，插件合计 89.96%（`stats` 100%、`modified-star` 96.43%、`dir` 88.64%、`box` 86.92%）。152 个存活的变异体中，条件表达式 43 个，字符串字面量 41 个，可选链 21 个，其余 47 个分散在各类变异中；没有逐个分析，这是留下的改进空间。报告在 `reports/mutation/index.html`，不提交到仓库。
 - 每次提交前，lefthook 再检查一次格式、类型和 lint，commitlint 检查提交信息，提交都有 GPG 签名。
 
 ## 7 迭代报告：Phase 1 → Phase 2
@@ -504,7 +510,7 @@ $ rg -n "import|require|switch" app/host
 | 装配方式     | 只有代码                               | 方式 A（代码清单）、方式 B（配置文件）、`--no-plugins`                          |
 | 模块边界     | 约定                                   | oxlint 规则加探针测试                                                           |
 
-度量结果（文件职责、按"内核 / 装配处 / 插件"分类的行数、圈复杂度增量）在 `docs/metrics/`，由 `bun scripts/metrics.ts --from final --to HEAD` 从 git 历史生成。生成时的 HEAD 就是 tag `p2` 所在提交的父提交，两者的代码相同（度量提交只改 `docs/metrics/`），所以以后运行 `--to p2` 得到相同的数字。
+度量结果（文件职责、按"内核 / 装配处 / 插件"分类的行数、圈复杂度增量）在 `docs/metrics/`，由 `bun scripts/metrics.ts --from final --to HEAD` 从 git 历史生成。生成时的 HEAD 与 tag `p2` 所在的度量提交只差 `docs/metrics/`，代码相同，所以以后运行 `--to p2` 得到相同的数字。VSCode 扩展（包括它的测试）单独列为一类，不计入 CLI 的测试。
 
 | 类别   | 文件数  | 非空行      | 圈复杂度合计 |
 | ------ | ------- | ----------- | ------------ |
