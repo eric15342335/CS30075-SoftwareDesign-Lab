@@ -1,8 +1,5 @@
-import { afterAll, expect, test } from 'bun:test';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { stripVTControlCharacters } from 'node:util';
+import { expect, test } from 'bun:test';
+import { writeFileSync } from 'node:fs';
 
 import { CliProgram } from '#cli/CliProgram.ts';
 import { CommandExecutor } from '#command/CommandExecutor.ts';
@@ -10,18 +7,17 @@ import { Workspace } from '#command/Workspace.ts';
 import { Assembly } from '#host/Assembly.ts';
 import { PluginConfig } from '#host/PluginConfig.ts';
 import { PluginHost } from '#host/PluginHost.ts';
+import { CliProcess } from '#test/support/CliProcess.ts';
 import { MemorySource } from '#test/support/MemorySource.ts';
+import { repo } from '#test/support/Paths.ts';
 import { Session } from '#test/support/Session.ts';
+import { TempFolder } from '#test/support/TempFolder.ts';
 
-const configs = join(import.meta.dir, '..', 'fixtures', 'configs');
-const failures = join(configs, 'failures.config.json');
-const main = join(import.meta.dir, '..', '..', 'app', 'main.ts');
-const dir = mkdtempSync(join(tmpdir(), 'svg-config-'));
-afterAll(() => rmSync(dir, { recursive: true, force: true }));
+const failures = repo.fixture('configs', 'failures.config.json');
 
-/** Writes a config file with the text into the temporary folder and returns its path. */
-function config(name: string, text: string): string {
-  const path = join(dir, name);
+/** Writes a config file with the text into the folder and returns its path. */
+function config(folder: TempFolder, name: string, text: string): string {
+  const path = folder.file(name);
   writeFileSync(path, text);
   return path;
 }
@@ -74,7 +70,8 @@ test.each([
     'entry 2 has no module',
   ],
 ])('the config %s is refused as a whole, so no plugin loads', (name, text, reason) => {
-  const path = text === null ? join(dir, name) : config(name, text);
+  using folder = new TempFolder();
+  const path = text === null ? folder.file(name) : config(folder, name, text);
   const assembly = Assembly.from(['--config', path], []);
   expect(assembly.sources).toEqual([]);
   expect(assembly.problems).toEqual([`invalid plugin config: ${path} (${reason})`]);
@@ -82,7 +79,7 @@ test.each([
 
 test('the command line picks mode A, mode B or no plugins', () => {
   const shipped = [new MemorySource('shipped', { name: 'shipped' }, {})];
-  const empty = config('empty-list.json', '{ "plugins": [] }');
+  const empty = repo.fixture('configs', 'empty.config.json');
   expect(Assembly.from([], shipped).sources).toBe(shipped);
   expect(Assembly.from(['--config', empty], shipped).sources).toEqual([]);
   expect(Assembly.from(['--no-plugins', '--config', failures], shipped).sources).toEqual([]);
@@ -92,13 +89,11 @@ test('the command line picks mode A, mode B or no plugins', () => {
 });
 
 test('the real program loads a config from another folder and prints the problems after the banner', async () => {
-  const child = Bun.spawn([process.execPath, main, '--config', failures], {
-    cwd: dir,
-    stdin: new Blob(['init\ntree\n']),
-  });
-  const output = stripVTControlCharacters(await new Response(child.stdout).text());
-  expect(await child.exited).toBe(0);
-  expect(output.split('\n')).toEqual([
+  using folder = new TempFolder();
+  const cli = new CliProcess();
+  const { stdout, code } = await cli.run(['--config', failures], 'init\ntree\n', folder.path);
+  expect(code).toBe(0);
+  expect(stdout.split('\n')).toEqual([
     "svg-editor 0.1 — type 'help' for commands",
     ...expected.map((line) => `error: ${line}`),
     '',

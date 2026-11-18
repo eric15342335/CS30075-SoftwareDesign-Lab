@@ -1,5 +1,8 @@
-import { copyFileSync, mkdirSync, readFileSync, readdirSync, rmSync } from 'node:fs';
-import { join } from 'node:path';
+import { copyFileSync, readFileSync, readdirSync } from 'node:fs';
+
+import { CliProcess } from '#test/support/CliProcess.ts';
+import { repo } from '#test/support/Paths.ts';
+import { TempFolder } from '#test/support/TempFolder.ts';
 
 /** The stdout of one run and the text of each file that the session saved, by file name. */
 export interface TranscriptResult {
@@ -9,38 +12,28 @@ export interface TranscriptResult {
 
 /**
  * TranscriptRunner runs a script of commands through a real entry point, like
- * `bun app/main.ts < doc/transcript/cli-1.txt`. Every run uses the same working folder, which it
- * empties and fills with the seed files first, so two runs see the same folder. Stdout stays in
- * memory and never lands in that folder.
+ * `bun app/main.ts < doc/transcript/cli-1.txt`. Each run gets a new working folder that holds
+ * only the seed files, and it returns the files that the session saved there.
  */
 export class TranscriptRunner {
-  static readonly #fixtures = join(import.meta.dir, '..', 'fixtures');
   /** The files that every session finds in its working folder. */
   static readonly #seeds = ['other.svg'];
-  readonly #cwd: string;
+  readonly #process: CliProcess;
 
-  constructor(cwd: string) {
-    this.#cwd = cwd;
+  constructor(entry = repo.main) {
+    this.#process = new CliProcess(entry);
   }
 
-  async run(entry: string, args: string[], input: string): Promise<TranscriptResult> {
-    rmSync(this.#cwd, { recursive: true, force: true });
-    mkdirSync(this.#cwd, { recursive: true });
-    for (const seed of TranscriptRunner.#seeds) {
-      copyFileSync(join(TranscriptRunner.#fixtures, seed), join(this.#cwd, seed));
-    }
-    // Colours would make the bytes depend on the terminal, so the child gets none.
-    const { FORCE_COLOR: _, ...env } = process.env;
-    const child = Bun.spawn([process.execPath, entry, ...args], {
-      cwd: this.#cwd,
-      env: { ...env, NO_COLOR: '1' },
-      stdin: new Blob([input]),
-    });
-    const stdout = await new Response(child.stdout).text();
-    if ((await child.exited) !== 0) throw new Error(`${entry} exited with an error`);
-    const saved = readdirSync(this.#cwd).filter((name) => !TranscriptRunner.#seeds.includes(name));
+  async run(args: string[], input: string): Promise<TranscriptResult> {
+    using folder = new TempFolder();
+    for (const seed of TranscriptRunner.#seeds) copyFileSync(repo.fixture(seed), folder.file(seed));
+    const { stdout, code } = await this.#process.run(args, input, folder.path);
+    if (code !== 0) throw new Error(`the program exited with code ${code}`);
+    const saved = readdirSync(folder.path).filter(
+      (name) => !TranscriptRunner.#seeds.includes(name),
+    );
     const files = Object.fromEntries(
-      saved.toSorted().map((name) => [name, readFileSync(join(this.#cwd, name), 'utf8')]),
+      saved.toSorted().map((name) => [name, readFileSync(folder.file(name), 'utf8')]),
     );
     return { stdout, files };
   }

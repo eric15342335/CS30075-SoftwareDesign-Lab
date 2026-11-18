@@ -5,16 +5,14 @@
 //
 // The script checks out `final` into .baseline/final inside the repository, so that the old code
 // finds the same node_modules, and removes the worktree again at the end.
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, rmdirSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, readFileSync, rmSync, rmdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { repo } from '#test/support/Paths.ts';
 import { TranscriptRunner } from '#test/support/TranscriptRunner.ts';
 
-const root = join(import.meta.dir, '..');
-const transcripts = join(root, 'doc', 'transcript');
+const { root, transcripts } = repo;
 const worktree = join(root, '.baseline', 'final');
-const scratch = mkdtempSync(join(tmpdir(), 'svg-baseline-'));
 const git = (...args: string[]): void => {
   const result = Bun.spawnSync(['git', ...args], {
     cwd: root,
@@ -26,12 +24,11 @@ const git = (...args: string[]): void => {
 
 git('worktree', 'add', '--detach', worktree, 'final');
 try {
-  const runner = new TranscriptRunner(join(scratch, 'cwd'));
+  const runner = new TranscriptRunner(join(worktree, 'src', 'main.ts'));
   for (const name of ['cli-1', 'cli-2']) {
     const input = readFileSync(join(transcripts, `${name}.txt`), 'utf8');
-    // The runs share one working folder, so they must not overlap.
     // oxlint-disable-next-line no-await-in-loop
-    const result = await runner.run(join(worktree, 'src', 'main.ts'), [], input);
+    const result = await runner.run([], input);
     const expected = join(transcripts, 'expected', name);
     rmSync(expected, { recursive: true, force: true });
     mkdirSync(expected, { recursive: true });
@@ -48,5 +45,4 @@ try {
   } catch {
     // .baseline holds other files, so it stays.
   }
-  rmSync(scratch, { recursive: true, force: true });
 }
