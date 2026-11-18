@@ -511,7 +511,7 @@
   },
   "to": {
     "ref": "HEAD",
-    "commit": "cbf8909",
+    "commit": "2a8f5b3",
     "files": [
       {
         "path": "app/host/Assembly.ts",
@@ -596,8 +596,8 @@
       {
         "path": "plugins/command-dir/src/DirPlugin.test.ts",
         "role": "tests",
-        "lines": 67,
-        "functions": 11,
+        "lines": 63,
+        "functions": 12,
         "complexity": 12,
         "responsibility": ""
       },
@@ -636,9 +636,9 @@
       {
         "path": "plugins/command-dir/src/DirectoryListing.test.ts",
         "role": "tests",
-        "lines": 51,
+        "lines": 55,
         "functions": 11,
-        "complexity": 12,
+        "complexity": 13,
         "responsibility": ""
       },
       {
@@ -653,8 +653,8 @@
         "path": "plugins/command-dir/src/NodeDirectory.test.ts",
         "role": "tests",
         "lines": 39,
-        "functions": 9,
-        "complexity": 9,
+        "functions": 8,
+        "complexity": 8,
         "responsibility": ""
       },
       {
@@ -708,15 +708,15 @@
       {
         "path": "plugins/shape-box/src/Box.ts",
         "role": "plugins",
-        "lines": 66,
-        "functions": 13,
-        "complexity": 22,
+        "lines": 72,
+        "functions": 15,
+        "complexity": 24,
         "responsibility": "Box is a titled rectangle: a container on the tag g that owns two parts, the rect <id>-rect and the text <id>-label."
       },
       {
         "path": "plugins/shape-box/src/BoxAttributes.ts",
         "role": "plugins",
-        "lines": 35,
+        "lines": 36,
         "functions": 5,
         "complexity": 10,
         "responsibility": "BoxAttributes gives two attributes of a box their meaning."
@@ -724,9 +724,9 @@
       {
         "path": "plugins/shape-box/src/BoxPlugin.test.ts",
         "role": "tests",
-        "lines": 184,
-        "functions": 33,
-        "complexity": 40,
+        "lines": 185,
+        "functions": 32,
+        "complexity": 39,
         "responsibility": ""
       },
       {
@@ -748,7 +748,7 @@
       {
         "path": "plugins/shape-box/src/BoxTypeLabel.ts",
         "role": "plugins",
-        "lines": 8,
+        "lines": 9,
         "functions": 2,
         "complexity": 3,
         "responsibility": "BoxTypeLabel adds \"(box)\" to the tree row of a box, whose element is a plain g."
@@ -756,9 +756,9 @@
       {
         "path": "plugins/tree-star/src/ModifiedStar.test.ts",
         "role": "tests",
-        "lines": 88,
-        "functions": 16,
-        "complexity": 17,
+        "lines": 105,
+        "functions": 15,
+        "complexity": 16,
         "responsibility": ""
       },
       {
@@ -780,7 +780,7 @@
       {
         "path": "scripts/baseline.ts",
         "role": "scripts",
-        "lines": 49,
+        "lines": 47,
         "functions": 1,
         "complexity": 2,
         "responsibility": "Records the output of the tag `final` (Phase 1) for the transcripts in doc/transcript/."
@@ -788,7 +788,7 @@
       {
         "path": "scripts/metrics.ts",
         "role": "scripts",
-        "lines": 47,
+        "lines": 48,
         "functions": 3,
         "complexity": 6,
         "responsibility": "Writes docs/metrics/ from the git history: the file list with responsibilities, the lines split into kernel, assembly and plugins, and the change in cyclomatic complexity between two refs."
@@ -892,7 +892,7 @@
       {
         "path": "src/cli/CliProgram.ts",
         "role": "kernel",
-        "lines": 107,
+        "lines": 108,
         "functions": 17,
         "complexity": 28,
         "responsibility": "CliProgram is the client in the Command pattern."
@@ -1244,9 +1244,9 @@
       {
         "path": "src/domain/Decimal.ts",
         "role": "kernel",
-        "lines": 43,
+        "lines": 45,
         "functions": 10,
-        "complexity": 12,
+        "complexity": 13,
         "responsibility": "Decimal is an immutable value object for every number that the editor handles."
       },
       {
@@ -1364,9 +1364,9 @@
       {
         "path": "src/domain/SvgDocument.ts",
         "role": "kernel",
-        "lines": 210,
-        "functions": 32,
-        "complexity": 64,
+        "lines": 219,
+        "functions": 35,
+        "complexity": 68,
         "responsibility": "SvgDocument is the receiver of every edit command."
       },
       {
@@ -1380,9 +1380,9 @@
       {
         "path": "src/io/SvgReader.ts",
         "role": "kernel",
-        "lines": 204,
+        "lines": 207,
         "functions": 27,
-        "complexity": 64,
+        "complexity": 66,
         "responsibility": "SvgReader turns SVG text into a document."
       },
       {
@@ -1396,7 +1396,7 @@
       {
         "path": "test/cli/CliProgram.test.ts",
         "role": "tests",
-        "lines": 162,
+        "lines": 158,
         "functions": 22,
         "complexity": 23,
         "responsibility": ""
@@ -1428,9 +1428,9 @@
       {
         "path": "test/command/DocumentCommands.test.ts",
         "role": "tests",
-        "lines": 99,
-        "functions": 17,
-        "complexity": 17,
+        "lines": 100,
+        "functions": 16,
+        "complexity": 16,
         "responsibility": ""
       },
       {
@@ -1460,7 +1460,7 @@
       {
         "path": "test/command/UndoRedo.property.test.ts",
         "role": "tests",
-        "lines": 106,
+        "lines": 111,
         "functions": 24,
         "complexity": 30,
         "responsibility": ""
@@ -1468,9 +1468,9 @@
       {
         "path": "test/command/WorkspaceObservers.test.ts",
         "role": "tests",
-        "lines": 55,
-        "functions": 7,
-        "complexity": 7,
+        "lines": 53,
+        "functions": 6,
+        "complexity": 6,
         "responsibility": ""
       },
       {
@@ -1492,7 +1492,7 @@
       {
         "path": "test/domain/CompositeShapes.test.ts",
         "role": "tests",
-        "lines": 105,
+        "lines": 114,
         "functions": 26,
         "complexity": 30,
         "responsibility": ""
@@ -1516,41 +1516,33 @@
       {
         "path": "test/domain/SvgDocument.test.ts",
         "role": "tests",
-        "lines": 284,
-        "functions": 68,
-        "complexity": 71,
+        "lines": 291,
+        "functions": 71,
+        "complexity": 74,
         "responsibility": ""
       },
       {
         "path": "test/e2e/Assembly.test.ts",
         "role": "tests",
-        "lines": 65,
-        "functions": 8,
-        "complexity": 8,
+        "lines": 67,
+        "functions": 7,
+        "complexity": 7,
         "responsibility": ""
       },
       {
         "path": "test/e2e/BoxSession.test.ts",
         "role": "tests",
-        "lines": 70,
-        "functions": 11,
-        "complexity": 16,
-        "responsibility": ""
-      },
-      {
-        "path": "test/e2e/Plugins.test.ts",
-        "role": "tests",
-        "lines": 23,
-        "functions": 2,
-        "complexity": 2,
+        "lines": 52,
+        "functions": 4,
+        "complexity": 7,
         "responsibility": ""
       },
       {
         "path": "test/e2e/Transcripts.test.ts",
         "role": "tests",
-        "lines": 78,
-        "functions": 11,
-        "complexity": 14,
+        "lines": 37,
+        "functions": 3,
+        "complexity": 3,
         "responsibility": ""
       },
       {
@@ -1594,14 +1586,6 @@
         "responsibility": ""
       },
       {
-        "path": "test/fixtures/plugins/spike/src/index.ts",
-        "role": "tests",
-        "lines": 3,
-        "functions": 0,
-        "complexity": 0,
-        "responsibility": ""
-      },
-      {
         "path": "test/fixtures/plugins/throws-on-load/src/index.ts",
         "role": "tests",
         "lines": 5,
@@ -1612,9 +1596,9 @@
       {
         "path": "test/host/PluginConfig.test.ts",
         "role": "tests",
-        "lines": 103,
-        "functions": 9,
-        "complexity": 10,
+        "lines": 98,
+        "functions": 8,
+        "complexity": 9,
         "responsibility": ""
       },
       {
@@ -1626,43 +1610,51 @@
         "responsibility": ""
       },
       {
+        "path": "test/host/PluginLoader.test.ts",
+        "role": "tests",
+        "lines": 18,
+        "functions": 3,
+        "complexity": 3,
+        "responsibility": ""
+      },
+      {
         "path": "test/io/SvgReader.test.ts",
         "role": "tests",
-        "lines": 170,
-        "functions": 23,
-        "complexity": 23,
+        "lines": 182,
+        "functions": 24,
+        "complexity": 24,
         "responsibility": ""
       },
       {
         "path": "test/io/SvgWriter.test.ts",
         "role": "tests",
-        "lines": 53,
-        "functions": 6,
-        "complexity": 6,
+        "lines": 51,
+        "functions": 5,
+        "complexity": 5,
         "responsibility": ""
       },
       {
         "path": "test/lint/ModuleRules.test.ts",
         "role": "tests",
-        "lines": 54,
-        "functions": 6,
-        "complexity": 11,
+        "lines": 95,
+        "functions": 4,
+        "complexity": 12,
         "responsibility": ""
       },
       {
         "path": "test/scripts/Metrics.test.ts",
         "role": "tests",
         "lines": 142,
-        "functions": 10,
-        "complexity": 13,
+        "functions": 9,
+        "complexity": 12,
         "responsibility": ""
       },
       {
-        "path": "test/spike/PluginPackages.test.ts",
+        "path": "test/support/CliProcess.ts",
         "role": "tests",
-        "lines": 58,
-        "functions": 6,
-        "complexity": 9,
+        "lines": 32,
+        "functions": 2,
+        "complexity": 4,
         "responsibility": ""
       },
       {
@@ -1687,6 +1679,14 @@
         "lines": 35,
         "functions": 4,
         "complexity": 10,
+        "responsibility": ""
+      },
+      {
+        "path": "test/support/Paths.ts",
+        "role": "tests",
+        "lines": 22,
+        "functions": 2,
+        "complexity": 2,
         "responsibility": ""
       },
       {
@@ -1722,9 +1722,25 @@
         "responsibility": ""
       },
       {
+        "path": "test/support/SpecTranscript.ts",
+        "role": "tests",
+        "lines": 29,
+        "functions": 7,
+        "complexity": 9,
+        "responsibility": ""
+      },
+      {
+        "path": "test/support/TempFolder.ts",
+        "role": "tests",
+        "lines": 20,
+        "functions": 4,
+        "complexity": 4,
+        "responsibility": ""
+      },
+      {
         "path": "test/support/Testing.ts",
         "role": "tests",
-        "lines": 4,
+        "lines": 5,
         "functions": 0,
         "complexity": 0,
         "responsibility": ""
@@ -1732,8 +1748,8 @@
       {
         "path": "test/support/TranscriptRunner.ts",
         "role": "tests",
-        "lines": 43,
-        "functions": 6,
+        "lines": 39,
+        "functions": 5,
         "complexity": 8,
         "responsibility": ""
       },

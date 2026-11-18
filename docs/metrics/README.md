@@ -1,17 +1,17 @@
 # 度量：final → HEAD
 
-本文件由 `bun scripts/metrics.ts --from final --to HEAD` 生成，请勿手改。final = `3084d36`，HEAD = `cbf8909`。行数只数非空行。圈复杂度由 oxlint 的 `eslint/complexity` 规则逐个单元给出（单元是函数、方法、访问器、构造器、箭头函数和类字段初始化器），再按文件和类别求和。
+本文件由 `bun scripts/metrics.ts --from final --to HEAD` 生成，请勿手改。final = `3084d36`，HEAD = `2a8f5b3`。行数只数非空行。圈复杂度由 oxlint 的 `eslint/complexity` 规则逐个单元给出（单元是函数、方法、访问器、构造器、箭头函数和类字段初始化器），再按文件和类别求和。
 
 ## 按类别汇总
 
 | 类别 | 文件数 | 非空行 | 单元数 | 圈复杂度合计 |
 | --- | --- | --- | --- | --- |
-| 内核 | 47 → 69 (+22) | 1821 → 2432 (+611) | 316 → 382 (+66) | 475 → 597 (+122) |
+| 内核 | 47 → 69 (+22) | 1821 → 2447 (+626) | 316 → 385 (+69) | 475 → 604 (+129) |
 | 装配处 | 1 → 9 (+8) | 8 → 426 (+418) | 0 → 63 (+63) | 0 → 122 (+122) |
-| 插件 | 0 → 18 (+18) | 0 → 377 (+377) | 0 → 63 (+63) | 0 → 92 (+92) |
+| 插件 | 0 → 18 (+18) | 0 → 385 (+385) | 0 → 65 (+65) | 0 → 94 (+94) |
 | VSCode 扩展 | 0 → 9 (+9) | 0 → 318 (+318) | 0 → 45 (+45) | 0 → 80 (+80) |
-| 脚本 | 0 → 8 (+8) | 0 → 390 (+390) | 0 → 49 (+49) | 0 → 90 (+90) |
-| 测试 | 15 → 49 (+34) | 1634 → 3548 (+1914) | 276 → 598 (+322) | 299 → 678 (+379) |
+| 脚本 | 0 → 8 (+8) | 0 → 389 (+389) | 0 → 49 (+49) | 0 → 90 (+90) |
+| 测试 | 15 → 51 (+36) | 1634 → 3605 (+1971) | 276 → 586 (+310) | 299 → 666 (+367) |
 
 ## 圈复杂度增量（只列有变化的文件）
 
@@ -29,22 +29,22 @@
 | `plugins/command-dir/src/DirPlugin.test.ts` | 测试 | 0 | 12 | +12 |
 | `plugins/command-dir/src/DirPlugin.ts` | 插件 | 0 | 2 | +2 |
 | `plugins/command-dir/src/DirProvider.ts` | 插件 | 0 | 5 | +5 |
-| `plugins/command-dir/src/DirectoryListing.test.ts` | 测试 | 0 | 12 | +12 |
+| `plugins/command-dir/src/DirectoryListing.test.ts` | 测试 | 0 | 13 | +13 |
 | `plugins/command-dir/src/DirectoryListing.ts` | 插件 | 0 | 10 | +10 |
-| `plugins/command-dir/src/NodeDirectory.test.ts` | 测试 | 0 | 9 | +9 |
+| `plugins/command-dir/src/NodeDirectory.test.ts` | 测试 | 0 | 8 | +8 |
 | `plugins/command-dir/src/NodeDirectory.ts` | 插件 | 0 | 4 | +4 |
 | `plugins/command-stats/src/ShapeStatistics.ts` | 插件 | 0 | 7 | +7 |
 | `plugins/command-stats/src/StatsCommand.ts` | 插件 | 0 | 2 | +2 |
 | `plugins/command-stats/src/StatsPlugin.test.ts` | 测试 | 0 | 8 | +8 |
 | `plugins/command-stats/src/StatsPlugin.ts` | 插件 | 0 | 1 | +1 |
 | `plugins/command-stats/src/StatsProvider.ts` | 插件 | 0 | 4 | +4 |
-| `plugins/shape-box/src/Box.ts` | 插件 | 0 | 22 | +22 |
+| `plugins/shape-box/src/Box.ts` | 插件 | 0 | 24 | +24 |
 | `plugins/shape-box/src/BoxAttributes.ts` | 插件 | 0 | 10 | +10 |
-| `plugins/shape-box/src/BoxPlugin.test.ts` | 测试 | 0 | 40 | +40 |
+| `plugins/shape-box/src/BoxPlugin.test.ts` | 测试 | 0 | 39 | +39 |
 | `plugins/shape-box/src/BoxPlugin.ts` | 插件 | 0 | 2 | +2 |
 | `plugins/shape-box/src/BoxProvider.ts` | 插件 | 0 | 3 | +3 |
 | `plugins/shape-box/src/BoxTypeLabel.ts` | 插件 | 0 | 3 | +3 |
-| `plugins/tree-star/src/ModifiedStar.test.ts` | 测试 | 0 | 17 | +17 |
+| `plugins/tree-star/src/ModifiedStar.test.ts` | 测试 | 0 | 16 | +16 |
 | `plugins/tree-star/src/ModifiedStar.ts` | 插件 | 0 | 14 | +14 |
 | `plugins/tree-star/src/ModifiedStarPlugin.ts` | 插件 | 0 | 1 | +1 |
 | `scripts/baseline.ts` | 脚本 | 0 | 2 | +2 |
@@ -71,42 +71,49 @@
 | `src/domain/BasicShapeProvider.ts` | 内核 | 0 | 2 | +2 |
 | `src/domain/Canvas.ts` | 内核 | 12 | 13 | +1 |
 | `src/domain/Catalog.ts` | 内核 | 0 | 19 | +19 |
+| `src/domain/Decimal.ts` | 内核 | 12 | 13 | +1 |
 | `src/domain/Group.ts` | 内核 | 21 | 23 | +2 |
 | `src/domain/Registry.ts` | 内核 | 0 | 10 | +10 |
 | `src/domain/Shape.ts` | 内核 | 44 | 53 | +9 |
 | `src/domain/ShapeFactory.ts` | 内核 | 6 | 0 | -6 |
 | `src/domain/StandardAttributes.ts` | 内核 | 0 | 2 | +2 |
-| `src/domain/SvgDocument.ts` | 内核 | 53 | 64 | +11 |
-| `src/io/SvgReader.ts` | 内核 | 63 | 64 | +1 |
+| `src/domain/SvgDocument.ts` | 内核 | 53 | 68 | +15 |
+| `src/io/SvgReader.ts` | 内核 | 63 | 66 | +3 |
 | `test/cli/CliProgram.test.ts` | 测试 | 17 | 23 | +6 |
 | `test/cli/Repl.test.ts` | 测试 | 11 | 12 | +1 |
+| `test/command/DocumentCommands.test.ts` | 测试 | 17 | 16 | -1 |
 | `test/command/TreeDecorators.test.ts` | 测试 | 0 | 14 | +14 |
-| `test/command/WorkspaceObservers.test.ts` | 测试 | 0 | 7 | +7 |
+| `test/command/WorkspaceObservers.test.ts` | 测试 | 0 | 6 | +6 |
 | `test/domain/AttributeHandlers.test.ts` | 测试 | 0 | 30 | +30 |
 | `test/domain/Catalog.test.ts` | 测试 | 0 | 12 | +12 |
 | `test/domain/CompositeShapes.test.ts` | 测试 | 0 | 30 | +30 |
-| `test/e2e/Assembly.test.ts` | 测试 | 0 | 8 | +8 |
-| `test/e2e/BoxSession.test.ts` | 测试 | 0 | 16 | +16 |
-| `test/e2e/Plugins.test.ts` | 测试 | 0 | 2 | +2 |
-| `test/e2e/Transcripts.test.ts` | 测试 | 12 | 14 | +2 |
+| `test/domain/SvgDocument.test.ts` | 测试 | 71 | 74 | +3 |
+| `test/e2e/Assembly.test.ts` | 测试 | 0 | 7 | +7 |
+| `test/e2e/BoxSession.test.ts` | 测试 | 0 | 7 | +7 |
+| `test/e2e/Transcripts.test.ts` | 测试 | 12 | 3 | -9 |
 | `test/fixtures/plugins/bad-activate/src/index.ts` | 测试 | 0 | 4 | +4 |
 | `test/fixtures/plugins/duplicate/src/index.ts` | 测试 | 0 | 1 | +1 |
 | `test/fixtures/plugins/mark/src/index.ts` | 测试 | 0 | 3 | +3 |
 | `test/fixtures/plugins/mismatch/src/index.ts` | 测试 | 0 | 2 | +2 |
 | `test/fixtures/plugins/throws-on-load/src/index.ts` | 测试 | 0 | 1 | +1 |
-| `test/host/PluginConfig.test.ts` | 测试 | 0 | 10 | +10 |
+| `test/host/PluginConfig.test.ts` | 测试 | 0 | 9 | +9 |
 | `test/host/PluginHost.test.ts` | 测试 | 0 | 51 | +51 |
-| `test/io/SvgReader.test.ts` | 测试 | 19 | 23 | +4 |
-| `test/lint/ModuleRules.test.ts` | 测试 | 0 | 11 | +11 |
-| `test/scripts/Metrics.test.ts` | 测试 | 0 | 13 | +13 |
-| `test/spike/PluginPackages.test.ts` | 测试 | 0 | 9 | +9 |
+| `test/host/PluginLoader.test.ts` | 测试 | 0 | 3 | +3 |
+| `test/io/SvgReader.test.ts` | 测试 | 19 | 24 | +5 |
+| `test/io/SvgWriter.test.ts` | 测试 | 6 | 5 | -1 |
+| `test/lint/ModuleRules.test.ts` | 测试 | 0 | 12 | +12 |
+| `test/scripts/Metrics.test.ts` | 测试 | 0 | 12 | +12 |
+| `test/support/CliProcess.ts` | 测试 | 0 | 4 | +4 |
 | `test/support/EchoProvider.ts` | 测试 | 0 | 4 | +4 |
 | `test/support/FixedDecorator.ts` | 测试 | 0 | 2 | +2 |
 | `test/support/MemorySource.ts` | 测试 | 0 | 10 | +10 |
+| `test/support/Paths.ts` | 测试 | 0 | 2 | +2 |
 | `test/support/PluginHarness.ts` | 测试 | 0 | 5 | +5 |
 | `test/support/RecordingObserver.ts` | 测试 | 0 | 7 | +7 |
 | `test/support/ScriptedHandler.ts` | 测试 | 0 | 4 | +4 |
 | `test/support/Session.ts` | 测试 | 12 | 16 | +4 |
+| `test/support/SpecTranscript.ts` | 测试 | 0 | 9 | +9 |
+| `test/support/TempFolder.ts` | 测试 | 0 | 4 | +4 |
 | `test/support/TranscriptRunner.ts` | 测试 | 0 | 8 | +8 |
 | `vscode-extension/integration/Badge.itest.ts` | VSCode 扩展 | 0 | 10 | +10 |
 | `vscode-extension/integration/Outline.itest.ts` | VSCode 扩展 | 0 | 21 | +21 |
@@ -142,15 +149,15 @@
 | `plugins/command-stats/src/StatsCommand.ts` | 插件 | 16 | 2 | StatsCommand forwards `stats` to its receiver. |
 | `plugins/command-stats/src/StatsPlugin.ts` | 插件 | 8 | 1 | The stats plugin adds the `stats` command, which counts the shapes of the document by type. |
 | `plugins/command-stats/src/StatsProvider.ts` | 插件 | 12 | 4 | Registers the `stats` command. |
-| `plugins/shape-box/src/Box.ts` | 插件 | 66 | 22 | Box is a titled rectangle: a container on the tag g that owns two parts, the rect <id>-rect and the text <id>-label. |
-| `plugins/shape-box/src/BoxAttributes.ts` | 插件 | 35 | 10 | BoxAttributes gives two attributes of a box their meaning. |
+| `plugins/shape-box/src/Box.ts` | 插件 | 72 | 24 | Box is a titled rectangle: a container on the tag g that owns two parts, the rect <id>-rect and the text <id>-label. |
+| `plugins/shape-box/src/BoxAttributes.ts` | 插件 | 36 | 10 | BoxAttributes gives two attributes of a box their meaning. |
 | `plugins/shape-box/src/BoxPlugin.ts` | 插件 | 16 | 2 | The box plugin adds the shape type box, the attribute handler for its fill and label, and the "(box)" tree label. |
 | `plugins/shape-box/src/BoxProvider.ts` | 插件 | 13 | 3 | Registers the shape type "box". |
-| `plugins/shape-box/src/BoxTypeLabel.ts` | 插件 | 8 | 3 | BoxTypeLabel adds "(box)" to the tree row of a box, whose element is a plain g. |
+| `plugins/shape-box/src/BoxTypeLabel.ts` | 插件 | 9 | 3 | BoxTypeLabel adds "(box)" to the tree row of a box, whose element is a plain g. |
 | `plugins/tree-star/src/ModifiedStar.ts` | 插件 | 50 | 14 | ModifiedStar adds "*" to a row of `tree` when the shape changed since the document was last opened or saved (ADR 3). |
 | `plugins/tree-star/src/ModifiedStarPlugin.ts` | 插件 | 13 | 1 | The modified-star plugin marks the rows of `tree` that differ from the last opened or saved document. |
-| `scripts/baseline.ts` | 脚本 | 49 | 2 | Records the output of the tag `final` (Phase 1) for the transcripts in doc/transcript/. |
-| `scripts/metrics.ts` | 脚本 | 47 | 6 | Writes docs/metrics/ from the git history: the file list with responsibilities, the lines split into kernel, assembly and plugins, and the change in cyclomatic complexity between two refs. |
+| `scripts/baseline.ts` | 脚本 | 47 | 2 | Records the output of the tag `final` (Phase 1) for the transcripts in doc/transcript/. |
+| `scripts/metrics.ts` | 脚本 | 48 | 6 | Writes docs/metrics/ from the git history: the file list with responsibilities, the lines split into kernel, assembly and plugins, and the change in cyclomatic complexity between two refs. |
 | `scripts/metrics/FileMetric.ts` | 脚本 | 17 | 0 | What the metrics know about one file of one tree. |
 | `scripts/metrics/MetricsReport.ts` | 脚本 | 108 | 33 | The measured files of one git ref. |
 | `scripts/metrics/Role.ts` | 脚本 | 2 | 0 | The categories that the metrics count apart. |
@@ -163,7 +170,7 @@
 | `src/builtin/BuiltinCommandProvider.ts` | 内核 | 23 | 2 | A command provider for one built-in verb. |
 | `src/builtin/BuiltinCommands.ts` | 内核 | 173 | 45 | The 19 commands of Phase 1, in the order that `help` lists them. |
 | `src/builtin/BuiltinShapes.ts` | 内核 | 22 | 3 | The six shape types of Phase 1. |
-| `src/cli/CliProgram.ts` | 内核 | 107 | 28 | CliProgram is the client in the Command pattern. |
+| `src/cli/CliProgram.ts` | 内核 | 108 | 28 | CliProgram is the client in the Command pattern. |
 | `src/cli/Repl.ts` | 内核 | 67 | 21 | Repl is the read-eval-print loop. |
 | `src/command/AddtoCommand.ts` | 内核 | 29 | 7 | AddtoCommand moves a shape to the end of a container. |
 | `src/command/BackCommand.ts` | 内核 | 23 | 5 | BackCommand paints a shape below its siblings. |
@@ -207,7 +214,7 @@
 | `src/domain/Canvas.ts` | 内核 | 44 | 13 | Canvas is the `<svg>` root. |
 | `src/domain/Catalog.ts` | 内核 | 47 | 19 | Catalog holds the shape types and the attribute handlers that the document knows. |
 | `src/domain/Circle.ts` | 内核 | 8 | 2 | A circle with a center (cx, cy) and a radius r. |
-| `src/domain/Decimal.ts` | 内核 | 43 | 12 | Decimal is an immutable value object for every number that the editor handles. |
+| `src/domain/Decimal.ts` | 内核 | 45 | 13 | Decimal is an immutable value object for every number that the editor handles. |
 | `src/domain/EditorError.ts` | 内核 | 7 | 1 | An EditorError reports a mistake by the user. |
 | `src/domain/Ellipse.ts` | 内核 | 8 | 2 | An ellipse with a center (cx, cy) and the radii rx and ry. |
 | `src/domain/GeometryMemento.ts` | 内核 | 17 | 3 | Holds the exact geometry of one leaf. |
@@ -222,9 +229,9 @@
 | `src/domain/Shape.ts` | 内核 | 164 | 53 | The positional parameters of `create <type> <id> ...`. |
 | `src/domain/ShapeProvider.ts` | 内核 | 11 | 0 | Extension point 1. |
 | `src/domain/StandardAttributes.ts` | 内核 | 17 | 2 | The default attribute rule. |
-| `src/domain/SvgDocument.ts` | 内核 | 210 | 64 | SvgDocument is the receiver of every edit command. |
+| `src/domain/SvgDocument.ts` | 内核 | 219 | 68 | SvgDocument is the receiver of every edit command. |
 | `src/domain/Text.ts` | 内核 | 33 | 11 | In SVG, the content is the element's child text, so it counts as an attribute only for `set`. |
-| `src/io/SvgReader.ts` | 内核 | 204 | 64 | SvgReader turns SVG text into a document. |
+| `src/io/SvgReader.ts` | 内核 | 207 | 66 | SvgReader turns SVG text into a document. |
 | `src/io/SvgWriter.ts` | 内核 | 45 | 8 | SvgWriter writes a document as indented SVG text. |
 | `vscode-extension/integration/Badge.itest.ts` | VSCode 扩展 | 32 | 10 |  |
 | `vscode-extension/integration/Outline.itest.ts` | VSCode 扩展 | 65 | 21 |  |
@@ -240,52 +247,54 @@
 
 | 文件 | 非空行 |
 | --- | --- |
-| `plugins/command-dir/src/DirPlugin.test.ts` | 67 |
-| `plugins/command-dir/src/DirectoryListing.test.ts` | 51 |
+| `plugins/command-dir/src/DirPlugin.test.ts` | 63 |
+| `plugins/command-dir/src/DirectoryListing.test.ts` | 55 |
 | `plugins/command-dir/src/NodeDirectory.test.ts` | 39 |
 | `plugins/command-stats/src/StatsPlugin.test.ts` | 44 |
-| `plugins/shape-box/src/BoxPlugin.test.ts` | 184 |
-| `plugins/tree-star/src/ModifiedStar.test.ts` | 88 |
-| `test/cli/CliProgram.test.ts` | 162 |
+| `plugins/shape-box/src/BoxPlugin.test.ts` | 185 |
+| `plugins/tree-star/src/ModifiedStar.test.ts` | 105 |
+| `test/cli/CliProgram.test.ts` | 158 |
 | `test/cli/Repl.test.ts` | 88 |
 | `test/command/CommandExecutor.test.ts` | 112 |
 | `test/command/DisplayCommands.test.ts` | 76 |
-| `test/command/DocumentCommands.test.ts` | 99 |
+| `test/command/DocumentCommands.test.ts` | 100 |
 | `test/command/EditCommands.test.ts` | 81 |
 | `test/command/StructureCommands.test.ts` | 65 |
 | `test/command/TreeDecorators.test.ts` | 50 |
-| `test/command/UndoRedo.property.test.ts` | 106 |
-| `test/command/WorkspaceObservers.test.ts` | 55 |
+| `test/command/UndoRedo.property.test.ts` | 111 |
+| `test/command/WorkspaceObservers.test.ts` | 53 |
 | `test/domain/AttributeHandlers.test.ts` | 118 |
 | `test/domain/Catalog.test.ts` | 67 |
-| `test/domain/CompositeShapes.test.ts` | 105 |
+| `test/domain/CompositeShapes.test.ts` | 114 |
 | `test/domain/Decimal.test.ts` | 26 |
 | `test/domain/Shapes.test.ts` | 244 |
-| `test/domain/SvgDocument.test.ts` | 284 |
-| `test/e2e/Assembly.test.ts` | 65 |
-| `test/e2e/BoxSession.test.ts` | 70 |
-| `test/e2e/Plugins.test.ts` | 23 |
-| `test/e2e/Transcripts.test.ts` | 78 |
+| `test/domain/SvgDocument.test.ts` | 291 |
+| `test/e2e/Assembly.test.ts` | 67 |
+| `test/e2e/BoxSession.test.ts` | 52 |
+| `test/e2e/Transcripts.test.ts` | 37 |
 | `test/fixtures/plugins/bad-activate/src/index.ts` | 14 |
 | `test/fixtures/plugins/duplicate/src/index.ts` | 8 |
 | `test/fixtures/plugins/mark/src/index.ts` | 9 |
 | `test/fixtures/plugins/mismatch/src/index.ts` | 7 |
 | `test/fixtures/plugins/no-default/src/index.ts` | 2 |
-| `test/fixtures/plugins/spike/src/index.ts` | 3 |
 | `test/fixtures/plugins/throws-on-load/src/index.ts` | 5 |
-| `test/host/PluginConfig.test.ts` | 103 |
+| `test/host/PluginConfig.test.ts` | 98 |
 | `test/host/PluginHost.test.ts` | 209 |
-| `test/io/SvgReader.test.ts` | 170 |
-| `test/io/SvgWriter.test.ts` | 53 |
-| `test/lint/ModuleRules.test.ts` | 54 |
+| `test/host/PluginLoader.test.ts` | 18 |
+| `test/io/SvgReader.test.ts` | 182 |
+| `test/io/SvgWriter.test.ts` | 51 |
+| `test/lint/ModuleRules.test.ts` | 95 |
 | `test/scripts/Metrics.test.ts` | 142 |
-| `test/spike/PluginPackages.test.ts` | 58 |
+| `test/support/CliProcess.ts` | 32 |
 | `test/support/EchoProvider.ts` | 15 |
 | `test/support/FixedDecorator.ts` | 14 |
 | `test/support/MemorySource.ts` | 35 |
+| `test/support/Paths.ts` | 22 |
 | `test/support/PluginHarness.ts` | 29 |
 | `test/support/RecordingObserver.ts` | 22 |
 | `test/support/ScriptedHandler.ts` | 26 |
 | `test/support/Session.ts` | 76 |
-| `test/support/Testing.ts` | 4 |
-| `test/support/TranscriptRunner.ts` | 43 |
+| `test/support/SpecTranscript.ts` | 29 |
+| `test/support/TempFolder.ts` | 20 |
+| `test/support/Testing.ts` | 5 |
+| `test/support/TranscriptRunner.ts` | 39 |

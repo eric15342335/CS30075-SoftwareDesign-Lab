@@ -484,9 +484,9 @@ $ rg -n "import|require|switch" app/host
 
 ## 6 质量保证
 
-- 测试：`bun run check` 依次运行格式检查、oxlint（含模块边界规则）、类型检查（CLI 和 VSCode 扩展各一次）、knip 和带覆盖率阈值的测试。在 tag `p2` 之前的最后一次运行中，35 个测试文件共 278 个测试全部通过。
+- 测试：`bun run check` 依次运行格式检查、oxlint（含模块边界规则）、类型检查（CLI 和 VSCode 扩展各一次）、knip 和带覆盖率阈值的测试。34 个测试文件共 272 个测试全部通过。VSCode 扩展的 9 个集成测试在 VS Code 1.146.0 里全部通过。
 - 覆盖率：行覆盖率 99.97%，函数覆盖率 99.93%（`bunfig.toml` 设了阈值，低于阈值时 `check` 失败）。测试用的夹具插件不计入。
-- 变异测试：`bun run mutation` 用 Stryker 对 `src/`、`app/host/` 和 `plugins/*/src/` 生成变异体，每个变异体运行一次 `bun test`。下面的数字来自 Codex 第二次评审之前的代码（提交 `0f992a1`）。共 1851 个变异体，杀死 1699 个，变异分数 91.79%。按目录：内核 `src/` 92.36%，`app/host/` 90.73%，插件合计 89.96%（`stats` 100%、`modified-star` 96.43%、`dir` 88.64%、`box` 86.92%）。152 个存活的变异体中，条件表达式 43 个，字符串字面量 41 个，可选链 21 个，其余 47 个分散在各类变异中；没有逐个分析，这是留下的改进空间。报告在 `reports/mutation/index.html`，不提交到仓库。
+- 变异测试：`bun run mutation` 用 Stryker 对 `src/`、`app/host/` 和 `plugins/*/src/` 生成变异体，每个变异体运行一次 `bun test`。共 1878 个变异体，杀死 1721 个，变异分数 91.64%。按目录：内核 `src/` 92.19%，`app/host/` 90.73%，插件合计 89.74%（`stats` 100%、`modified-star` 93.33%、`dir` 88.64%、`box` 87.22%）。157 个存活的变异体没有逐个分析。报告在 `reports/mutation/index.html`，不提交到仓库。
 - 每次提交前，lefthook 再检查一次格式、类型和 lint，commitlint 检查提交信息，提交都有 GPG 签名。
 
 ## 7 迭代报告：Phase 1 → Phase 2
@@ -503,15 +503,15 @@ $ rg -n "import|require|switch" app/host
 | 装配方式     | 只有代码                               | 方式 A（代码清单）、方式 B（配置文件）、`--no-plugins`                          |
 | 模块边界     | 约定                                   | oxlint 规则加探针测试                                                           |
 
-度量结果（文件职责、按"内核 / 装配处 / 插件"分类的行数、圈复杂度增量）在 `docs/metrics/`，由 `bun scripts/metrics.ts --from final --to HEAD` 从 git 历史生成。生成时的 HEAD 与 tag `p2` 所在的度量提交只差 `docs/metrics/`，代码相同，所以以后运行 `--to p2` 得到相同的数字。VSCode 扩展（包括它的测试）单独列为一类，不计入 CLI 的测试。
+度量结果（文件职责、按"内核 / 装配处 / 插件"分类的行数、圈复杂度增量）在 `docs/metrics/`，由 `bun scripts/metrics.ts --from final --to HEAD` 从 git 历史生成。tag `p2` 打在度量提交上，它与生成时的 HEAD 只差 `docs/metrics/`，所以 `--to p2` 得到相同的数字。VSCode 扩展和它的测试单独列为一类，不计入 CLI。
 
 | 类别   | 文件数  | 非空行      | 圈复杂度合计 |
 | ------ | ------- | ----------- | ------------ |
-| 内核   | 47 → 69 | 1821 → 2432 | 475 → 597    |
+| 内核   | 47 → 69 | 1821 → 2447 | 475 → 604    |
 | 装配处 | 1 → 9   | 8 → 426     | 0 → 122      |
-| 插件   | 0 → 18  | 0 → 377     | 0 → 92       |
+| 插件   | 0 → 18  | 0 → 385     | 0 → 94       |
 
-内核增加的代码主要是四个扩展点、注册表和 `builtin/`。之后接入四个插件时，内核的数字没有再变化。
+内核增加的代码主要是四个扩展点、注册表和 `builtin/`。接入四个插件的提交都没有改内核（5.1 节）。
 
 ## 附录 A 题目未明确之处与本实现的约定
 
