@@ -33,6 +33,10 @@
       "name": "@svgframe/plugin-stats",
       "version": "0.1.0",
     },
+    "plugins/shape-box": {
+      "name": "@svgframe/plugin-shape-box",
+      "version": "0.1.0",
+    },
     "test/fixtures/plugins/bad-activate": {
       "name": "@svgframe/fixture-bad-activate",
       "version": "0.0.0",
@@ -452,6 +456,8 @@
     "@svgframe/fixture-throws-on-load": ["@svgframe/fixture-throws-on-load@workspace:test/fixtures/plugins/throws-on-load"],
 
     "@svgframe/plugin-dir": ["@svgframe/plugin-dir@workspace:plugins/command-dir"],
+
+    "@svgframe/plugin-shape-box": ["@svgframe/plugin-shape-box@workspace:plugins/shape-box"],
 
     "@svgframe/plugin-stats": ["@svgframe/plugin-stats@workspace:plugins/command-stats"],
 
