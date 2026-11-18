@@ -5,7 +5,7 @@
 //
 // The script checks out `final` into .baseline/final inside the repository, so that the old code
 // finds the same node_modules, and removes the worktree again at the end.
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, rmdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -43,6 +43,10 @@ try {
   }
 } finally {
   git('worktree', 'remove', '--force', worktree);
-  rmSync(join(root, '.baseline'), { recursive: true, force: true });
+  try {
+    rmdirSync(join(root, '.baseline'));
+  } catch {
+    // .baseline holds other files, so it stays.
+  }
   rmSync(scratch, { recursive: true, force: true });
 }
