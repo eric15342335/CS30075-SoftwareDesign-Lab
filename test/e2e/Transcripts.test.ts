@@ -35,8 +35,8 @@ function normalize(text: string): string[] {
 }
 
 // The transcripts are copied word for word from the spec (section 6 and version A of section 6.1).
-// Each one runs the real program, as `bun run cli < script` would, in a new directory that holds
-// other.svg.
+// Each one runs the real program, as `bun run cli --no-plugins < script` would, in a new directory
+// that holds other.svg. Phase 1 text has no tree labels, so the plugins stay off.
 test.each([
   ['session.txt', 'demo.svg'],
   ['flowchart.txt', 'flowchart.svg'],
@@ -45,7 +45,7 @@ test.each([
   dirs.push(dir);
   copyFileSync(join(fixtures, 'other.svg'), join(dir, 'other.svg'));
   const transcript = readFileSync(join(fixtures, name), 'utf8');
-  const child = Bun.spawn([process.execPath, main], {
+  const child = Bun.spawn([process.execPath, main, '--no-plugins'], {
     cwd: dir,
     stdin: new Blob([script(transcript)]),
   });
