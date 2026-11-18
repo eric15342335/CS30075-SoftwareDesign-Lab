@@ -3,7 +3,14 @@
   "testRunner": "command",
   "commandRunner": { "command": "bun test" },
   "coverageAnalysis": "off",
-  "mutate": ["src/**/*.ts", "!src/main.ts"],
+  "mutate": [
+    "src/**/*.ts",
+    "app/**/*.ts",
+    "plugins/*/src/**/*.ts",
+    "!src/main.ts",
+    "!app/main.ts",
+    "!**/*.test.ts"
+  ],
   "ignorePatterns": ["/tsconfig.json"],
   "reporters": ["clear-text", "progress", "html", "json"],
   "htmlReporter": { "fileName": "reports/mutation/index.html" },

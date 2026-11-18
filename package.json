@@ -4,6 +4,8 @@
   "private": true,
   "description": "CS30075 Lab1 Phase 1: an SVG editor driven from the command line",
   "workspaces": [
+    "plugins/*",
+    "test/fixtures/plugins/*",
     "vscode-extension"
   ],
   "type": "module",
@@ -12,6 +14,7 @@
     "#command/*": "./src/command/*",
     "#io/*": "./src/io/*",
     "#cli/*": "./src/cli/*",
+    "#api/*": "./src/api/*",
     "#test/*": "./test/*"
   },
   "scripts": {

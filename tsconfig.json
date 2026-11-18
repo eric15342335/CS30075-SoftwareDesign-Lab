@@ -18,7 +18,11 @@
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "@svgframe/api": ["./src/api/index.ts"],
+      "@svgframe/testing": ["./test/support/Testing.ts"]
+    }
   },
-  "include": ["src", "test"]
+  "include": ["src", "test", "app", "plugins", "scripts"]
 }

@@ -31,7 +31,7 @@
         "patterns": [
           {
             "regex": "^\\.\\./",
-            "message": "Cross-module imports must use the #domain/ #command/ #io/ #cli/ aliases."
+            "message": "Imports must use the #domain/ #command/ #io/ #cli/ #builtin/ #api/ aliases, or @svgframe/api in a plugin."
           }
         ]
       }
@@ -39,10 +39,39 @@
   },
   "overrides": [
     {
-      "files": ["src/**/*.ts"],
-      "excludeFiles": ["src/main.ts"],
+      "files": ["src/**/*.ts", "app/**/*.ts", "plugins/*/src/**/*.ts"],
+      "excludeFiles": ["src/api/index.ts", "app/main.ts", "src/main.ts"],
       "rules": {
-        "unicorn/filename-case": ["error", { "case": "pascalCase" }]
+        "unicorn/filename-case": [
+          "error",
+          {
+            "case": "pascalCase"
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "regex": "^\\.\\./",
+                "message": "Imports must use the #domain/ #command/ #io/ #cli/ #builtin/ #api/ aliases, or @svgframe/api in a plugin."
+              },
+              {
+                "regex": "^#host/",
+                "message": "The kernel must not depend on the assembly code in app/."
+              },
+              {
+                "regex": "^@svgframe/",
+                "message": "The kernel must not depend on plugins or on the plugin API package name."
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -54,10 +83,18 @@
             "patterns": [
               {
                 "regex": "^\\.\\./",
-                "message": "Cross-module imports must use the #domain/ #command/ #io/ #cli/ aliases."
+                "message": "Imports must use the #domain/ #command/ #io/ #cli/ #builtin/ #api/ aliases, or @svgframe/api in a plugin."
               },
               {
-                "regex": "^#(command|io|cli)/",
+                "regex": "^#host/",
+                "message": "The kernel must not depend on the assembly code in app/."
+              },
+              {
+                "regex": "^@svgframe/",
+                "message": "The kernel must not depend on plugins or on the plugin API package name."
+              },
+              {
+                "regex": "^#(command|io|cli|builtin|api)/",
                 "message": "domain must not depend on any other module."
               },
               {
@@ -78,10 +115,18 @@
             "patterns": [
               {
                 "regex": "^\\.\\./",
-                "message": "Cross-module imports must use the #domain/ #command/ #io/ #cli/ aliases."
+                "message": "Imports must use the #domain/ #command/ #io/ #cli/ #builtin/ #api/ aliases, or @svgframe/api in a plugin."
               },
               {
-                "regex": "^#(command|cli)/",
+                "regex": "^#host/",
+                "message": "The kernel must not depend on the assembly code in app/."
+              },
+              {
+                "regex": "^@svgframe/",
+                "message": "The kernel must not depend on plugins or on the plugin API package name."
+              },
+              {
+                "regex": "^#(command|cli|builtin|api)/",
                 "message": "io may only depend on domain."
               },
               {
@@ -102,11 +147,19 @@
             "patterns": [
               {
                 "regex": "^\\.\\./",
-                "message": "Cross-module imports must use the #domain/ #command/ #io/ #cli/ aliases."
+                "message": "Imports must use the #domain/ #command/ #io/ #cli/ #builtin/ #api/ aliases, or @svgframe/api in a plugin."
               },
               {
-                "regex": "^#cli/",
-                "message": "command must not depend on cli."
+                "regex": "^#host/",
+                "message": "The kernel must not depend on the assembly code in app/."
+              },
+              {
+                "regex": "^@svgframe/",
+                "message": "The kernel must not depend on plugins or on the plugin API package name."
+              },
+              {
+                "regex": "^#(cli|builtin|api)/",
+                "message": "command must not depend on cli, builtin or api."
               },
               {
                 "regex": "^(node:|bun(:|$)|commander$|@commander-js/|fast-xml-)",
@@ -126,15 +179,75 @@
             "patterns": [
               {
                 "regex": "^\\.\\./",
-                "message": "Cross-module imports must use the #domain/ #command/ #io/ #cli/ aliases."
+                "message": "Imports must use the #domain/ #command/ #io/ #cli/ #builtin/ #api/ aliases, or @svgframe/api in a plugin."
               },
               {
-                "regex": "^#io/",
-                "message": "cli reaches files only through commands."
+                "regex": "^#host/",
+                "message": "The kernel must not depend on the assembly code in app/."
+              },
+              {
+                "regex": "^@svgframe/",
+                "message": "The kernel must not depend on plugins or on the plugin API package name."
+              },
+              {
+                "regex": "^#(io|builtin|api)/",
+                "message": "cli reaches files only through commands, and commands only through the registry."
               },
               {
                 "regex": "^(node:fs|fast-xml-)",
                 "message": "cli does not touch files or XML."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["plugins/**/*.ts", "test/fixtures/plugins/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "regex": "^\\.\\./",
+                "message": "Imports must use the #domain/ #command/ #io/ #cli/ #builtin/ #api/ aliases, or @svgframe/api in a plugin."
+              },
+              {
+                "regex": "^#",
+                "message": "A plugin may import the kernel only through @svgframe/api."
+              },
+              {
+                "regex": "^@svgframe/plugin-",
+                "message": "A plugin must not depend on another plugin."
+              },
+              {
+                "regex": "^@svgframe/testing$",
+                "message": "Only plugin tests may use the test doubles."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["plugins/**/*.test.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "regex": "^\\.\\./",
+                "message": "Imports must use the #domain/ #command/ #io/ #cli/ #builtin/ #api/ aliases, or @svgframe/api in a plugin."
+              },
+              {
+                "regex": "^#",
+                "message": "A plugin may import the kernel only through @svgframe/api."
+              },
+              {
+                "regex": "^@svgframe/plugin-",
+                "message": "A plugin must not depend on another plugin."
               }
             ]
           }
