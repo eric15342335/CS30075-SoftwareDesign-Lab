@@ -51,30 +51,6 @@
       }
     },
     {
-      "files": ["src/**/*.ts"],
-      "rules": {
-        "no-restricted-imports": [
-          "error",
-          {
-            "patterns": [
-              {
-                "regex": "^\\.\\./",
-                "message": "Imports must use the #domain/ #command/ #io/ #cli/ #builtin/ #api/ aliases, or @svgframe/api in a plugin."
-              },
-              {
-                "regex": "^#host/",
-                "message": "The kernel must not depend on the assembly code in app/."
-              },
-              {
-                "regex": "^@svgframe/",
-                "message": "The kernel must not depend on plugins or on the plugin API package name."
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
       "files": ["src/domain/**/*.ts"],
       "rules": {
         "no-restricted-imports": [
@@ -82,24 +58,8 @@
           {
             "patterns": [
               {
-                "regex": "^\\.\\./",
-                "message": "Imports must use the #domain/ #command/ #io/ #cli/ #builtin/ #api/ aliases, or @svgframe/api in a plugin."
-              },
-              {
-                "regex": "^#host/",
-                "message": "The kernel must not depend on the assembly code in app/."
-              },
-              {
-                "regex": "^@svgframe/",
-                "message": "The kernel must not depend on plugins or on the plugin API package name."
-              },
-              {
-                "regex": "^#(command|io|cli|builtin|api)/",
-                "message": "domain must not depend on any other module."
-              },
-              {
-                "regex": "^(node:|bun(:|$)|commander$|@commander-js/|fast-xml-)",
-                "message": "domain does no IO and uses no libraries."
+                "group": ["*", "!#domain/*"],
+                "message": "domain imports only domain: no IO, no libraries."
               }
             ]
           }
@@ -114,24 +74,16 @@
           {
             "patterns": [
               {
-                "regex": "^\\.\\./",
-                "message": "Imports must use the #domain/ #command/ #io/ #cli/ #builtin/ #api/ aliases, or @svgframe/api in a plugin."
-              },
-              {
-                "regex": "^#host/",
-                "message": "The kernel must not depend on the assembly code in app/."
-              },
-              {
-                "regex": "^@svgframe/",
-                "message": "The kernel must not depend on plugins or on the plugin API package name."
-              },
-              {
-                "regex": "^#(command|cli|builtin|api)/",
-                "message": "io may only depend on domain."
-              },
-              {
-                "regex": "^(bun(:|$)|commander$)",
-                "message": "io uses node:fs and the fast-xml packages only."
+                "group": [
+                  "*",
+                  "!#domain/*",
+                  "!#io/*",
+                  "!node:fs",
+                  "!fast-xml-parser",
+                  "!fast-xml-validator",
+                  "!fast-xml-builder"
+                ],
+                "message": "io imports only domain, node:fs and the fast-xml packages."
               }
             ]
           }
@@ -146,24 +98,8 @@
           {
             "patterns": [
               {
-                "regex": "^\\.\\./",
-                "message": "Imports must use the #domain/ #command/ #io/ #cli/ #builtin/ #api/ aliases, or @svgframe/api in a plugin."
-              },
-              {
-                "regex": "^#host/",
-                "message": "The kernel must not depend on the assembly code in app/."
-              },
-              {
-                "regex": "^@svgframe/",
-                "message": "The kernel must not depend on plugins or on the plugin API package name."
-              },
-              {
-                "regex": "^#(cli|builtin|api)/",
-                "message": "command must not depend on cli, builtin or api."
-              },
-              {
-                "regex": "^(node:|bun(:|$)|commander$|@commander-js/|fast-xml-)",
-                "message": "command reaches files and XML only through io."
+                "group": ["*", "!#domain/*", "!#io/*", "!#command/*"],
+                "message": "command imports only domain and io."
               }
             ]
           }
@@ -178,24 +114,17 @@
           {
             "patterns": [
               {
-                "regex": "^\\.\\./",
-                "message": "Imports must use the #domain/ #command/ #io/ #cli/ #builtin/ #api/ aliases, or @svgframe/api in a plugin."
-              },
-              {
-                "regex": "^#host/",
-                "message": "The kernel must not depend on the assembly code in app/."
-              },
-              {
-                "regex": "^@svgframe/",
-                "message": "The kernel must not depend on plugins or on the plugin API package name."
-              },
-              {
-                "regex": "^#(io|builtin|api)/",
-                "message": "cli reaches files only through commands, and commands only through the registry."
-              },
-              {
-                "regex": "^(node:fs|fast-xml-)",
-                "message": "cli does not touch files or XML."
+                "group": [
+                  "*",
+                  "!#domain/*",
+                  "!#command/*",
+                  "!#cli/*",
+                  "!commander",
+                  "!@commander-js/*",
+                  "!node:*",
+                  "node:fs"
+                ],
+                "message": "cli imports only command, domain, commander and node:* modules other than node:fs."
               }
             ]
           }
@@ -210,24 +139,24 @@
           {
             "patterns": [
               {
-                "regex": "^\\.\\./",
-                "message": "Imports must use the #domain/ #command/ #io/ #cli/ #builtin/ #api/ aliases, or @svgframe/api in a plugin."
-              },
+                "group": ["*", "!#domain/*", "!#command/*", "!#builtin/*"],
+                "message": "builtin imports only domain and command, and no libraries."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/api/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
               {
-                "regex": "^#host/",
-                "message": "The kernel must not depend on the assembly code in app/."
-              },
-              {
-                "regex": "^@svgframe/",
-                "message": "The kernel must not depend on plugins or on the plugin API package name."
-              },
-              {
-                "regex": "^#(cli|io|api)/",
-                "message": "builtin may only depend on domain and command."
-              },
-              {
-                "regex": "^(node:|bun(:|$)|commander$|@commander-js/|fast-xml-)",
-                "message": "builtin uses no libraries."
+                "group": ["*", "!#domain/*", "!#command/*", "!#api/*"],
+                "message": "api imports only domain and command."
               }
             ]
           }
@@ -242,20 +171,8 @@
           {
             "patterns": [
               {
-                "regex": "^\\.\\./",
-                "message": "Imports must use the #domain/ #command/ #io/ #cli/ #builtin/ #api/ aliases, or @svgframe/api in a plugin."
-              },
-              {
-                "regex": "^#",
-                "message": "A plugin may import the kernel only through @svgframe/api."
-              },
-              {
-                "regex": "^@svgframe/plugin-",
-                "message": "A plugin must not depend on another plugin."
-              },
-              {
-                "regex": "^@svgframe/testing$",
-                "message": "Only plugin tests may use the test doubles."
+                "group": ["*", "!@svgframe/api", "!node:*", "!./*"],
+                "message": "A plugin imports only @svgframe/api, node:* modules and its own files."
               }
             ]
           }
@@ -270,16 +187,15 @@
           {
             "patterns": [
               {
-                "regex": "^\\.\\./",
-                "message": "Imports must use the #domain/ #command/ #io/ #cli/ #builtin/ #api/ aliases, or @svgframe/api in a plugin."
-              },
-              {
-                "regex": "^#",
-                "message": "A plugin may import the kernel only through @svgframe/api."
-              },
-              {
-                "regex": "^@svgframe/plugin-",
-                "message": "A plugin must not depend on another plugin."
+                "group": [
+                  "*",
+                  "!@svgframe/api",
+                  "!@svgframe/testing",
+                  "!bun:test",
+                  "!node:*",
+                  "!./*"
+                ],
+                "message": "A plugin test imports only @svgframe/api, @svgframe/testing, bun:test, node:* modules and its own files."
               }
             ]
           }
