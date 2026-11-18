@@ -27,18 +27,19 @@ const run = (command: string[], cwd: string): string => {
 
 const scratch = mkdtempSync(join(tmpdir(), 'svg-metrics-'));
 try {
-  const snapshot = (ref: string, listed: boolean): Snapshot => {
-    const tree = join(scratch, ref.replaceAll(/[^\w.-]/g, '_'));
+  // Each side gets a fixed folder name, because a ref such as `HEAD~1` or `a/b` is no folder name.
+  const snapshot = (side: 'from' | 'to', ref: string, listed: boolean): Snapshot => {
+    const tree = join(scratch, side);
     mkdirSync(tree);
     run(['git', 'archive', '--format=tar', '-o', `${tree}.tar`, ref], root);
     // A relative archive path keeps tar from reading "C:" as a remote host.
-    run(['tar', '-xf', `../${ref.replaceAll(/[^\w.-]/g, '_')}.tar`], tree);
+    run(['tar', '-xf', `../${side}.tar`], tree);
     const files = new TreeMetrics(tree, new RoleMap(ref), listed).measure();
     return { ref, commit: run(['git', 'rev-parse', '--short', `${ref}^{commit}`], root), files };
   };
   const report = new MetricsReport(
-    snapshot(option('--from', 'final'), false),
-    snapshot(option('--to', 'HEAD'), true),
+    snapshot('from', option('--from', 'final'), false),
+    snapshot('to', option('--to', 'HEAD'), true),
   );
   const out = join(root, 'docs', 'metrics');
   mkdirSync(out, { recursive: true });
