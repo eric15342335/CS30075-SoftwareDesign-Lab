@@ -48,6 +48,7 @@ test.each(['cli-1', 'cli-2'])(
   async (name) => {
     const codeAssembly = await runner.run(main, [], input(name));
     expect(await runner.run(main, ['--config', assembly], input(name))).toEqual(codeAssembly);
+    expect(await runner.run(main, ['--config', shipped], input(name))).toEqual(codeAssembly);
   },
 );
 
@@ -60,16 +61,13 @@ test.each([[[]], [['--config', assembly]], [['--config', shipped]]])(
   },
 );
 
-// Version B of spec 6.1 uses box, and its tree rows get the labels of every shipped plugin. The
-// code assembly and the shipped plugins.config.json must print and save the same bytes.
-test('version B of spec 6.1 prints and saves the same bytes in mode A and with plugins.config.json', async () => {
-  const session = readFileSync(join(root, 'test', 'fixtures', 'flowchart-box.txt'), 'utf8')
-    .split(/\r?\n/)
-    .filter((line) => /^(?:svg> |#)/.test(line))
-    .map((line) => line.replace(/^svg> /, ''))
-    .join('\n');
+// cli-4 is version B of spec 6.1. It uses box, and its tree rows get the labels of every shipped
+// plugin. test/e2e/BoxSession.test.ts checks it against the spec text with box alone.
+test('cli-4 (version B of spec 6.1) prints and saves the same bytes in every assembly', async () => {
+  const session = input('cli-4');
   const codeAssembly = await runner.run(main, [], session);
   expect(codeAssembly.stdout).toContain('    ├── g#n1 (box) *\n');
   expect(Object.keys(codeAssembly.files)).toEqual(['flowchart-box.svg']);
+  expect(await runner.run(main, ['--config', assembly], session)).toEqual(codeAssembly);
   expect(await runner.run(main, ['--config', shipped], session)).toEqual(codeAssembly);
 });
