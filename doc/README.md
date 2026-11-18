@@ -90,3 +90,82 @@ scripts/            度量脚本和基线脚本
 2. 第二轮由 gpt-6.2-astra（中等推理强度）评审一次、gpt-6.2-sol（高推理强度）评审两次，再由 Opus 5.5 筛选。被采纳的主要意见有：方式 A 改为惰性导入，让导入失败也落在回滚边界之内；`Decimal` 的字符串只保留 6 位小数，所以属性备忘录必须保存原来的准确值；观察者抛错时要单独捕获。
 3. 没有采纳的意见也记了下来。例如，有评审建议保留 Phase 1 读入时对重复 id 的自动改名，但题目要求重复 id 必须拒绝整个读入，我选择了全局拒绝。又如，有评审建议不要合并方式 A 的演示分支，但这个分支需要留在远程仓库里作为证据，所以仍然合并。
 4. 评审中有两处需要我决定：读入时出现重复 id 一律拒绝；`dir` 的输出采用题目示例中的格式（`[DIR]` 后两个空格，`[FILE]` 后一个空格），题目文字与示例的冲突记在附录 A。
+
+### 2.2 开发中发现并修正的问题
+
+1. VSCode 截图：我在截图时发现，VS Code 默认用图片预览打开 `.svg` 文件。这时大纲视图显示 "The active editor cannot provide outline information"，点击大纲节点也会重新打开图片预览，而不是跳到源码。原因是大纲只对文本编辑器生效。AI 在示例文件夹里加了 `sample/.vscode/settings.json`，把 `*.svg` 的默认编辑器设为文本编辑器，这样打开示例文件夹时不需要改全局设置。
+
+## 3 第一部分：VSCode 扩展
+
+扩展的源码在 `vscode-extension/` 中，它是一个独立的 bun workspace 包，有自己的 `tsconfig.json`。
+
+### 3.1 安装与启动
+
+1. 在仓库根目录运行 `bun install`。
+2. 在 `vscode-extension/` 中运行 `bun run build`，生成 `dist/extension.js`。
+3. 运行 `code --extensionDevelopmentPath=<仓库路径>/vscode-extension <仓库路径>/vscode-extension/sample`。也可以用 VS Code 打开 `vscode-extension/` 文件夹，再按 F5（配置在 `.vscode/launch.json` 中）。
+
+这样启动的是一个"扩展开发宿主"窗口。扩展只在这个窗口里加载，所以它不会出现在扩展视图的已安装列表中，关掉窗口以后也不会留下。
+
+注意：VS Code 默认用图片预览打开 `.svg` 文件，大纲视图只对文本编辑器生效。示例文件夹里的 `.vscode/settings.json` 已经把 `*.svg` 设为用文本编辑器打开。在其他文件夹里，可以右键文件，选择 "Open With…"，再选 "Text Editor"。
+
+测试：`bun test vscode-extension` 运行不依赖 VS Code 的单元测试。`vscode-extension/` 中的 `bun run test:integration` 在真实的 VS Code 扩展宿主里运行集成测试。如果本机已经装了 VS Code，可以用环境变量 `VSCODE_TEST_PATH` 指向 `Code.exe`，省去下载。CI 在 xvfb 下运行同一组集成测试。
+
+示例文件是 `vscode-extension/sample/example.svg`。
+
+### 3.2 原生大纲的行为（A.2 要求先观察）
+
+在写代码之前，我们先在禁用所有扩展的 VS Code 里打开了示例文件。VS Code 用图片预览打开它，大纲视图显示 "The active editor cannot provide outline information"。改用文本编辑器打开时，VS Code 自带的 XML 支持只有语法高亮，大纲视图仍然没有内容。所以 SVG 的大纲需要由扩展提供。
+
+![禁用扩展时，原生大纲没有内容](images/native-outline.png)
+
+### 3.3 运行效果
+
+Explorer 中 `example.svg` 的右侧显示 `[]`。文件夹 `assets` 和文本文件 `notes.txt` 没有这个标记，文件名也没有改变。（截图中的 `U` 是 Git 的"未跟踪"标记，与本扩展无关。）
+
+![SVG 文件标记](images/vscode-badge.png)
+
+大纲视图显示 SVG 的嵌套层级。有 id 的元素显示为 `标签名#id`，没有 id 的元素只显示标签名。选中 `rect#start` 以后，编辑器跳到第 3 行并选中这个元素。
+
+![SVG 大纲与源码定位](images/vscode-outline.png)
+
+### 3.4 VS Code 与插件的职责，以及注册和调用的过程
+
+VS Code 负责界面（Explorer、大纲视图、编辑器）、文件系统、文档的内容和扩展的生命周期。它决定什么时候需要数据，也负责把数据画出来。插件只回答 VS Code 的提问：某个文件要不要加标记，某个文档有哪些元素。
+
+注册和调用的过程如下：
+
+1. `package.json` 声明入口 `main` 和激活事件 `onStartupFinished`。VS Code 启动完成后，加载 `dist/extension.js` 并调用其中的 `activate(context)`。
+2. `activate` 调用 `window.registerFileDecorationProvider` 注册 `SvgBadgeProvider`，调用 `languages.registerDocumentSymbolProvider` 注册 `SvgOutlineProvider`。选择器是 `{ pattern: '**/*.svg' }`，所以不管编辑器为文件选了哪种语言模式，只要文件名匹配就生效。
+3. 两个注册调用都返回 `Disposable`。`activate` 把它们放进 `context.subscriptions`，扩展停止时 VS Code 会注销它们。
+4. 之后，Explorer 每显示一个条目，VS Code 就调用 `provideFileDecoration(uri)`。大纲视图需要内容时，或者文档被编辑以后，VS Code 调用 `provideDocumentSymbols(document)`。插件从不主动刷新界面。
+
+这是"好莱坞原则"：插件把对象交给框架，由框架决定何时调用。
+
+### 3.5 文件装饰与 Decorator 模式
+
+| 方面     | 经典 Decorator                                       | VS Code 的文件装饰                                                                       |
+| -------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| 接口     | 装饰者和被装饰者实现同一个接口                       | `SvgBadgeProvider` 实现 `FileDecorationProvider`，它和 Explorer 条目不是同一个接口       |
+| 对象组合 | 装饰者持有被装饰者的引用，一层包一层                 | 提供者不持有条目。VS Code 持有一组提供者，由它把各个提供者返回的标记、颜色和提示合并起来 |
+| 调用关系 | 客户调用最外层，每一层先转发给内层，再加上自己的行为 | VS Code 分别询问每个提供者，提供者只返回数据，不转发调用                                 |
+
+相同之处在于意图：两者都在不修改原对象（文件本身和 Explorer 的代码）的情况下，给它附加职责（显示的信息），而且多个装饰可以叠加。不同之处在于组合的位置：经典 Decorator 的组合在对象链里，VS Code 的组合在框架内部。所以，文件装饰更像是框架提供的"装饰扩展点"。第二部分的 `TreeDecorator` 借用了同样的思路：插件只返回标签，内核里的 `DecoratingLabel` 负责按 Decorator 模式把它们串起来。
+
+### 3.6 大纲提供者与 Adapter 模式
+
+| Adapter 的角色                 | 本扩展中的类                                                                                       |
+| ------------------------------ | -------------------------------------------------------------------------------------------------- |
+| 目标接口（Target），由客户定义 | VS Code 的 `DocumentSymbolProvider`                                                                |
+| 客户（Client）                 | VS Code 的大纲视图                                                                                 |
+| 被适配者（Adaptee）            | `SvgOutline`：输入文本，输出带字符偏移量的元素树                                                   |
+| 适配器（Adapter）              | `SvgOutlineProvider`：持有一个 `SvgOutline`，把偏移量转换成行列位置，把元素转换成 `DocumentSymbol` |
+
+这是对象适配器：适配器通过组合持有被适配者，而不是继承它。与教科书中的例子相比，这里的被适配者是为本扩展写的，并不是一个已有的、接口不匹配的旧类。但把它和 VS Code API 分开以后，`SvgOutline` 可以直接用 Bun 测试，适配器只负责数据转换。
+
+### 3.7 Phase 1 代码的复用评估
+
+- 可以复用：XML 格式检查。Phase 1 的 `SvgReader` 用 fast-xml-validator 检查格式，扩展沿用了同一个库和同样的做法：格式不对时不抛出异常，只返回空大纲。
+- 不能复用 `SvgReader` 的解析部分，原因有四个。第一，它把 XML 转成领域对象以后，就丢掉了源码位置，而大纲定位必须知道每个元素在源码里的偏移量。第二，它跳过不认识的元素（例如 `<defs>`、`<path>`），而大纲应该显示文件里所有的元素。第三，它会给没有 id 的元素编号，Phase 2 还会拒绝重复 id，而大纲必须如实显示文件的内容。第四，它用 `node:fs` 从磁盘读文件，而大纲必须读取编辑器里尚未保存的内容。
+- 不能复用 Phase 1 的模型：`Shape` 类层次只有六种图形，也没有位置信息。
+- 遍历的思路可以复用，但代码不能直接复用。`Shape.walk()` 是组合模式上的通用先序遍历，如果模型里有偏移量，它可以直接生成大纲。但由于上面两点，扩展另建了一棵只有标签、id 和偏移量的轻量树，并用递归生成 `DocumentSymbol`。另外，扩展是独立打包的，不依赖 CLI 的内核。
