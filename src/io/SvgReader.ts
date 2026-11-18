@@ -67,7 +67,7 @@ export class SvgReader {
     for (const [name, value] of attributes) {
       if (!SvgReader.#canvasOwned.has(name)) canvas.loadAttribute(name, value);
     }
-    this.#written = new Set(this.#ids(nodes));
+    this.#written = this.#unique(nodes);
     this.#fill(canvas, this.#children(root));
     return new SvgDocument(canvas, this.#catalog);
   }
@@ -157,23 +157,26 @@ export class SvgReader {
   }
 
   /**
-   * Returns the id from the file, unless an earlier element already has it. In that case, it
-   * returns the tag name plus the first free number.
+   * Returns every id in the file. An id that appears twice anywhere, even on an element that the
+   * reader would skip, makes the whole file unusable (Phase 2 spec 4).
    */
-  #id(tag: string, written: string | undefined): string {
-    if (written && !this.#given.has(written)) {
-      this.#given.add(written);
-      return written;
+  #unique(nodes: readonly XmlNode[]): Set<string> {
+    const ids = new Set<string>();
+    for (const id of this.#ids(nodes)) {
+      if (ids.has(id)) throw new EditorError(`duplicate id: ${id}`);
+      ids.add(id);
     }
+    return ids;
+  }
+
+  /** Returns the id from the file, or else the tag name plus the first free number. */
+  #id(tag: string, written: string | undefined): string {
+    if (written) return written;
     let number = 1;
     while (this.#written.has(`${tag}${number}`) || this.#given.has(`${tag}${number}`)) number += 1;
     const id = `${tag}${number}`;
     this.#given.add(id);
-    this.#warnings.push(
-      written
-        ? `assigned id ${id} to <${tag}> with duplicate id ${written}`
-        : `assigned id ${id} to unnamed <${tag}>`,
-    );
+    this.#warnings.push(`assigned id ${id} to unnamed <${tag}>`);
     return id;
   }
 

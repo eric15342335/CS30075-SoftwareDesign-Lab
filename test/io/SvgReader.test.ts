@@ -3,6 +3,8 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import { InitCommand } from '#command/InitCommand.ts';
+import { ReadCommand } from '#command/ReadCommand.ts';
 import { EditorError } from '#domain/EditorError.ts';
 import { SvgReader } from '#io/SvgReader.ts';
 import { SvgWriter } from '#io/SvgWriter.ts';
@@ -56,24 +58,46 @@ test('the nested sample from the spec keeps transform and the other attributes, 
   );
 });
 
-test('a missing or duplicate id becomes the tag plus a number, and never an id that appears later', () => {
+test('a missing id becomes the tag plus a number, and never an id that appears later', () => {
   const reader = new SvgReader(Session.catalog());
   const document = reader.parse(
     [
       '<svg width="10" height="10">',
       '  <rect width="1" height="1"/>',
       '  <rect id="rect1" width="1" height="1"/>',
-      '  <circle id="rect1" r="1"/>',
       '  <g id=""/>',
       '</svg>',
     ].join('\n'),
   );
-  expect(document.ids()).toEqual(['rect2', 'rect1', 'circle1', 'g1']);
+  expect(document.ids()).toEqual(['rect2', 'rect1', 'g1']);
   expect(reader.warnings()).toEqual([
     'assigned id rect2 to unnamed <rect>',
-    'assigned id circle1 to <circle> with duplicate id rect1',
     'assigned id g1 to unnamed <g>',
   ]);
+});
+
+test.each([
+  ['two shapes', '<rect id="a"/><circle id="a"/>'],
+  ['a shape and a skipped element', '<rect id="a"/><path id="a"/>'],
+  ['the root and a shape', '<rect id="root"/>'],
+])('a duplicate id between %s rejects the whole file', (_case, body) => {
+  const reader = new SvgReader(Session.catalog());
+  expect(() => reader.parse(`<svg id="root" width="10" height="10">${body}</svg>`)).toThrow(
+    /^duplicate id: (a|root)$/,
+  );
+});
+
+test('a failed read because of a duplicate id keeps the open document and its path', () => {
+  const session = new Session();
+  const path = join(dir, 'dup.svg');
+  writeFileSync(path, '<svg width="10" height="10"><rect id="a"/><rect id="a"/></svg>');
+  session.run(new InitCommand(session.workspace));
+  session.create('rect', 'kept', ['1', '2', '3', '4']);
+  expect(() => session.run(new ReadCommand(session.workspace, path))).toThrow(
+    `cannot read file: ${path} (duplicate id: a)`,
+  );
+  expect(session.document().ids()).toEqual(['kept']);
+  expect(session.undo()).toEqual(['rect#kept removed']);
 });
 
 test('unnamed elements of one type get numbers in order, and a reused reader starts counting again', () => {
