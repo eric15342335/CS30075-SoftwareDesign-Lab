@@ -61,10 +61,6 @@
       "name": "@svgframe/fixture-no-default",
       "version": "0.0.0",
     },
-    "test/fixtures/plugins/spike": {
-      "name": "@svgframe/fixture-spike",
-      "version": "0.0.0",
-    },
     "test/fixtures/plugins/throws-on-load": {
       "name": "@svgframe/fixture-throws-on-load",
       "version": "0.0.0",
@@ -454,8 +450,6 @@
     "@svgframe/fixture-mismatch": ["@svgframe/fixture-mismatch@workspace:test/fixtures/plugins/mismatch"],
 
     "@svgframe/fixture-no-default": ["@svgframe/fixture-no-default@workspace:test/fixtures/plugins/no-default"],
-
-    "@svgframe/fixture-spike": ["@svgframe/fixture-spike@workspace:test/fixtures/plugins/spike"],
 
     "@svgframe/fixture-throws-on-load": ["@svgframe/fixture-throws-on-load@workspace:test/fixtures/plugins/throws-on-load"],
 
