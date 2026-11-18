@@ -90,7 +90,14 @@ test('two plugin instances keep their own saved state', () => {
   expect(starred(second)).toHaveLength(2);
 });
 
-test('tree of one shape marks its root row too', () => {
+test('a move into the group just before marks the canvas row, although the order stays', () => {
+  const cli = after('init', 'create g g1', 'create rect r 0 0 1 1', `save ${file}`, 'addto g1 r');
+  expect(starred(cli)).toEqual(['svg (800x600) *', '    └── rect#r  x=0 y=0 w=1 h=1 *']);
+});
+
+test('tree of one shape marks a changed root row and leaves an unchanged one alone', () => {
   const cli = after('init', 'create g g1', `save ${file}`, 'create rect r 0 0 1 1 in g1');
   expect(cli.run('tree g1')).toEqual(['g#g1', '└── rect#r  x=0 y=0 w=1 h=1 *']);
+  cli.run('set g1 fill red');
+  expect(cli.run('tree g1')[0]).toBe('g#g1 fill=red *');
 });

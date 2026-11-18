@@ -6,7 +6,8 @@ import type { Shape, SvgDocument, TreeDecorator, WorkspaceObserver } from '@svgf
  * clears the star. The fingerprints are for comparison only; they are not undo snapshots.
  *
  * A shape row compares its type, parent id, attributes and text. The canvas row compares the
- * canvas attributes and the ids in document order, so it also marks deletes and reorders. A new
+ * canvas attributes and each id with its parent id in document order, so it also marks deletes,
+ * reorders and moves into another container, even a move that keeps the document order. A new
  * shape has no saved fingerprint, so it gets the star at once. Ancestors are not marked.
  */
 export class ModifiedStar implements TreeDecorator, WorkspaceObserver {
@@ -49,7 +50,7 @@ export class ModifiedStar implements TreeDecorator, WorkspaceObserver {
     const ids = canvas
       .walk()
       .drop(1)
-      .map((shape) => shape.id)
+      .map((shape) => [shape.id, shape.parent?.id])
       .toArray();
     return JSON.stringify([canvas.attributes(), ids]);
   }
