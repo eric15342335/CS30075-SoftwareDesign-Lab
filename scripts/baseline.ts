@@ -9,6 +9,7 @@ import { mkdirSync, readFileSync, rmSync, rmdirSync, writeFileSync } from 'node:
 import { join } from 'node:path';
 
 import { repo } from '#test/support/Paths.ts';
+import { TempFolder } from '#test/support/TempFolder.ts';
 import { TranscriptRunner } from '#test/support/TranscriptRunner.ts';
 
 const { root, transcripts } = repo;
@@ -24,7 +25,8 @@ const git = (...args: string[]): void => {
 
 git('worktree', 'add', '--detach', worktree, 'final');
 try {
-  const runner = new TranscriptRunner(join(worktree, 'src', 'main.ts'));
+  using folder = new TempFolder();
+  const runner = new TranscriptRunner(folder.path, join(worktree, 'src', 'main.ts'));
   for (const name of ['cli-1', 'cli-2']) {
     const input = readFileSync(join(transcripts, `${name}.txt`), 'utf8');
     // oxlint-disable-next-line no-await-in-loop
