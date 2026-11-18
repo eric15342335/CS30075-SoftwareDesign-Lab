@@ -37,6 +37,10 @@
       "name": "@svgframe/plugin-shape-box",
       "version": "0.1.0",
     },
+    "plugins/tree-star": {
+      "name": "@svgframe/plugin-tree-star",
+      "version": "0.1.0",
+    },
     "test/fixtures/plugins/bad-activate": {
       "name": "@svgframe/fixture-bad-activate",
       "version": "0.0.0",
@@ -460,6 +464,8 @@
     "@svgframe/plugin-shape-box": ["@svgframe/plugin-shape-box@workspace:plugins/shape-box"],
 
     "@svgframe/plugin-stats": ["@svgframe/plugin-stats@workspace:plugins/command-stats"],
+
+    "@svgframe/plugin-tree-star": ["@svgframe/plugin-tree-star@workspace:plugins/tree-star"],
 
     "@tybys/wasm-util": ["@tybys/wasm-util@0.10.4", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-W3c4gRigFS0T/Ma4qIYF3GDAc5AQdHb1yL5znJT1Zv1YaD9Kitx656wBjvr19qbiosmZT8lWDM5BEMynUqX65A=="],
 

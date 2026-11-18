@@ -1,0 +1,19 @@
+{
+  "name": "@svgframe/plugin-tree-star",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/ModifiedStarPlugin.ts",
+  "exports": {
+    ".": "./src/ModifiedStarPlugin.ts",
+    "./package.json": "./package.json"
+  },
+  "contributes": {
+    "decorators": [
+      "modified-star"
+    ],
+    "observers": [
+      "modified-star"
+    ]
+  }
+}
