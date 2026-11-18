@@ -15,7 +15,9 @@ export class Decimal {
 
   readonly #value: number;
 
+  /** A result too large for a float, such as 1e308 * 10, is an error, so no shape gets Infinity. */
   constructor(value: number) {
+    if (!Number.isFinite(value)) throw new EditorError('number out of range');
     this.#value = value;
   }
 

@@ -71,7 +71,7 @@ export class SvgDocument {
   move(id: string, dx: Decimal, dy: Decimal): Memento {
     const shape = this.find(id);
     const memento = shape.saveGeometry();
-    shape.move(dx, dy);
+    SvgDocument.#allOrNothing(memento, () => shape.move(dx, dy));
     return memento;
   }
 
@@ -79,8 +79,18 @@ export class SvgDocument {
     const shape = this.find(id);
     if (!factor.isPositive()) throw new EditorError('scale factor must be positive');
     const memento = shape.saveGeometry();
-    shape.scale(factor);
+    SvgDocument.#allOrNothing(memento, () => shape.scale(factor));
     return memento;
+  }
+
+  /** Runs a geometry edit. If it fails partway, for example in the last child of a group, the edit is undone. */
+  static #allOrNothing(memento: Memento, edit: () => void): void {
+    try {
+      edit();
+    } catch (error) {
+      memento.restore();
+      throw error;
+    }
   }
 
   /**

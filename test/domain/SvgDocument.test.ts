@@ -168,6 +168,14 @@ describe('move and scale', () => {
     expectRejected(doc, () => doc.scale('c1', n(-2)), 'scale factor must be positive');
     expectRejected(doc, () => doc.move('r9', n(1), n(1)), 'no such shape: r9');
   });
+
+  test('a result too large for a number fails, and the children that already changed go back', () => {
+    const doc = session();
+    // The last child overflows, so the first child has already moved when the error comes.
+    doc.create('rect', 'huge', ['1e308', '0', '1', '1'], 'markers');
+    expectRejected(doc, () => doc.scale('markers', n(10)), 'number out of range');
+    expectRejected(doc, () => doc.move('markers', n(1e308), n(0)), 'number out of range');
+  });
 });
 
 describe('set', () => {
