@@ -6,10 +6,11 @@ import type { Role } from '#scripts/metrics/Role.ts';
  * report never hides a file.
  */
 export class RoleMap {
+  static readonly #test = /(?:^|\/)(?:test|integration)\/|\.i?test\.ts$/;
   static readonly #rules: [RegExp, Role][] = [
     // The spec counts the VS Code extension apart from the CLI, its tests included.
     [/^vscode-extension\//, 'vscode'],
-    [/(?:^|\/)(?:test|integration)\/|\.i?test\.ts$/, 'tests'],
+    [RoleMap.#test, 'tests'],
     [/^src\//, 'kernel'],
     [/^app\//, 'assembly'],
     [/^plugins\/[^/]+\/src\//, 'plugins'],
@@ -31,5 +32,10 @@ export class RoleMap {
       this.#overrides[path] ?? RoleMap.#rules.find(([pattern]) => pattern.test(path))?.[1];
     if (role === undefined) throw new Error(`unclassified file: ${path}`);
     return role;
+  }
+
+  /** Tells whether a file is a test, also when it counts with the VS Code extension. */
+  isTest(path: string): boolean {
+    return RoleMap.#test.test(path);
   }
 }

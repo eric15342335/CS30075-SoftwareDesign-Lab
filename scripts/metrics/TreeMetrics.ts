@@ -46,7 +46,7 @@ export class TreeMetrics {
         functions: found.length,
         complexity: found.reduce((sum, value) => sum + value, 0),
         responsibility:
-          role === 'tests' || !this.#listed ? '' : TreeMetrics.#responsibility(path, text),
+          this.#roles.isTest(path) || !this.#listed ? '' : TreeMetrics.#responsibility(path, text),
       };
     });
   }
