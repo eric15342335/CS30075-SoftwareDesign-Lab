@@ -1,16 +1,14 @@
 # SVG 编辑器 Phase 2 设计文档
 
-本文档对应题目 `doc/pj1-phase2/phase_cli_2.md`（Lab1 Phase 2）。Phase 1 的设计文档已经移到 [doc/pj1-phase1/README.md](pj1-phase1/README.md)，那里的内容不再修改。
+本文档对应题目 `doc/pj1-phase2/phase_cli_2.md`。Phase 1 的设计文档在 [doc/pj1-phase1/README.md](pj1-phase1/README.md)。题目同时用到 `doc/` 和 `docs/metrics/`：前者放文档和会话脚本，后者只放脚本生成的度量结果。
 
-关于目录名的说明：题目同时提到 `doc/README.md` 和 `docs/metrics/` 两个位置，所以仓库里两个目录都有。`doc/` 放设计文档和会话脚本，`docs/metrics/` 只放由脚本生成的度量结果。
-
-第 1 节是写代码之前定的方案，已按最终实现更新，改动记在 1.6 修订记录里。
+第 1 节是写代码之前定的方案，已按最终实现更新，改动见 1.6 修订记录。
 
 ## 1 架构方案
 
 ### 1.1 三类代码，三个顶层目录
 
-题目的差异判据要求"内核与既有插件的差异为 0"，度量也要求按"内核 / 装配处 / 插件"三类统计。所以本方案让三类代码各占一个顶层目录，`git diff` 和行数统计都可以直接按目录来做。
+差异判据和度量都按"内核 / 装配处 / 插件"三类来算，所以三类代码各占一个顶层目录，`git diff` 和行数统计直接按目录做。
 
 ```text
 src/        内核。接入新插件时，这里的文件一个都不改。
@@ -30,7 +28,7 @@ plugins.config.json 方式 B 的配置文件
 scripts/            度量脚本和基线脚本
 ```
 
-依赖方向：插件的源码只能导入 `@svgframe/api`、`node:*` 和自己的文件，不能导入内核的内部路径、装配处、其他插件或别的包。`app` 可以依赖内核和 `node:*`。内核不依赖 `app`、插件和测试代码。oxlint 的 `no-restricted-imports` 为每个模块写一条白名单，`test/lint/ModuleRules.test.ts` 逐个检查允许和禁止的导入。
+依赖方向：插件的源码只导入 `@svgframe/api`、`node:*` 和自己的文件。`app` 依赖内核和 `node:*`。内核不依赖 `app`、插件和测试代码。oxlint 的 `no-restricted-imports` 为每个模块写一条白名单，`test/lint/ModuleRules.test.ts` 逐个检查允许和禁止的导入。
 
 ### 1.2 扩展点清单
 
@@ -146,43 +144,25 @@ scripts/            度量脚本和基线脚本
 
 ### 1.5 实施顺序
 
-1. 第一部分：VSCode 扩展（文件标记、大纲、测试、分析）。
-2. 框架：工作区与模块规则、组合根移到 `app/`、四个扩展点、插件宿主、两种装配方式、端到端对比、度量脚本。
-3. 命令插件 `stats` 和 `dir`。
-4. 图形插件 `box`，两种装配方式各演示一次。
-5. 树标签 `modified-star`。
-6. 收尾：最终文档、度量结果、tag `p2`。
-
-每一步是一次独立的提交，提交前运行 `bun run check`。
+按题目的过程节点推进：VSCode 扩展 → 框架（扩展点、宿主、两种装配、度量脚本）→ `stats` 和 `dir` → `box` → `modified-star` → 文档、度量和 tag `p2`。每一步一次提交，提交前运行 `bun run check`。
 
 ### 1.6 修订记录
 
-| 日期       | 改动                                                                                                                                                                                     | 原因                                                                                                                        |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| 2026-11-18 | 初版方案                                                                                                                                                                                 |                                                                                                                             |
-| 2026-11-18 | 读入文件时，任何位置出现重复 id 都拒绝整个读入，报 `cannot read file: <path> (duplicate id: <id>)`。Phase 1 附录 A 第 4 行原来的做法（重复 id 按缺失处理并重新编号）不再使用             | Phase 2 题目第 4 节要求重复 id 必须拒绝整个读入，不能靠降级消除                                                             |
-| 2026-11-18 | 未知命令的提示从 commander 的 `unknown command 'mvoe' (Did you mean move?)` 改为 `unknown command: mvoe`。`--help` 也按未知命令处理                                                      | Phase 2 题目 2.3 节规定了这个格式。现在由命令注册表决定命令是否存在，commander 只检查参数。Phase 1 的原文是我们自己定的约定 |
-| 2026-11-18 | 插件清单（`package.json`）格式不对时报 `invalid plugin manifest: <module> (<reason>)`，并且在加载入口模块之前就报。插件在 `activate` 之后还想注册时报 `the plugin context is closed`     | 方案的失败表里没有这两种情况。清单不对时无法核对声明，所以必须先报；关闭上下文是 V11 的要求，需要一条明确的报错             |
-| 2026-11-18 | `Catalog` 里的图形类型和属性处理器、`Extensions` 里的观察者都改成公开的 `Registry`。`Registry` 新增 `check(items)`，先检查名字再一次性提交                                               | 宿主要对五类注册统一做重名检查和原子提交。如果每类各写一套检查方法，代码会重复                                              |
-| 2026-11-18 | 测试用的夹具插件（`test/fixtures/plugins/`）不计入覆盖率                                                                                                                                 | 夹具插件里的很多函数只为被注册而存在，从不被调用。它们是测试数据，不是被测代码                                              |
-| 2026-11-18 | `doc/transcript/cli-1.txt` 是 Phase 1 第 6 节的基础会话，`cli-2.txt` 是第 6.1 节版本 A 的会话；`stats`、`dir` 的会话是 `cli-3.txt`，第 6.1 节版本 B（box）的会话是 `cli-4.txt`           | 方案只写了 cli-1 和 cli-2 两个文件名。Phase 1 的两段会话都需要和 `final` 逐字节对照，所以先占用前两个编号                   |
-| 2026-11-18 | 度量脚本不再使用人工复核的职责兜底表。Phase 1 中 16 个没有文档注释的类（12 个命令和 4 种叶子图形）补上了一句文档注释。复杂度的单元数包括类字段初始化器，因为 oxlint 把它们也当作单元报告 | 补注释比维护一张兜底表简单，代码本身也更清楚。单元的口径在度量报告的开头写明                                                |
-| 2026-11-18 | 清单的 `contributes` 多了第五类 `observers`                                                                                                                                              | `modified-star` 要在保存时记下状态，所以它注册了一个工作区观察者。题目要求比较全部注册，观察者也要有稳定的注册名            |
-| 2026-11-18 | 插件的源码可以导入 `node:*`。原来的规则是只能导入 `@svgframe/api`                                                                                                                        | `dir` 插件的适配器 `NodeDirectory` 需要 `node:fs`。题目要求由插件持有文件系统的适配器，内核不提供文件系统接口               |
-| 2026-11-18 | 第 6.1 节版本 B 的会话放在 `doc/transcript/cli-4.txt`（只有命令和注释）。题目原文的版本 B 放在 `test/fixtures/flowchart-box.txt`，只装 `box` 时与它对照                                  | 题目要求输入文件只含命令和注释，预期输出单独保存。只装 `box` 时，以后加入的树标签不会改变这段输出                           |
-| 2026-11-18 | Phase 1 第 6 节和第 6.1 节版本 A 的原文对照改用 `--no-plugins` 运行                                                                                                                      | 装上 `modified-star` 以后，方式 A 的 `tree` 会显示 `*`，而这两段原文没有标签。题目要求基础兼容性对照时禁用新增插件          |
-| 2026-11-18 | Stryker 的沙箱用 `scripts/stryker-sandbox.ts` 准备：复制 `tsconfig.json`，并在沙箱里单独安装依赖                                                                                         | 沙箱里没有 `tsconfig.json`，Bun 会找到上两级真实项目的配置，插件因此加载了真实的 `src/`，内核出现两份，测试失败             |
-| 2026-11-19 | 模块规则从黑名单改为每个模块一条白名单                                                                                                                                                   | 黑名单漏掉了 `#test/`、`#scripts/`、`io` 里的 `node:path` 和插件里的第三方包。白名单只列表格里允许的导入                    |
+| 日期       | 改动                                                                                                                                                                                                   | 原因                                                                            |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| 2026-11-18 | 初版方案                                                                                                                                                                                               |                                                                                 |
+| 2026-11-18 | 读入时任何位置出现重复 id 都拒绝整个读入：`cannot read file: <path> (duplicate id: <id>)`。Phase 1 的自动改名不再使用                                                                                  | 题目第 4 节要求拒绝，不能靠降级消除                                             |
+| 2026-11-18 | 未知命令报 `unknown command: <name>`，`--help` 也按未知命令处理                                                                                                                                        | 题目 2.3 节规定了格式。命令是否存在由注册表决定，commander 只检查参数           |
+| 2026-11-18 | 新增两条报错：清单格式不对时报 `invalid plugin manifest: <module> (<reason>)`，在加载入口模块之前报；`activate` 之后再注册报 `the plugin context is closed`                                            | 清单不对时无法核对声明；上下文关闭后需要一条明确的报错                          |
+| 2026-11-18 | `contributes` 增加第五类 `observers`                                                                                                                                                                   | `modified-star` 注册了工作区观察者，题目要求比较全部注册                        |
+| 2026-11-18 | 插件的源码可以导入 `node:*`                                                                                                                                                                            | `dir` 的适配器需要 `node:fs`，题目要求文件系统适配器由插件持有                  |
+| 2026-11-18 | 会话文件：`cli-1.txt`、`cli-2.txt` 是 Phase 1 第 6 节和第 6.1 节版本 A，`cli-3.txt` 是 `stats` 和 `dir`，`cli-4.txt` 是第 6.1 节版本 B（`box`）。题目原文的版本 B 在 `test/fixtures/flowchart-box.txt` | 输入文件只含命令和注释，预期输出单独保存                                        |
+| 2026-11-18 | Phase 1 两段原文的对照用 `--no-plugins` 运行                                                                                                                                                           | 装上 `modified-star` 后 `tree` 会显示 `*`；题目要求基础兼容性对照时禁用新增插件 |
+| 2026-11-19 | 模块规则从黑名单改为每个模块一条白名单                                                                                                                                                                 | 黑名单漏掉了 `#test/`、`#scripts/` 和插件里的第三方包                           |
 
 ### 1.7 重构前后的模块依赖图
 
-箭头表示"导入"。重构后的规则由 oxlint 的 `no-restricted-imports` 检查。`test/lint/ModuleRules.test.ts` 为每个模块写一个探针文件，同时导入允许和禁止的模块，检查 oxlint 只报告禁止的那些。
-
-两张图用 PlantUML 写成，源码折叠在图下。图片用官方 Docker 镜像在本地离线生成：
-
-```sh
-docker run --rm --network none -v "<目录>:/data" -v "C:/Windows/Fonts/msyh.ttc:/usr/share/fonts/truetype/msyh/msyh.ttc:ro" plantuml/plantuml -tpng -charset UTF-8 "-SdefaultFontName=Microsoft YaHei" -Sdpi=150 /data/phase1-modules.puml /data/phase2-modules.puml
-```
+箭头表示"导入"，重构后的箭头由 1.1 节的 oxlint 规则约束。PlantUML 源码折叠在图下，图片由官方镜像 `plantuml/plantuml` 在本地生成。
 
 重构前（tag `final`，Phase 1）：
 
@@ -276,36 +256,32 @@ end note
 
 主要变化：
 
-- 组合根从 `src/main.ts` 移到 `app/main.ts`，插件宿主放在 `app/host/`。所以"接入插件时内核不变"可以直接用 `git diff -- src` 检查。
-- 内核新增 `builtin/`：六种内置图形和 Phase 1 的命令也通过注册表装入，内核的其他部分不再知道它们的名字。
-- 内核新增 `api/`：插件唯一的入口。插件之间互不依赖，也不依赖装配处。
+- 组合根从 `src/main.ts` 移到 `app/main.ts`，插件宿主在 `app/host/`。"接入插件时内核不变"因此可以用 `git diff -- src` 检查。
+- 内核新增 `builtin/`：内置图形和 Phase 1 的命令也通过注册表装入，内核的其他部分不知道它们的名字。
+- 内核新增 `api/`，它是插件唯一的入口。插件之间互不依赖，也不依赖装配处。
 
 ## 2 过程记录
 
-代码和文档由 AI（Claude Code，Opus 5.5）编写。每一轮评审的意见都由 AI 先复现、再筛选，结果交给我确认。下面只记评审的结论和被推翻的 AI 判断。
+代码和文档由 Claude Code（Opus 5.5）编写。方案和代码另由 Codex（gpt-6.2）评审，每条意见先在代码里复现，再由我决定是否采纳。下表只列有代表性的问题。
 
-### 2.1 方案评审
+| 问题                                                                                         | 发现者   | 处理                                                                            |
+| -------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------- |
+| 组合根在 `src/main.ts`，方式 A 接入插件必然改动内核，差异判据无法成立                        | 方案评审 | 组合根移到 `app/main.ts`                                                        |
+| AI 认为 oxlint 没有圈复杂度规则                                                              | 方案评审 | 改用 oxlint 的 `eslint/complexity`                                              |
+| 方式 A 在启动时就导入插件，导入失败发生在回滚边界之外                                        | 方案评审 | 改为 `load: () => import(...)`，导入也在回滚边界内                              |
+| `Decimal` 只输出 6 位小数，属性的 undo 会丢精度                                              | 方案评审 | `AttributeEdit` 保存原来的准确值                                                |
+| 异步的 `activate` 被当作成功；命令名带空格时 CLI 启动崩溃；`ungroup` 能拆掉 box 的部件       | 代码评审 | 分别拒绝，每条一个回归测试                                                      |
+| 嵌套 box 或调整过部件顺序的 box 读不回来；id 为 `n1-rect text#n1-label` 的矩形能冒充两个部件 | 代码评审 | 只要求两个部件各出现一次且标签正确，顺序和其他子节点不限（ADR 2）               |
+| `scale` 能把坐标变成 `Infinity`；多个根元素时只读第一个；参数 `"--"` 被 commander 吞掉       | 代码评审 | 分别报 `number out of range`、`more than one root element`，`"--"` 原样传给命令 |
+| 模块规则是黑名单，内核能导入测试代码，插件能导入任意包                                       | 代码评审 | 每个模块一条白名单，探针测试覆盖                                                |
+| 测试里手工拼接路径，临时目录的建立和清理重复了十几次                                         | 我       | 新增 `test/support/` 的 `Paths`、`TempFolder`（`using` 声明）和 `CliProcess`    |
+| AI 让每次会话运行用各自的临时目录，违反题目"两种装配在同一目录运行"的要求                    | 计划评审 | 每个对比测试只用一个目录，每次运行前重建                                        |
+| AI 写 `modified-star` 的测试时，以为 undo 能越过 `save`、`canvas` 能撤销                     | 运行测试 | 按 Phase 1 的规则改正测试（附录 A 第 7 条）                                     |
+| VS Code 默认用图片预览打开 SVG，大纲不可用                                                   | 我       | 示例文件夹的 `.vscode/settings.json` 指定文本编辑器                             |
 
-1. 第一轮：gpt-6-astra（中等推理强度）和 Opus 5.5（高推理强度）。两者都指出差异检查没有覆盖 `src/main.ts`，组合根因此移到 `app/`。Opus 指出方式 A 和方式 B 的提交之间端到端对比可能失效，对比测试因此改用与 `app/main.ts` 对应的镜像配置。Opus 还指出 oxlint 自带 `eslint/complexity` 规则，推翻了 AI "oxlint 没有圈复杂度规则"的假设。
-2. 第二轮：gpt-6.2-astra（中等）评审一次，gpt-6.2-sol（高）评审两次。采纳的意见：方式 A 改为惰性导入，让导入失败也落在回滚边界之内；`Decimal` 只输出 6 位小数，所以属性备忘录保存原来的准确值；观察者抛错时单独捕获。没有采纳的意见：保留 Phase 1 对重复 id 的自动改名（题目要求拒绝整个读入）；不合并方式 A 的演示分支（这个分支是证据，需要留在远程仓库）。
-3. 需要我决定的两处：读入时重复 id 一律拒绝；`dir` 的输出按题目示例的空格（附录 A 第 2 条）。
+没有采纳的意见，例如：读入时保留 Phase 1 对重复 id 的自动改名（题目要求拒绝）；保存时先写临时文件再改名（题目没有要求，Phase 1 也没有）；防御返回 Promise 的观察者（插件契约规定同步）。
 
-### 2.2 代码评审
-
-1. 框架完成后，Codex（gpt-6.2-sol，最高推理强度，只读）评审 `e2e3da8..66336b3`，报告 17 条。
-   - 采纳 6 条，每条有一个测试：`ungroup` 能拆掉复合图形里作为部件的组；`data-kind` 指定的类型在标签没有注册提供者时不被查找；插件注册带空格的命令名会让 CLI 启动时崩溃；异步的 `activate` 被当作成功；清单比较用逗号拼接字符串，`"a,decorators/b"` 能冒充两个名字；基线脚本会删掉 `.baseline/` 下的其他文件。
-   - 推迟 2 条，在插件阶段补上：插件 API 缺 `Command` 基类和 `EditorError`；双装配对比的插件列表为空。
-   - 不采纳 9 条：防御故意写坏的插件（例如第二次读取就抛错的 `name`），插件契约已经规定处理器只能依赖文档状态和参数；按 `require` 条件解析包，契约要求 `exports['.']` 只有一个路径；其余是只在人为构造的输入下出现的问题，以及禁止插件导入 `node:fs` 的建议（`dir` 需要它）。
-2. 插件完成后，Codex（同上）评审 `8262d32..49756d7`，报告 11 条。
-   - 采纳 7 条，每条有回归测试：嵌套了 box 或调整过部件顺序的 box 读不回来；id 写成 `n1-rect text#n1-label` 的矩形能冒充两个部件；把紧跟在 `g1` 后面的图形移进 `g1` 时 `modified-star` 漏标根节点；`set … label`、`dir` 的历史、`tree <id>` 的根行三处测试太弱；度量把 VSCode 扩展的测试算进了 CLI。
-   - 不采纳 4 条：推送和 tag（等我确认）；box 标题读回后丢掉首尾空格（这是 Phase 1 读入器对所有 `<text>` 的处理）；`dir` 的空格和配置出错时的提示（附录 A 第 2、6 条）。
-3. 收尾前，我评审了测试代码：路径在各个测试里手工拼接，临时目录的建立和清理重复了十几次。AI 自查，并请两个 Codex（gpt-6.2-sol，高）分别评审测试和其余代码，再请 gpt-6.2-astra（中等）评审修改计划。
-   - 测试：`test/support/` 新增 `Paths`（仓库路径）、`TempFolder`（用 `using` 声明、测试结束自动删除的临时目录）、`CliProcess`（启动 CLI 进程）和 `SpecTranscript`（解析题目里的会话）。删除了与其他测试重复的 `test/e2e/Plugins.test.ts` 和写宿主之前的 `test/spike/`；spike 里唯一没有被别处覆盖的检查（插件类继承的是同一个内核的 `Group`）移到 `test/host/PluginLoader.test.ts`。另有六处测试名与断言不符，已补上断言。
-   - 代码：`scale` 能把坐标变成 `Infinity`，现在报 `number out of range` 并恢复已改的子图形；读入时多个根元素只取第一个，现在报 `more than one root element`；参数 `"--"` 被 commander 吞掉；模块规则是黑名单，内核能导入 `#test/`、插件能导入任意包，现在每个模块一条白名单；`box` 的类型名和部件 id 规则集中到 `Box`；度量脚本用 ref 名做目录名。
-   - 不采纳：保存时先写临时文件再改名（Phase 1 的行为，题目没有要求）；数千个无 id 元素时编号变慢；防御返回 Promise 的观察者（插件契约规定同步）；用 `parseArgs` 解析启动参数（会改变已测试的 `--config` 报错）。
-   - 计划评审推翻了 AI 的一处修改：AI 让每次会话运行使用各自的临时目录，但题目要求两种装配在同一个运行目录里执行。现在每个对比测试只用一个目录，每次运行前清空并重新放入 `other.svg`。
-4. VSCode 截图时我发现大纲在图片预览里不可用。AI 在示例文件夹加了 `.vscode/settings.json`，让 `*.svg` 用文本编辑器打开。
-5. AI 写 `modified-star` 的测试时，以为 undo 可以越过 `save`，`canvas` 也可以撤销，两处都与 Phase 1 的规则不符，测试已改正（ADR 3、附录 A 第 7 条）。
+由我决定的两处：读入时重复 id 一律拒绝；`dir` 的空格按题目示例（附录 A 第 2 条）。
 
 ## 3 第一部分：VSCode 扩展
 
@@ -315,19 +291,14 @@ end note
 
 1. 在仓库根目录运行 `bun install`。
 2. 在 `vscode-extension/` 中运行 `bun run build`，生成 `dist/extension.js`。
-3. 运行 `code --extensionDevelopmentPath=<仓库路径>/vscode-extension <仓库路径>/vscode-extension/sample`。也可以用 VS Code 打开 `vscode-extension/` 文件夹，再按 F5（配置在 `.vscode/launch.json` 中）。
+3. 运行 `code --extensionDevelopmentPath=<仓库路径>/vscode-extension <仓库路径>/vscode-extension/sample`，或者用 VS Code 打开 `vscode-extension/` 再按 F5。扩展只在这个"扩展开发宿主"窗口里加载，不会安装到 VS Code。
+4. 打开示例文件 `example.svg`。VS Code 默认用图片预览打开 `.svg`，而大纲只对文本编辑器生效，所以示例文件夹的 `.vscode/settings.json` 指定用文本编辑器打开。其他文件夹里可以右键文件，选 "Open With…" → "Text Editor"。
 
-这样启动的是一个"扩展开发宿主"窗口。扩展只在这个窗口里加载，所以它不会出现在扩展视图的已安装列表中，关掉窗口以后也不会留下。
-
-VS Code 默认用图片预览打开 `.svg` 文件，大纲视图只对文本编辑器生效。示例文件夹里的 `.vscode/settings.json` 已经把 `*.svg` 设为用文本编辑器打开。在其他文件夹里，可以右键文件，选择 "Open With…"，再选 "Text Editor"。
-
-测试：`bun test vscode-extension` 运行不依赖 VS Code 的单元测试。`vscode-extension/` 中的 `bun run test:integration` 在真实的 VS Code 扩展宿主里运行集成测试。如果本机已经装了 VS Code，可以用环境变量 `VSCODE_TEST_PATH` 指向 `Code.exe`，省去下载。CI 在 xvfb 下运行同一组集成测试。
-
-示例文件是 `vscode-extension/sample/example.svg`。
+测试：`bun test vscode-extension` 运行单元测试；`vscode-extension/` 中的 `bun run test:integration` 在真实的 VS Code 里运行集成测试，CI 也运行这一组。
 
 ### 3.2 原生大纲的行为（A.2 要求先观察）
 
-在写代码之前，我们先在禁用所有扩展的 VS Code 里打开了示例文件。VS Code 用图片预览打开它，大纲视图显示 "The active editor cannot provide outline information"。改用文本编辑器打开时，VS Code 自带的 XML 支持只有语法高亮，大纲视图仍然没有内容。所以 SVG 的大纲需要由扩展提供。
+写代码之前，在禁用所有扩展的 VS Code 里打开示例文件。图片预览下，大纲视图显示 "The active editor cannot provide outline information"。改用文本编辑器，自带的 XML 支持只有语法高亮，大纲仍然为空。所以 SVG 的大纲需要由扩展提供。
 
 ![禁用扩展时，原生大纲没有内容](images/native-outline.png)
 
@@ -362,7 +333,7 @@ VS Code 负责界面（Explorer、大纲视图、编辑器）、文件系统、�
 | 对象组合 | 装饰者持有被装饰者的引用，一层包一层                 | 提供者不持有条目。VS Code 持有一组提供者，由它把各个提供者返回的标记、颜色和提示合并起来 |
 | 调用关系 | 客户调用最外层，每一层先转发给内层，再加上自己的行为 | VS Code 分别询问每个提供者，提供者只返回数据，不转发调用                                 |
 
-相同之处在于意图：两者都在不修改原对象（文件本身和 Explorer 的代码）的情况下，给它附加职责（显示的信息），而且多个装饰可以叠加。不同之处在于组合的位置：经典 Decorator 的组合在对象链里，VS Code 的组合在框架内部。所以，文件装饰更像是框架提供的"装饰扩展点"。第二部分的 `TreeDecorator` 借用了同样的思路：插件只返回标签，内核里的 `DecoratingLabel` 负责按 Decorator 模式把它们串起来。
+两者的意图相同：不修改原对象（文件和 Explorer 的代码），给它附加显示的信息，而且多个装饰可以叠加。组合的位置不同：经典 Decorator 组合在对象链里，VS Code 组合在框架内部，所以文件装饰更像框架提供的"装饰扩展点"。第二部分的 `TreeDecorator` 用了同样的思路：插件只返回标签，内核的 `DecoratingLabel` 按 Decorator 模式把它们串起来。
 
 ### 3.6 大纲提供者与 Adapter 模式
 
@@ -373,18 +344,18 @@ VS Code 负责界面（Explorer、大纲视图、编辑器）、文件系统、�
 | 被适配者（Adaptee）            | `SvgOutline`：输入文本，输出带字符偏移量的元素树                                                   |
 | 适配器（Adapter）              | `SvgOutlineProvider`：持有一个 `SvgOutline`，把偏移量转换成行列位置，把元素转换成 `DocumentSymbol` |
 
-这是对象适配器：适配器通过组合持有被适配者，而不是继承它。教科书里的被适配者通常是接口不匹配的旧类，这里的 `SvgOutline` 是为本扩展新写的。把它和 VS Code API 分开以后，它可以直接用 Bun 测试，适配器只负责数据转换。
+这是对象适配器：适配器通过组合持有被适配者。教科书里的被适配者通常是接口不匹配的旧类，这里的 `SvgOutline` 是新写的；它与 VS Code API 分开，可以直接用 Bun 测试，适配器只做数据转换。
 
 ### 3.7 Phase 1 代码的复用评估
 
-- 可以复用：XML 格式检查。Phase 1 的 `SvgReader` 用 fast-xml-validator 检查格式，扩展沿用了同一个库和同样的做法：格式不对时不抛出异常，只返回空大纲。
-- 不能复用 `SvgReader` 的解析部分，原因有四个。第一，它把 XML 转成领域对象以后，就丢掉了源码位置，而大纲定位必须知道每个元素在源码里的偏移量。第二，它跳过不认识的元素（例如 `<defs>`、`<path>`），而大纲应该显示文件里所有的元素。第三，它会给没有 id 的元素编号，Phase 2 还会拒绝重复 id，而大纲必须如实显示文件的内容。第四，它用 `node:fs` 从磁盘读文件，而大纲必须读取编辑器里尚未保存的内容。
-- 不能复用 Phase 1 的模型：`Shape` 类层次只有六种图形，也没有位置信息。
-- 遍历的思路可以复用，但代码不能直接复用。`Shape.walk()` 是组合模式上的通用先序遍历，如果模型里有偏移量，它可以直接生成大纲。但由于上面两点，扩展另建了一棵只有标签、id 和偏移量的轻量树，并用递归生成 `DocumentSymbol`。另外，扩展是独立打包的，不依赖 CLI 的内核。
+- 复用了 XML 格式检查：扩展和 Phase 1 的 `SvgReader` 一样用 fast-xml-validator，格式不对时返回空大纲，不抛异常。
+- `SvgReader` 的解析部分不能复用：它转成领域对象后丢掉了源码位置；跳过不认识的元素（如 `<defs>`、`<path>`）；给没有 id 的元素编号；从磁盘读文件。大纲需要偏移量、需要显示全部元素和原样的 id，还要读编辑器里未保存的内容。
+- Phase 1 的模型不能复用：`Shape` 只有六种图形，也没有位置信息。
+- 遍历的思路可以复用：`Shape.walk()` 是组合模式上的先序遍历。扩展另建了一棵只有标签、id 和偏移量的轻量树，用同样的递归生成 `DocumentSymbol`。扩展独立打包，不依赖 CLI 的内核。
 
 ## 4 第二部分：插件
 
-四个插件都在 `plugins/` 下，每个是一个 bun workspace 包。插件的测试放在源码旁边（`plugins/*/src/*.test.ts`），只依赖 `@svgframe/api` 和测试替身 `@svgframe/testing`，不依赖其他插件，可以单独运行，例如 `bun test plugins/shape-box`。测试替身 `PluginHarness` 用和宿主相同的方式激活插件（暂存、检查、提交），再把它接到一个只有内置能力的 CLI 上。
+每个插件是 `plugins/` 下的一个 bun workspace 包。测试在源码旁边，只依赖 `@svgframe/api` 和 `@svgframe/testing`，可以单独运行，例如 `bun test plugins/shape-box`。`PluginHarness` 按宿主的步骤（暂存、检查、提交）激活插件，再接到一个只有内置能力的 CLI 上。
 
 ### 4.1 命令插件 `stats`
 
@@ -464,7 +435,7 @@ svg (800x600) *
 git diff C^ C -- src app/host plugins ':(exclude)plugins/<本次新增的插件>'
 ```
 
-这里的路径都存在（`src`、`app/host` 和 `plugins` 是目录），所以空输出不是因为路径写错。`app/main.ts` 不在这个范围内，因为它就是方式 A 唯一允许修改的装配文件。
+三个路径都是存在的目录，所以空输出不是路径写错造成的。`app/main.ts` 不在范围内，它是方式 A 唯一允许修改的装配文件。
 
 ### 5.2 加载器的独立性
 
@@ -472,11 +443,11 @@ git diff C^ C -- src app/host plugins ':(exclude)plugins/<本次新增的插件>
 $ rg -n "import|require|switch" app/host
 ```
 
-结果中的 `import` 都是导入内核模块和 `node:*` 模块的语句，或者 `PluginLoader` 里的 `import(this.#url(this.module))`，模块名来自配置文件。`require` 只出现在 `createRequire(configPath)` 和它的 `resolve`。没有 `switch`，没有插件的包名，也没有名字到模块的映射表。逐个读过 `app/host/` 的八个文件，也没有按插件名分支的代码。
+结果中的 `import` 是导入内核和 `node:*` 的语句，以及 `PluginLoader` 里的 `import(this.#url(this.module))`，模块名来自配置文件。`require` 只出现在 `createRequire(configPath)` 和它的 `resolve`。没有 `switch`、插件包名或名字到模块的映射表。
 
 ### 5.3 双装配一致性
 
-`test/e2e/Assembly.test.ts` 用真实的入口 `app/main.ts` 运行 `doc/transcript/` 里的四段会话。每次运行前清空并重建同一个临时工作目录，放入固定的 `other.svg`，输出留在内存里，不写进这个目录，所以 `dir` 的结果不受影响。
+`test/e2e/Assembly.test.ts` 用真实的入口 `app/main.ts` 运行 `doc/transcript/` 的四段会话。所有运行都在同一个临时目录里，每次运行前重建目录内容，所以 `dir` 每次看到的目录相同。
 
 | 会话        | 内容                                     | 对照                                                                                                                      |
 | ----------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
@@ -500,10 +471,10 @@ $ rg -n "import|require|switch" app/host
 
 ## 6 质量保证
 
-- 测试：`bun run check` 依次运行格式检查、oxlint（含模块边界规则）、类型检查（CLI 和 VSCode 扩展各一次）、knip 和带覆盖率阈值的测试。34 个测试文件共 272 个测试全部通过。VSCode 扩展的 9 个集成测试在 VS Code 1.146.0 里全部通过。
-- 覆盖率：行覆盖率 99.97%，函数覆盖率 99.93%（`bunfig.toml` 设了阈值，低于阈值时 `check` 失败）。测试用的夹具插件不计入。
-- 变异测试：`bun run mutation` 用 Stryker 对 `src/`、`app/host/` 和 `plugins/*/src/` 生成变异体，每个变异体运行一次 `bun test`。共 1878 个变异体，杀死 1721 个，变异分数 91.64%。按目录：内核 `src/` 92.19%，`app/host/` 90.73%，插件合计 89.74%（`stats` 100%、`modified-star` 93.33%、`dir` 88.64%、`box` 87.22%）。157 个存活的变异体没有逐个分析。报告在 `reports/mutation/index.html`，不提交到仓库。
-- 每次提交前，lefthook 再检查一次格式、类型和 lint，commitlint 检查提交信息，提交都有 GPG 签名。
+- `bun run check` 运行格式检查、oxlint（含模块规则）、类型检查、knip 和测试。272 个测试全部通过；VSCode 扩展的 9 个集成测试也通过。
+- 覆盖率：行 99.97%，函数 99.93%，低于 `bunfig.toml` 的阈值时 `check` 失败。
+- 变异测试（`bun run mutation`，Stryker）：1878 个变异体，杀死 1721 个，分数 91.64%。内核 92.19%，`app/host/` 90.73%，插件 89.74%。157 个存活的变异体没有逐个分析。
+- 提交前 lefthook 检查格式、类型、lint 和提交信息。
 
 ## 7 迭代报告：Phase 1 → Phase 2
 
@@ -519,7 +490,7 @@ $ rg -n "import|require|switch" app/host
 | 装配方式     | 只有代码                               | 方式 A（代码清单）、方式 B（配置文件）、`--no-plugins`                          |
 | 模块边界     | 约定                                   | oxlint 规则加探针测试                                                           |
 
-度量结果（文件职责、按"内核 / 装配处 / 插件"分类的行数、圈复杂度增量）在 `docs/metrics/`，由 `bun scripts/metrics.ts --from final --to HEAD` 从 git 历史生成。tag `p2` 打在度量提交上，它与生成时的 HEAD 只差 `docs/metrics/`，所以 `--to p2` 得到相同的数字。VSCode 扩展和它的测试单独列为一类，不计入 CLI。
+度量结果（文件职责、三类行数、圈复杂度增量）在 `docs/metrics/`，由 `bun scripts/metrics.ts --from final --to HEAD` 从 git 历史生成。VSCode 扩展单独列出，不计入 CLI。
 
 | 类别   | 文件数  | 非空行      | 圈复杂度合计 |
 | ------ | ------- | ----------- | ------------ |
