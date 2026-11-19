@@ -44,4 +44,4 @@ Each module has one allow-list in `.oxlintrc.json`, so anything the table does n
 - Write the tests first (`bun:test`). Every error message in the spec and every transcript in the spec has a test.
 - Tests take repository paths from `repo` in `test/support/Paths.ts` and temp folders from `using folder = new TempFolder()`, which deletes the folder when the test ends. `CliProcess` starts the real CLI, and `TranscriptRunner` runs a transcript in one fixed folder. Plugin tests get `TempFolder` from `@svgframe/testing`.
 - Make one commit per step, with a conventional commit message (commitlint checks it).
-- When an AI suggestion turns out to be wrong or the spec is unclear, add an entry to 过程记录 or 附录 A in `doc/README.md`. Record plan changes in 1.6 修订记录.
+- When an AI suggestion turns out to be wrong or the spec is unclear, add an entry to 过程记录 or 附录 A in `doc/README.md`. Record plan changes in 1.5 与初版方案的差异.
